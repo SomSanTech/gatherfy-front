@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const hello = 'aaa'
+const hello2 = 'aaa'
 </script>
 
 <template>
