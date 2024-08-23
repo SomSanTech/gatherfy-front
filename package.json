@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "prettier --write ."
+    "lint": "prettier --write .",
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{js,ts,vue,json,css,scss,md}": "prettier --write"
