@@ -86,5 +86,5 @@ jobs:
 
             docker stop gatherfy || true
             docker rm gatherfy || true
-            docker build -t frontDockerfile:latest .
-            docker run -d --name gatherfy -p 80:3000 frontDockerfile:latest
+            docker build -t frontdockerfile:latest .
+            docker run -d --name gatherfy -p 80:3000 frontdockerfile:latest
