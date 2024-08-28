@@ -7,4 +7,5 @@ const hello3 = 'aaa';
 <template>
   <h1 class="mx-auto text-2xl font-bold">Hello this is Gatherfy kub pom!</h1>
   <h1 class="mx-auto text-2xl font-bold">Hello this is Gatherfy kub pom!</h1>
+  <h1 class="mx-auto text-2xl font-bold">Hello this is Gatherfy kub pom!</h1>
 </template>
