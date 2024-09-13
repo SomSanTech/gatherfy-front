@@ -9,4 +9,10 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  components: {
+    dirs: ['~/components'],
+  },
+  typescript: {
+    strict: true,
+  },
 });
