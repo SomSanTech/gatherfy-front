@@ -3,7 +3,7 @@ name: CI/CD kub pom
 on:
   push:
     branches:
-      - '*'
+      - 'main'
 
 jobs:
   build:
