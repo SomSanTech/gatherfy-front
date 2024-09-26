@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const route = useRoute();
 console.log(route.params.id);
+const isOpenPopup = ref(false);
+
+const regis = () => {
+  alert('you regis leaw');
+  isOpenPopup.value = false;
+};
 </script>
 <template>
   <div class="relative">
@@ -38,7 +44,10 @@ console.log(route.params.id);
       <div class="flex items-center justify-end gap-3 py-4">
         <p>Free tickets<span> available</span></p>
 
-        <button class="rounded-sm bg-black px-7 py-2 text-white">
+        <button
+          @click="isOpenPopup = true"
+          class="rounded-sm bg-black px-7 py-2 text-white"
+        >
           Register now
         </button>
       </div>
@@ -65,10 +74,12 @@ console.log(route.params.id);
         </div>
       </div>
     </div>
+    <!-- pop up -->
     <div
-      class="fixed -top-0 right-3 h-screen w-2/5 rounded-lg bg-white p-7 shadow-2xl"
+      v-show="isOpenPopup"
+      class="fixed -top-0 right-3 h-screen w-2/5 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
     >
-      <button class="p-3">>></button>
+      <button @click="isOpenPopup = false" class="p-3">>></button>
       <div class="flex flex-col gap-5">
         <img
           src="https://picsum.photos/350/350"
@@ -132,7 +143,9 @@ console.log(route.params.id);
                 placeholder="Your Age"
               />
             </div>
-            <button class="rounded-md bg-zinc-200 py-1">Register</button>
+            <button @click="regis" class="rounded-md bg-zinc-200 py-1">
+              Register
+            </button>
           </div>
         </div>
       </div>
