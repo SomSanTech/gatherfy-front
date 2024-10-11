@@ -1,76 +1,147 @@
 <script setup lang="ts">
+// import { Client } from 'minio';
+import Calendar from '~/components/icons/Calendar.vue';
+import Location from '~/components/icons/Location.vue';
 const route = useRoute();
-console.log(route.params.id);
+const param = route.params.id;
 const isOpenPopup = ref(false);
 
 const regis = () => {
   alert('you regis leaw');
   isOpenPopup.value = false;
 };
+const event = ref();
+
+// const minioClient = new Client({
+//   endPoint: 'cp24us1.sit.kmutt.ac.th',
+//   port: 9000,
+//   accessKey: '3257BL5ZydsByO63I6N2',
+//   secretKey: 'TSaA4wzqrMmxZcmeeNdC4XywYkhgrfbYgD9DVrXv',
+//   useSSL: false,
+// });
+// Helper ฟังก์ชันในการแปลง ReadableStream เป็น Blob
+// const streamToBlob = async (stream: any): Promise<Blob> => {
+//   const chunks: Uint8Array[] = [];
+//   for await (const chunk of stream) {
+//     chunks.push(chunk);
+//   }
+//   return new Blob(chunks);
+// };
+
+// const image = ref();
+// // ฟังก์ชันดาวน์โหลดรูปภาพและแสดงผล
+// const downloadFile = async () => {
+//   try {
+//     const fileStream = await minioClient.getObject('thumnails', 'download.jpg');
+
+//     // แปลง ReadableStream เป็น Blob
+//     const blob = await streamToBlob(fileStream);
+//     image.value = URL.createObjectURL(blob);
+//   } catch (error) {
+//     console.error('Error downloading file:', error);
+//   }
+// };
+
+const getEventDetail = async () => {
+  const { data, error } = await useFetch(
+    `http://localhost:8080/api/events/${param}`
+  );
+
+  if (error.value) {
+    console.log('Error fetching events:', error.value);
+    return;
+  }
+
+  event.value = data.value;
+};
+onMounted(() => {
+  getEventDetail();
+});
+
+watchEffect(() => {
+  if (param) {
+    console.log(param);
+
+    getEventDetail();
+  }
+});
 </script>
 <template>
-  <div class="relative">
-    <div class="mx-auto my-20 w-full max-w-5xl">
+  <div class="relative my-24 w-full">
+    <div class="mx-auto my-20 w-full">
       <!-- header -->
-      <div class="flex w-full gap-12 border">
-        <div class="h-[500px] w-[350px] bg-zinc-200">
-          <img src="https://picsum.photos/350/500" alt="" class="h- w-" />
-        </div>
-
-        <div class="flex w-fit flex-col justify-center gap-3">
-          <div class="tag-group flex gap-2">
-            <button class="rounded-md bg-zinc-200 px-4 text-sm">Tag 1</button>
-            <button class="rounded-md bg-zinc-200 px-4 text-sm">Tag 2</button>
-          </div>
-          <p class="text-3xl font-semibold">SomSan 1st Fancon in Bangkok</p>
-          <div><p>13 Sep 2024 09:00 - 15 Sep 2024 19:00</p></div>
-          <div>
-            <p>IMPACT, Muang Thong,<span> Hall 7</span></p>
-            <p>Nonthaburi, Thailand</p>
-          </div>
-          <div class="flex gap-2">
-            <button class="rounded-sm border border-black px-5 py-2">
-              Add To Calendar
-            </button>
-            <button class="rounded-sm border border-black px-5 py-2">
-              Follow
-            </button>
-            <button class="rounded-sm border border-black px-5 py-2">
-              Add To Fav
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center justify-end gap-3 py-4">
-        <p>Free tickets<span> available</span></p>
-
-        <button
-          @click="isOpenPopup = true"
-          class="rounded-sm bg-black px-7 py-2 text-white"
+      <div
+        :style="{ backgroundImage: `url(${event?.image})` }"
+        class="w-screen bg-opacity-75 bg-cover bg-center backdrop-blur-md"
+      >
+        <div
+          class="relative z-10 bg-black bg-opacity-30 p-10 py-32 backdrop-blur-md"
         >
-          Register now
-        </button>
+          <div class="mx-auto flex w-full max-w-6xl gap-12 text-white">
+            <div class="h-[500px] w-[350px] bg-zinc-200">
+              <img
+                :src="event?.image"
+                alt=""
+                class="h-full w-full object-fill"
+              />
+            </div>
+
+            <div class="flex w-fit flex-col justify-center gap-3">
+              <div class="tag-group flex gap-2">
+                <button class="bg-zin-200 rounded-md text-sm">Tag 1</button>
+                <button class="bg-zin-200 rounded-md text-sm">Tag 2</button>
+              </div>
+              <p class="text-3xl font-semibold">{{ event?.name }}</p>
+              <div class="flex items-center gap-2">
+                <Calendar />
+                <p>13 Sep 2024 09:00 - 15 Sep 2024 19:00</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <Location />
+                <p>{{ event?.location }}</p>
+              </div>
+              <div class="flex gap-2">
+                <button class="rounded-xl bg-[#FEFEFE] px-5 py-2 text-black">
+                  Register event
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- content -->
-      <div class="flex flex-col gap-4 py-8">
-        <h1 class="font-semibold">Event Information</h1>
-        <!-- image -->
-        <div class="h-[500px] w-full bg-zinc-200">
-          <img
-            src="https://picsum.photos/1000/500"
-            alt=""
-            class="h-full w-full"
-          />
-        </div>
-        <!-- text -->
-        <div>
-          <h1 class="text-2xl font-semibold">SomSan CONCERT ‘YOUR BOY’</h1>
+      <div class="mx-auto mt-[100px] grid max-w-6xl grid-cols-5 gap-20">
+        <div class="col-span-3 flex flex-col gap-4">
+          <h1 class="font-semibold">Description</h1>
           <p>
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Architecto
-            incidunt dolores esse pariatur. Veritatis ipsam ea sint, facilis
-            modi possimus accusamus magni voluptate dolores, dicta fugit,
-            perferendis officiis? Ex, ad.
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa fuga
+            aspernatur aperiam, tenetur, repellendus ipsum aliquid dolore et
+            voluptatem, nisi reprehenderit maiores similique numquam ipsam sunt
+            deserunt! Necessitatibus vel delectus ab atque ut impedit, nam
+            error, nihil a dolor in. Lorem ipsum dolor sit amet consectetur
+            adipisicing elit. Ipsa fuga aspernatur aperiam, tenetur, repellendus
+            ipsum aliquid dolore et voluptatem, nisi reprehenderit maiores
+            similique numquam ipsam sunt deserunt! Necessitatibus vel delectus
+            ab atque ut impedit, nam error, nihil a dolor in.
           </p>
+          <!-- image -->
+          <div class="h-[500px] w-fit bg-zinc-200">
+            <img
+              src="https://picsum.photos/1000/500"
+              alt=""
+              class="h-full w-fit"
+            />
+          </div>
+        </div>
+        <div class="col-span-2 flex flex-col gap-6">
+          <div class="flex flex-col gap-5">
+            <p>Event location</p>
+            <div class="h-64 w-64 rounded-lg bg-slate-200"></div>
+          </div>
+          <div class="flex flex-col gap-5">
+            <p>Tags</p>
+            <div class="h-10 w-32 rounded-lg bg-slate-200"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -88,7 +159,7 @@ const regis = () => {
         />
 
         <div>
-          <h1 class="text-2xl font-semibold">SomSan 1st Fancon in Bangkok</h1>
+          <h1 class="text-2xl font-semibold">{{ event?.name }}</h1>
           <p class="font-semibold text-zinc-600">Host by SomSan</p>
         </div>
 

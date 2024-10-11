@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as d3 from 'd3';
 import ArrowIcon from '~/components/icons/ArrowIcon.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
 interface Event {
@@ -17,12 +18,27 @@ interface Event {
 const data = ref<Event[]>([]);
 const fetchEvents = async () => {
   let fetchData = await fetch('/events.json');
-  console.log(fetchData);
+  // console.log(fetchData);
   const jsonData = await fetchData.json();
   data.value = jsonData;
   console.log(data.value);
 };
 
+const data2 = ref();
+const fetchData = async () => {
+  let fetchData = await fetch('http://localhost:8080/api/events');
+  let searchData = await fetch(
+    'http://localhost:8080/api/events/search?keyword=expo'
+  );
+
+  const searchDatas = await searchData.json();
+  console.log(searchDatas);
+
+  // console.log(fetchData.json());
+  const jsonData = await fetchData.json();
+  data2.value = jsonData;
+  console.log(data2.value);
+};
 const handleReccomEvent = (type: string) => {
   if (type === 'next' && reccommentIndex.value !== data.value.length) {
     reccommentIndex.value += 1;
@@ -32,21 +48,39 @@ const handleReccomEvent = (type: string) => {
   }
 };
 const reccommentIndex = ref(0);
+
 onMounted(() => {
   fetchEvents();
+  fetchData();
 });
 </script>
 
 <template>
-  <div class="mx-auto my-20 max-w-4xl">
+  <div class="mx-auto my-24 max-w-4xl">
     <!-- Header Event Banner -->
     <NuxtLink :to="{ name: 'event-id', params: { id: 1 } }">
-      <div class="h-[500px] w-full rounded-2xl bg-zinc-100">
-        <img
-          src="https://picsum.photos/900/500"
-          alt=""
-          class="h-full w-full rounded-2xl"
-        />
+      <div class="relative h-[500px] w-full rounded-2xl">
+        <div class="relative">
+          <img
+            src="https://picsum.photos/900/500"
+            alt=""
+            class="h-full w-full rounded-2xl"
+          />
+          <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
+        </div>
+        <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
+          <h1 class="shw text-4xl text-white">Tech Expo 2024</h1>
+          <div class="mt-4 flex gap-2 text-sm">
+            <button class="mt-2 rounded-2xl bg-white px-4 py-2">
+              View more
+            </button>
+            <button
+              class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-white backdrop-blur-sm"
+            >
+              Register
+            </button>
+          </div>
+        </div>
       </div>
     </NuxtLink>
     <!-- Recommend Event section -->
@@ -54,23 +88,23 @@ onMounted(() => {
       <h1 class="t1">Reccomment Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
-          class="absolute left-0 h-fit rounded-full bg-zinc-100 p-2"
+          class="left-0 h-fit rounded-full"
           @click="handleReccomEvent('prev')"
         >
-          <ArrowIcon class="text-zinc-300" />
+          <ArrowIcon class="text-2xl text-black" />
         </button>
         <div class="flex w-full flex-col gap-3">
           <div class="flex gap-3">
-            <div class="h-[250px] w-full bg-zinc-100 p-4">
+            <div class="h-[250px] w-full rounded-2xl bg-beige p-4">
               <h3 class="text-xl font-semibold">
                 {{ data[reccommentIndex]?.event_title }}
               </h3>
               <p>
                 {{ data[reccommentIndex]?.event_detail }}
               </p>
-              <button class="my-3 bg-zinc-200 px-4 py-2">Read more</button>
+              <button class="my-3 bg-beige px-4 py-2">Read more</button>
             </div>
-            <div class="h-[250px] w-full bg-zinc-100">
+            <div class="h-[250px] w-full">
               <img
                 src="https://picsum.photos/250/340"
                 alt=""
@@ -80,7 +114,7 @@ onMounted(() => {
           </div>
           <div class="grid grid-cols-6 gap-3">
             <div
-              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center bg-zinc-100 p-5"
+              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-5 text-white"
             >
               <div>
                 When
@@ -103,26 +137,26 @@ onMounted(() => {
               :to="{ name: 'event-id', params: { id: 1 } }"
               class="col-span-2"
             >
-              <button class="h-[150px] w-full bg-zinc-100">
+              <button class="h-[150px] w-full rounded-2xl bg-beige">
                 Get<br />Ticket<br />Now
               </button>
             </NuxtLink>
           </div>
         </div>
         <button
-          class="absolute right-0 h-fit rounded-full bg-zinc-100 p-2"
+          class="right-0 h-fit rounded-full"
           @click="handleReccomEvent('next')"
         >
-          <ArrowIcon class="rotate-180 text-zinc-300" />
+          <ArrowIcon class="rotate-180 text-2xl text-black" />
         </button>
       </div>
     </div>
     <!-- Event List section -->
     <div class="w-full py-7">
-      <div class="flex gap-4 rounded-full bg-zinc-100 px-8 py-4">
-        <button>Today event</button>
-        <button>Upcoming event</button>
-        <button>All event</button>
+      <div class="flex divide-x-[2px] rounded-full bg-beige px-4 py-4">
+        <button class="px-4 font-bold">Today event</button>
+        <button class="px-4">Upcoming event</button>
+        <button class="px-4">All event</button>
       </div>
       <h1 class="t1 py-4">Today, 5 Jan</h1>
       <div class="w-full overflow-x-auto">
@@ -184,3 +218,9 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style>
+.shw {
+  text-shadow: 1px 1px 6px rgb(0 0 0 / 45%);
+}
+</style>
