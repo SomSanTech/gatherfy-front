@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// import { Client } from 'minio';
 import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
+import Map from '../Map.vue';
 const route = useRoute();
 const param = route.params.id;
 const isOpenPopup = ref(false);
@@ -11,36 +11,6 @@ const regis = () => {
   isOpenPopup.value = false;
 };
 const event = ref();
-
-// const minioClient = new Client({
-//   endPoint: 'cp24us1.sit.kmutt.ac.th',
-//   port: 9000,
-//   accessKey: '3257BL5ZydsByO63I6N2',
-//   secretKey: 'TSaA4wzqrMmxZcmeeNdC4XywYkhgrfbYgD9DVrXv',
-//   useSSL: false,
-// });
-// Helper ฟังก์ชันในการแปลง ReadableStream เป็น Blob
-// const streamToBlob = async (stream: any): Promise<Blob> => {
-//   const chunks: Uint8Array[] = [];
-//   for await (const chunk of stream) {
-//     chunks.push(chunk);
-//   }
-//   return new Blob(chunks);
-// };
-
-// const image = ref();
-// // ฟังก์ชันดาวน์โหลดรูปภาพและแสดงผล
-// const downloadFile = async () => {
-//   try {
-//     const fileStream = await minioClient.getObject('thumnails', 'download.jpg');
-
-//     // แปลง ReadableStream เป็น Blob
-//     const blob = await streamToBlob(fileStream);
-//     image.value = URL.createObjectURL(blob);
-//   } catch (error) {
-//     console.error('Error downloading file:', error);
-//   }
-// };
 
 const getEventDetail = async () => {
   const { data, error } = await useFetch(
@@ -136,7 +106,9 @@ watchEffect(() => {
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
             <p>Event location</p>
-            <div class="h-64 w-64 rounded-lg bg-slate-200"></div>
+            <div class="h-full w-full">
+              <Map :latitude="13.7563" :longitude="100.5018" />
+            </div>
           </div>
           <div class="flex flex-col gap-5">
             <p>Tags</p>
@@ -148,77 +120,42 @@ watchEffect(() => {
     <!-- pop up -->
     <div
       v-show="isOpenPopup"
-      class="fixed -top-0 right-3 h-screen w-2/5 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
+      class="fixed right-1/2 top-1/2 z-50 h-[350px] w-1/3 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
     >
-      <button @click="isOpenPopup = false" class="p-3">>></button>
-      <div class="flex flex-col gap-5">
+      <button @click="isOpenPopup = false" class="p-3">x</button>
+      <div class="flex gap-5">
+        <div>
+          <div>
+            <h1 class="text-2xl font-semibold">{{ event?.name }}</h1>
+            <p class="font-semibold text-zinc-600">Host by SomSan</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex w-fit flex-col">
+              <div
+                class="rounded-t-md border bg-zinc-200 px-3 text-[10px] font-semibold"
+              >
+                SEP
+              </div>
+              <div class="rounded-b-md border px-3 text-center font-semibold">
+                15
+              </div>
+            </div>
+            <div>
+              <p class="font-semibold">Sunday, September 15</p>
+
+              <p class="text-sm font-semibold text-zinc-500">
+                6:00 AM - 10:00 AM
+              </p>
+            </div>
+          </div>
+        </div>
+
         <img
-          src="https://picsum.photos/350/350"
-          class="mx-auto rounded-lg"
+          :src="event?.image"
+          class="mx-auto max-w-[150px] rounded-lg"
           alt=""
         />
-
-        <div>
-          <h1 class="text-2xl font-semibold">{{ event?.name }}</h1>
-          <p class="font-semibold text-zinc-600">Host by SomSan</p>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="flex w-fit flex-col">
-            <div
-              class="rounded-t-md border bg-zinc-200 px-3 text-[10px] font-semibold"
-            >
-              SEP
-            </div>
-            <div class="rounded-b-md border px-3 text-center font-semibold">
-              15
-            </div>
-          </div>
-          <div>
-            <p class="font-semibold">Sunday, September 15</p>
-
-            <p class="text-sm font-semibold text-zinc-500">
-              6:00 AM - 10:00 AM
-            </p>
-          </div>
-        </div>
-
-        <div class="">
-          <div
-            class="rounded-t-md bg-zinc-300 px-4 py-1 font-semibold text-black"
-          >
-            Registration
-          </div>
-          <div class="flex flex-col gap-3 rounded-b-md border p-4">
-            <div>
-              <p>Name *</p>
-              <input
-                type="text"
-                class="rounded-md border px-2 py-1"
-                placeholder="Your Name"
-              />
-            </div>
-            <div>
-              <p>Email *</p>
-              <input
-                type="text"
-                class="rounded-md border px-2 py-1"
-                placeholder="you@gmail.com"
-              />
-            </div>
-            <div>
-              <p>Age *</p>
-              <input
-                type="text"
-                class="rounded-md border px-2 py-1"
-                placeholder="Your Age"
-              />
-            </div>
-            <button @click="regis" class="rounded-md bg-zinc-200 py-1">
-              Register
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>

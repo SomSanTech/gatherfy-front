@@ -1,46 +1,39 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
+import Map from './Map.vue';
 import ArrowIcon from '~/components/icons/ArrowIcon.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
-interface Event {
-  id: number;
-  event_title: string;
-  event_detail: string;
-  event_start_date: string;
-  event_end_date: string;
-  event_access_start_date: string;
-  event_access_close_date: string;
+type Event = {
+  name: string;
+  description: string;
+  detail: string;
+  start_date: string; // หรือใช้ Date ถ้าต้องการแปลงให้เป็นวันที่
+  end_date: string; // หรือใช้ Date ถ้าต้องการแปลงให้เป็นวันที่
   location: string;
-  type: string[];
+  map: string;
+  capacity: number;
+  status: string;
+  slug: string;
   image: string;
-}
-
-const data = ref<Event[]>([]);
-const fetchEvents = async () => {
-  let fetchData = await fetch('/events.json');
-  // console.log(fetchData);
-  const jsonData = await fetchData.json();
-  data.value = jsonData;
-  console.log(data.value);
+  organizer: string;
 };
 
-const data2 = ref();
+const tagData = [
+  { tag: 'Technology', color: '#FF5733' },
+  { tag: 'Music', color: '#33FF57' },
+  { tag: 'Art', color: '#3357FF' },
+  { tag: 'Sports', color: '#FF33A1' },
+];
+
+const eventData = ref<Event[]>([]);
 const fetchData = async () => {
-  let fetchData = await fetch('http://localhost:8080/api/events');
-  let searchData = await fetch(
-    'http://localhost:8080/api/events/search?keyword=expo'
-  );
-
-  const searchDatas = await searchData.json();
-  console.log(searchDatas);
-
-  // console.log(fetchData.json());
-  const jsonData = await fetchData.json();
-  data2.value = jsonData;
-  console.log(data2.value);
+  const reponse = await fetch('http://localhost:8080/api/events');
+  eventData.value = await reponse.json();
+  console.log('insert data', eventData.value);
 };
+
 const handleReccomEvent = (type: string) => {
-  if (type === 'next' && reccommentIndex.value !== data.value.length) {
+  if (type === 'next' && reccommentIndex.value !== eventData.value.length) {
     reccommentIndex.value += 1;
   }
   if (type === 'prev' && reccommentIndex.value !== 0) {
@@ -49,14 +42,16 @@ const handleReccomEvent = (type: string) => {
 };
 const reccommentIndex = ref(0);
 
+const sampleEventIndex = ref(0);
+
 onMounted(() => {
-  fetchEvents();
   fetchData();
 });
 </script>
 
 <template>
   <div class="mx-auto my-24 max-w-4xl">
+    {{ eventData[sampleEventIndex] }}
     <!-- Header Event Banner -->
     <NuxtLink :to="{ name: 'event-id', params: { id: 1 } }">
       <div class="relative h-[500px] w-full rounded-2xl">
@@ -69,7 +64,9 @@ onMounted(() => {
           <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
         </div>
         <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
-          <h1 class="shw text-4xl text-white">Tech Expo 2024</h1>
+          <h1 class="shw text-4xl text-white">
+            {{ eventData[sampleEventIndex]?.name }}
+          </h1>
           <div class="mt-4 flex gap-2 text-sm">
             <button class="mt-2 rounded-2xl bg-white px-4 py-2">
               View more
@@ -97,10 +94,10 @@ onMounted(() => {
           <div class="flex gap-3">
             <div class="h-[250px] w-full rounded-2xl bg-beige p-4">
               <h3 class="text-xl font-semibold">
-                {{ data[reccommentIndex]?.event_title }}
+                {{ eventData[reccommentIndex]?.name }}
               </h3>
               <p>
-                {{ data[reccommentIndex]?.event_detail }}
+                {{ eventData[reccommentIndex]?.detail }}
               </p>
               <button class="my-3 bg-beige px-4 py-2">Read more</button>
             </div>
@@ -120,13 +117,13 @@ onMounted(() => {
                 When
                 <p>Tuesday - Friday</p>
                 <p>
-                  {{ data[reccommentIndex]?.event_start_date }} -
-                  {{ data[reccommentIndex]?.event_end_date }}
+                  {{ eventData[reccommentIndex]?.start_date }} -
+                  {{ eventData[reccommentIndex]?.end_date }}
                 </p>
               </div>
               <div>
                 Where
-                <p>{{ data[reccommentIndex]?.location }}</p>
+                <!-- <p>{{ eventData[reccommentIndex]?.location }}</p> -->
               </div>
               <div>
                 Who
@@ -161,15 +158,15 @@ onMounted(() => {
       <h1 class="t1 py-4">Today, 5 Jan</h1>
       <div class="w-full overflow-x-auto">
         <div class="flex h-full w-full gap-3">
-          <div v-for="event in data" class="h-full shrink-0 rounded-md">
+          <div v-for="event in eventData" class="h-full shrink-0 rounded-md">
             <img
               src="https://picsum.photos/200/280"
               alt=""
               class="rounded-2xl"
             />
             <div class="max-w-[200px]">
-              <p>{{ event?.event_start_date }}</p>
-              <p>{{ event?.event_title }}</p>
+              <p>{{ event?.start_date }}</p>
+              <p>{{ event?.name }}</p>
               <p>At {{ event?.location }}</p>
             </div>
           </div>
@@ -180,15 +177,17 @@ onMounted(() => {
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
-        <div class="h-[60px] w-[160px] rounded-md bg-zinc-100"></div>
+        <div
+          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-beige p-3 shadow-sm"
+          v-for="data in tagData"
+          :key="data.tag"
+        >
+          <div
+            :style="{ backgroundColor: data?.color }"
+            class="h-full w-[5px] rounded"
+          ></div>
+          <span class="ml-2 font-semibold">{{ data.tag }}</span>
+        </div>
       </div>
     </div>
     <!-- Explore Date section -->
@@ -201,18 +200,12 @@ onMounted(() => {
             Jan 5 <span class="text-sm text-zinc-500">Monday</span>
           </p>
           <div class="flex w-full flex-col gap-3">
-            <NuxtLink
-              :to="{ name: 'event-id', params: { id: event?.id } }"
-              v-for="event in data"
-            >
-              <EventExploreDateCard :eventDetail="event" />
-            </NuxtLink>
+            <div v-for="event in eventData">
+              <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
+                <EventExploreDateCard :eventDetail="event" />
+              </NuxtLink>
+            </div>
           </div>
-        </div>
-        <!-- map -->
-        <div class="flex flex-col gap-2">
-          <div class="h-[250px] w-[250px] rounded-md bg-zinc-200"></div>
-          <div class="h-[250px] w-[250px] rounded-md bg-zinc-200"></div>
         </div>
       </div>
     </div>
