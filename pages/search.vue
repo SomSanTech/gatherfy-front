@@ -1,18 +1,13 @@
 <script setup>
+import EventListCard from '~/components/EventListCard.vue';
+
 const route = useRoute();
 const searchTerm = route.query.k;
 const eventSearch = ref();
 const searchEvent = async () => {
-  const { data, error } = await useFetch(
-    `http://localhost:8080/api/events/search?keyword=${searchTerm}`
-  );
+  const fetchedSearchData = await useSearchEvent(searchTerm);
 
-  if (error.value) {
-    console.error('Error fetching events:', error.value);
-    return;
-  }
-
-  eventSearch.value = data.value;
+  eventSearch.value = fetchedSearchData;
 };
 onMounted(() => {
   searchEvent();
@@ -41,20 +36,7 @@ watchEffect(() => {
             v-if="event?.slug"
             :to="{ name: 'event-id', params: { id: event?.slug } }"
           >
-            <div class="flex flex-col">
-              <img
-                :src="event?.image"
-                alt=""
-                class="h-[222px] w-[353px] rounded-t-2xl"
-              />
-              <div
-                class="w-full rounded-b-2xl bg-beige/70 p-3 backdrop-blur-sm"
-              >
-                <p>{{ event?.start_date }}</p>
-                <p>{{ event?.name }}</p>
-                <p>At {{ event?.location }}</p>
-              </div>
-            </div>
+            <EventListCard :event-detail="event" />
           </NuxtLink>
         </div>
       </div>

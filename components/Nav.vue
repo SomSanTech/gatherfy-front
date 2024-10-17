@@ -23,7 +23,7 @@ const handleSearch = () => {
             id=""
             placeholder="search.."
             v-model="searchKw"
-            class="bg-white/0"
+            class="bg-white/0 focus:outline-none"
             @keyup.enter="handleSearch"
           />
           <button @click="handleSearch()">

@@ -1,27 +1,13 @@
 <script setup lang="ts">
+import type { Event } from '~/models/event';
 const props = defineProps<{
   eventDetail?: Event;
 }>();
-
-type Event = {
-  name: string;
-  description: string;
-  detail: string;
-  start_date: string;
-  end_date: string;
-  location: string;
-  map: string;
-  capacity: number;
-  status: string;
-  slug: string;
-  image: string;
-  organizer: string;
-};
 </script>
 
 <template>
   <div
-    class="flex h-[200px] w-full justify-between gap-3 rounded-lg bg-beige p-4"
+    class="flex h-[200px] w-full justify-between gap-3 rounded-lg bg-[#F1F1F1] p-4"
   >
     <div>
       <div>
@@ -42,11 +28,11 @@ type Event = {
         </button>
       </div>
     </div>
-    <div class="้rounded-md bg-zinc-200">
+    <div class="rounded-md bg-zinc-200">
       <img
         :src="props?.eventDetail?.image"
         alt=""
-        class="h-full w-auto rounded-md"
+        class="h-full w-auto rounded-md object-cover"
       />
     </div>
   </div>

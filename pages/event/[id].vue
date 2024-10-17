@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
+import Clock from '~/components/icons/Clock.vue';
+import Cancle from '~/components/icons/Cancle.vue';
 import Map from '../Map.vue';
 const route = useRoute();
 const param = route.params.id;
@@ -52,7 +54,7 @@ watchEffect(() => {
               <img
                 :src="event?.image"
                 alt=""
-                class="h-full w-full object-fill"
+                class="h-full w-full object-cover"
               />
             </div>
 
@@ -64,14 +66,27 @@ watchEffect(() => {
               <p class="text-3xl font-semibold">{{ event?.name }}</p>
               <div class="flex items-center gap-2">
                 <Calendar />
-                <p>13 Sep 2024 09:00 - 15 Sep 2024 19:00</p>
+                <p v-if="event?.start_date && event?.end_date">
+                  {{ useFormatDate(event?.start_date) }} -
+                  {{ useFormatDate(event?.end_date) }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <Clock />
+                <p v-if="event?.start_date && event?.end_date">
+                  {{ useFormatTime(event?.start_date) }} -
+                  {{ useFormatTime(event?.end_date) }}
+                </p>
               </div>
               <div class="flex items-center gap-2">
                 <Location />
                 <p>{{ event?.location }}</p>
               </div>
               <div class="flex gap-2">
-                <button class="rounded-xl bg-[#FEFEFE] px-5 py-2 text-black">
+                <button
+                  @click="isOpenPopup = true"
+                  class="rounded-xl bg-[#FEFEFE] px-5 py-2 text-black"
+                >
                   Register event
                 </button>
               </div>
@@ -82,24 +97,15 @@ watchEffect(() => {
       <!-- content -->
       <div class="mx-auto mt-[100px] grid max-w-6xl grid-cols-5 gap-20">
         <div class="col-span-3 flex flex-col gap-4">
-          <h1 class="font-semibold">Description</h1>
+          <h1 class="font-semibold">Event detail</h1>
           <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa fuga
-            aspernatur aperiam, tenetur, repellendus ipsum aliquid dolore et
-            voluptatem, nisi reprehenderit maiores similique numquam ipsam sunt
-            deserunt! Necessitatibus vel delectus ab atque ut impedit, nam
-            error, nihil a dolor in. Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Ipsa fuga aspernatur aperiam, tenetur, repellendus
-            ipsum aliquid dolore et voluptatem, nisi reprehenderit maiores
-            similique numquam ipsam sunt deserunt! Necessitatibus vel delectus
-            ab atque ut impedit, nam error, nihil a dolor in.
+            {{ event?.detail }}
           </p>
-          <!-- image -->
-          <div class="h-[500px] w-fit bg-zinc-200">
+          <div class="h-[500px] w-full bg-zinc-200">
             <img
-              src="https://picsum.photos/1000/500"
+              :src="event?.image"
               alt=""
-              class="h-full w-fit"
+              class="h-[500px] w-full object-cover"
             />
           </div>
         </div>
@@ -120,17 +126,39 @@ watchEffect(() => {
     <!-- pop up -->
     <div
       v-show="isOpenPopup"
-      class="fixed right-1/2 top-1/2 z-50 h-[350px] w-1/3 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
+      class="fixed right-1/2 top-1/2 z-50 w-[600px] -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
     >
-      <button @click="isOpenPopup = false" class="p-3">x</button>
-      <div class="flex gap-5">
+      <button @click="isOpenPopup = false" class="absolute right-0 top-0 p-3">
+        <Cancle />
+      </button>
+      <div class="flex justify-between gap-5">
         <div>
           <div>
-            <h1 class="text-2xl font-semibold">{{ event?.name }}</h1>
-            <p class="font-semibold text-zinc-600">Host by SomSan</p>
+            <p class="text-sm font-semibold">Register in</p>
+            <h1 class="py-2 text-2xl font-semibold">{{ event?.name }}</h1>
+            <div class="flex items-center gap-2">
+              <Calendar />
+              <p v-if="event?.start_date && event?.end_date">
+                {{ useFormatDate(event?.start_date) }} -
+                {{ useFormatDate(event?.end_date) }}
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <Clock />
+              <p v-if="event?.start_date && event?.end_date">
+                {{ useFormatTime(event?.start_date) }} -
+                {{ useFormatTime(event?.end_date) }}
+              </p>
+            </div>
+            <button
+              class="my-4 rounded-lg bg-black px-4 py-1 text-sm text-white"
+              @click="regis"
+            >
+              Confirm
+            </button>
           </div>
 
-          <div class="flex items-center gap-3">
+          <!-- <div class="flex items-center gap-3">
             <div class="flex w-fit flex-col">
               <div
                 class="rounded-t-md border bg-zinc-200 px-3 text-[10px] font-semibold"
@@ -148,12 +176,12 @@ watchEffect(() => {
                 6:00 AM - 10:00 AM
               </p>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <img
           :src="event?.image"
-          class="mx-auto max-w-[150px] rounded-lg"
+          class="max-w-[150px] self-end rounded-lg"
           alt=""
         />
       </div>

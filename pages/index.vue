@@ -1,22 +1,13 @@
 <script setup lang="ts">
-import * as d3 from 'd3';
-import Map from './Map.vue';
 import ArrowIcon from '~/components/icons/ArrowIcon.vue';
+import Calendar from '~/components/icons/Calendar.vue';
+import Location from '~/components/icons/Location.vue';
+import Clock from '~/components/icons/Clock.vue';
+import Organisation from '~/components/icons/Organisation.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
-type Event = {
-  name: string;
-  description: string;
-  detail: string;
-  start_date: string; // หรือใช้ Date ถ้าต้องการแปลงให้เป็นวันที่
-  end_date: string; // หรือใช้ Date ถ้าต้องการแปลงให้เป็นวันที่
-  location: string;
-  map: string;
-  capacity: number;
-  status: string;
-  slug: string;
-  image: string;
-  organizer: string;
-};
+import EventListCard from '~/components/EventListCard.vue';
+
+import type { Event } from '~/models/event';
 
 const tagData = [
   { tag: 'Technology', color: '#FF5733' },
@@ -26,10 +17,10 @@ const tagData = [
 ];
 
 const eventData = ref<Event[]>([]);
+
 const fetchData = async () => {
-  const reponse = await fetch('http://localhost:8080/api/events');
-  eventData.value = await reponse.json();
-  console.log('insert data', eventData.value);
+  const fetchedData = await useFetchEvent();
+  eventData.value = fetchedData || [];
 };
 
 const handleReccomEvent = (type: string) => {
@@ -40,46 +31,73 @@ const handleReccomEvent = (type: string) => {
     reccommentIndex.value -= 1;
   }
 };
+
 const reccommentIndex = ref(0);
 
 const sampleEventIndex = ref(0);
 
 onMounted(() => {
   fetchData();
+  const intervalId = setInterval(() => {
+    sampleEventIndex.value =
+      (sampleEventIndex.value + 1) % eventData?.value?.length;
+  }, 5000);
+
+  onUnmounted(() => {
+    clearInterval(intervalId);
+  });
 });
 </script>
 
 <template>
   <div class="mx-auto my-24 max-w-4xl">
-    {{ eventData[sampleEventIndex] }}
     <!-- Header Event Banner -->
-    <NuxtLink :to="{ name: 'event-id', params: { id: 1 } }">
-      <div class="relative h-[500px] w-full rounded-2xl">
-        <div class="relative">
-          <img
-            src="https://picsum.photos/900/500"
-            alt=""
-            class="h-full w-full rounded-2xl"
-          />
-          <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
-        </div>
-        <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
-          <h1 class="shw text-4xl text-white">
-            {{ eventData[sampleEventIndex]?.name }}
-          </h1>
-          <div class="mt-4 flex gap-2 text-sm">
-            <button class="mt-2 rounded-2xl bg-white px-4 py-2">
-              View more
-            </button>
-            <button
-              class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-white backdrop-blur-sm"
-            >
-              Register
-            </button>
+    <div class="relative">
+      <div
+        class="absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white"
+        @click="sampleEventIndex -= 1"
+      >
+        <ArrowIcon class="" />
+      </div>
+      <NuxtLink
+        :to="{
+          name: 'event-id',
+          params: { id: eventData[sampleEventIndex]?.slug || 1 },
+        }"
+      >
+        <div class="relative h-[500px] w-full rounded-2xl">
+          <div class="relative">
+            <img
+              :src="eventData[sampleEventIndex]?.image"
+              alt=""
+              class="h-[500px] w-full rounded-2xl object-cover"
+            />
+            <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
+          </div>
+          <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
+            <h1 class="shw text-4xl text-white">
+              {{ eventData[sampleEventIndex]?.name }}
+            </h1>
+            <div class="mt-4 flex gap-2 text-sm">
+              <button class="mt-2 rounded-2xl bg-white px-4 py-2">
+                View more
+              </button>
+              <button
+                class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-white backdrop-blur-sm"
+              >
+                Register
+              </button>
+            </div>
           </div>
         </div>
+      </NuxtLink>
+      <div
+        class="absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white"
+      >
+        <ArrowIcon class="rotate-180" />
       </div>
-    </NuxtLink>
+    </div>
+
     <!-- Recommend Event section -->
     <div class="w-full py-7">
       <h1 class="t1">Reccomment Event</h1>
@@ -92,7 +110,7 @@ onMounted(() => {
         </button>
         <div class="flex w-full flex-col gap-3">
           <div class="flex gap-3">
-            <div class="h-[250px] w-full rounded-2xl bg-beige p-4">
+            <div class="h-[250px] w-full rounded-2xl bg-[#FBE569] p-7">
               <h3 class="text-xl font-semibold">
                 {{ eventData[reccommentIndex]?.name }}
               </h3>
@@ -103,38 +121,57 @@ onMounted(() => {
             </div>
             <div class="h-[250px] w-full">
               <img
-                src="https://picsum.photos/250/340"
+                :src="eventData[reccommentIndex]?.image"
                 alt=""
-                class="h-full w-full rounded-2xl"
+                class="h-full w-full rounded-2xl object-cover"
               />
             </div>
           </div>
           <div class="grid grid-cols-6 gap-3">
             <div
-              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-5 text-white"
+              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-white"
             >
-              <div>
-                When
-                <p>Tuesday - Friday</p>
-                <p>
-                  {{ eventData[reccommentIndex]?.start_date }} -
-                  {{ eventData[reccommentIndex]?.end_date }}
-                </p>
+              <div class="flex flex-col gap-1">
+                <Calendar />
+                <div>
+                  <p class="font-semibold">When</p>
+
+                  <p v-if="eventData[reccommentIndex]" class="text-sm">
+                    {{
+                      useFormatDate(eventData[reccommentIndex]?.start_date)
+                    }}
+                    -
+                    {{ useFormatDate(eventData[reccommentIndex]?.end_date) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                Where
-                <!-- <p>{{ eventData[reccommentIndex]?.location }}</p> -->
+              <div class="flex flex-col gap-1">
+                <Location />
+                <div>
+                  <p class="font-semibold">Where</p>
+                  <p class="text-sm">
+                    {{ eventData[reccommentIndex]?.location }}
+                  </p>
+                </div>
               </div>
-              <div>
-                Who
-                <p>SomSan Tech</p>
+              <div class="flex flex-col gap-1">
+                <Organisation />
+                <div>
+                  <p class="font-semibold">Who</p>
+                  <p class="text-sm">SomSan Tech</p>
+                </div>
               </div>
             </div>
             <NuxtLink
-              :to="{ name: 'event-id', params: { id: 1 } }"
+              :to="{
+                name: 'event-id',
+                params: { id: eventData[reccommentIndex]?.slug || 0 },
+              }"
               class="col-span-2"
             >
-              <button class="h-[150px] w-full rounded-2xl bg-beige">
+              <button
+                class="h-[150px] w-full rounded-2xl bg-[#8BD0FC] font-semibold"
+              >
                 Get<br />Ticket<br />Now
               </button>
             </NuxtLink>
@@ -158,17 +195,10 @@ onMounted(() => {
       <h1 class="t1 py-4">Today, 5 Jan</h1>
       <div class="w-full overflow-x-auto">
         <div class="flex h-full w-full gap-3">
-          <div v-for="event in eventData" class="h-full shrink-0 rounded-md">
-            <img
-              src="https://picsum.photos/200/280"
-              alt=""
-              class="rounded-2xl"
-            />
-            <div class="max-w-[200px]">
-              <p>{{ event?.start_date }}</p>
-              <p>{{ event?.name }}</p>
-              <p>At {{ event?.location }}</p>
-            </div>
+          <div v-for="event in eventData">
+            <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
+              <EventListCard :eventDetail="event" :isVertical="true" />
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -178,7 +208,7 @@ onMounted(() => {
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
         <div
-          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-beige p-3 shadow-sm"
+          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-[#F1F1F1] p-3 shadow-sm"
           v-for="data in tagData"
           :key="data.tag"
         >
@@ -207,6 +237,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
+        <div>a</div>
       </div>
     </div>
   </div>
