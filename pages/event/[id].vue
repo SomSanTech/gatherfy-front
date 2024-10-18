@@ -3,7 +3,7 @@ import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
 import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
-import Map from '../Map.vue';
+import Map from '../../components/Map.vue';
 const route = useRoute();
 const param = route.params.id;
 const isOpenPopup = ref(false);
@@ -113,7 +113,7 @@ watchEffect(() => {
           <div class="flex flex-col gap-5">
             <p>Event location</p>
             <div class="h-full w-full">
-              <Map :latitude="13.7563" :longitude="100.5018" />
+              <!-- <Map :latitude="13.7563" :longitude="100.5018" /> -->
             </div>
           </div>
           <div class="flex flex-col gap-5">

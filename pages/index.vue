@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as d3 from 'd3';
 import ArrowIcon from '~/components/icons/ArrowIcon.vue';
 import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
@@ -6,9 +7,11 @@ import Clock from '~/components/icons/Clock.vue';
 import Organisation from '~/components/icons/Organisation.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
 import EventListCard from '~/components/EventListCard.vue';
-
+import { DatePicker } from 'v-calendar';
+import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
 
+const today = ref(new Date());
 const tagData = [
   { tag: 'Technology', color: '#FF5733' },
   { tag: 'Music', color: '#33FF57' },
@@ -35,6 +38,71 @@ const handleReccomEvent = (type: string) => {
 const reccommentIndex = ref(0);
 
 const sampleEventIndex = ref(0);
+function formatDate(date: Date): string {
+  const dayOfWeek = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+  }).format(date);
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
+    date
+  );
+  const day = new Intl.DateTimeFormat('en-US', { day: 'numeric' }).format(date);
+
+  return `${month} ${day} ${dayOfWeek}`;
+}
+
+const maxDate = new Date();
+maxDate.setMonth(maxDate.getMonth() + 2);
+
+const addDays = (date: Date, days: number) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+type GroupedEvents = {
+  [date: string]: Event[]; // each key (date) maps to an array of Event
+};
+const filterExploreDate = computed<GroupedEvents>(() => {
+  const filteredData = eventData.value.filter((item) => {
+    const itemDate = new Date(item.start_date).getTime();
+    return (
+      itemDate >= today.value.getTime() &&
+      itemDate <= addDays(today.value, 3).getTime()
+    );
+  });
+
+  // If no data for today and the next 3 days, find the next available date
+  if (filteredData.length === 0) {
+    const nextAvailableDate = eventData.value.find(
+      (item) => new Date(item.start_date).getTime() > today.value.getTime()
+    );
+    // Return an empty object if no events are found
+    return nextAvailableDate
+      ? { [nextAvailableDate.start_date]: [nextAvailableDate] }
+      : {};
+  }
+
+  // Group filtered data by start_date
+  const groupDateData = d3.group(filteredData, (d) => d.start_date);
+  const groupedEvents: GroupedEvents = {};
+
+  // Sort the grouped keys (dates) and populate groupedEvents
+  Array.from(groupDateData.entries())
+    .sort(
+      ([dateA], [dateB]) =>
+        new Date(dateA).getTime() - new Date(dateB).getTime()
+    )
+    .forEach(([date, events]) => {
+      groupedEvents[date] = events as Event[]; // Type assertion to ensure TypeScript understands the type
+    });
+
+  return groupedEvents;
+});
+watch([today], ([newToday]) => {
+  console.log('Today changed to:', newToday);
+
+  // ตัวอย่างการเรียกใช้ฟังก์ชันกรองข้อมูลใหม่
+  filterExploreDate.value; // ถ้า filterExploreDate เป็น computed
+});
 
 onMounted(() => {
   fetchData();
@@ -137,9 +205,7 @@ onMounted(() => {
                   <p class="font-semibold">When</p>
 
                   <p v-if="eventData[reccommentIndex]" class="text-sm">
-                    {{
-                      useFormatDate(eventData[reccommentIndex]?.start_date)
-                    }}
+                    {{ useFormatDate(eventData[reccommentIndex]?.start_date) }}
                     -
                     {{ useFormatDate(eventData[reccommentIndex]?.end_date) }}
                   </p>
@@ -221,23 +287,53 @@ onMounted(() => {
       </div>
     </div>
     <!-- Explore Date section -->
-    <div class="py-7">
+    <div class="w-full py-7">
       <h1 class="t1 py-3">Explore by date</h1>
-      <div class="flex justify-between gap-10">
+      <div class="flex w-full justify-between gap-10">
         <!-- Explore by Date -->
-        <div class="w-full">
-          <p class="py-2 text-lg font-semibold">
-            Jan 5 <span class="text-sm text-zinc-500">Monday</span>
-          </p>
-          <div class="flex w-full flex-col gap-3">
-            <div v-for="event in eventData">
-              <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
-                <EventExploreDateCard :eventDetail="event" />
-              </NuxtLink>
+        <div class="flex w-full">
+          <div class="w-full">
+            <div
+              class="flex w-full gap-4"
+              v-for="(events, date) in filterExploreDate"
+              :key="date"
+            >
+              <div class="flex flex-col">
+                <div class="my-4 h-3 w-3 rounded-full bg-zinc-200"></div>
+                <div class="h-full translate-x-1/2 border-l-[1px]"></div>
+              </div>
+              <div>
+                <p class="w-full py-2 text-lg font-semibold">
+                  {{ formatDate(new Date(date)) }}
+                </p>
+                <div class="flex w-full flex-col gap-3">
+                  <div v-for="event in events" class="w-full">
+                    <NuxtLink
+                      v-if="event?.slug"
+                      :to="{ name: 'event-id', params: { id: event?.slug } }"
+                    >
+                      <EventExploreDateCard
+                        :eventDetail="event"
+                        class="w-full"
+                      />
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div>a</div>
+
+        <div>
+          <DatePicker
+            v-model="today"
+            mode="date"
+            :min-date="today"
+            :max-date="maxDate"
+          />
+          <!-- {{ today }} -->
+          <!-- {{ filterExploreDate }} -->
+        </div>
       </div>
     </div>
   </div>

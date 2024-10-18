@@ -21,6 +21,7 @@ const props = defineProps<{
         <p class="text-sm text-zinc-400">
           At {{ props.eventDetail?.location }}
         </p>
+        {{ props.eventDetail?.start_date }}
       </div>
       <div class="pt-3">
         <button class="rounded-md bg-black px-5 py-1 text-sm text-white">

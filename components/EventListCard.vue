@@ -9,14 +9,16 @@ const props = defineProps<{
 
 <template>
   <div
-    :class="`shrink-0 rounded-md ${isVertical ? 'w-[272px]' : 'w-[353px]'} `"
+    :class="`shrink-0 rounded-md drop-shadow-md ${isVertical ? 'w-[272px]' : 'h-[370px] w-[370px]'} `"
   >
     <img
       :src="eventDetail?.image"
       alt=""
-      :class="`w-full rounded-t-2xl ${isVertical ? 'h-[400px]' : 'h-[222px]'} object-cover`"
+      :class="`w-full rounded-t-2xl ${isVertical ? 'h-[360px]' : 'h-[235px]'} object-cover`"
     />
-    <div class="w-full rounded-b-2xl bg-[#FBE569] p-4">
+    <div
+      :class="`w-full rounded-b-2xl bg-zinc-200 p-4 ${isVertical ? 'h-[135px]' : 'h-[135px]'}`"
+    >
       <p v-if="eventDetail?.start_date" class="text-sm">
         {{ useFormatDate(eventDetail?.start_date) }}
       </p>
