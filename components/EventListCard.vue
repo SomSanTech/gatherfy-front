@@ -9,12 +9,12 @@ const props = defineProps<{
 
 <template>
   <div
-    :class="`shrink-0 rounded-md drop-shadow-md ${isVertical ? 'w-[272px]' : 'h-[370px] w-[370px]'} `"
+    :class="`shrink-0 rounded-md drop-shadow-md ${isVertical ? 'w-[170px]' : 'h-[370px] w-[370px]'} `"
   >
     <img
       :src="eventDetail?.image"
       alt=""
-      :class="`w-full rounded-t-2xl ${isVertical ? 'h-[360px]' : 'h-[235px]'} object-cover`"
+      :class="`w-full rounded-t-lg ${isVertical ? 'h-[240px]' : 'h-[235px]'} object-cover`"
     />
     <div
       :class="`w-full rounded-b-2xl bg-zinc-200 p-4 ${isVertical ? 'h-[135px]' : 'h-[135px]'}`"

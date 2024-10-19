@@ -114,6 +114,15 @@ watchEffect(() => {
             <p>Event location</p>
             <div class="h-full w-full">
               <!-- <Map :latitude="13.7563" :longitude="100.5018" /> -->
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30988.16801609143!2d100.55004526585483!3d13.867766604333376!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29c5a3a91d177%3A0x140b15ef77bd4508!2z4Lin4Lix4LiU4Lie4Lij4Liw4Lio4Lij4Li14Lih4Lir4Liy4LiY4Liy4LiV4Li44Lin4Lij4Lih4Lir4Liy4Lin4Li04Lir4Liy4Lij!5e0!3m2!1sth!2sth!4v1729251996890!5m2!1sth!2sth"
+                width="370"
+                height="370"
+                style="border: 0"
+                allowfullscreen="true"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
           <div class="flex flex-col gap-5">

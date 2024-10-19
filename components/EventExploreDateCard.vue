@@ -12,7 +12,7 @@ const props = defineProps<{
     <div>
       <div>
         <p class="text-sm text-zinc-400">11:00 AM</p>
-        <p class="max-w-[350px] font-semibold">
+        <p class="w-[350px] font-semibold">
           {{ props.eventDetail?.name }}
         </p>
         <p class="text-sm text-zinc-400">

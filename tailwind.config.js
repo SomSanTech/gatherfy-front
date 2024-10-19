@@ -11,7 +11,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        beige: '#F7F7F3', // Add your custom color here
+        burgundy: '#D71515',
+        'light-grey': '#F6F6F6',
+        'black-1': '#1F1E22',
       },
     },
   },

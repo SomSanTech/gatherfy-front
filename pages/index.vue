@@ -122,7 +122,7 @@ onMounted(() => {
     <!-- Header Event Banner -->
     <div class="relative">
       <div
-        class="absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white"
+        class="absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
         @click="sampleEventIndex -= 1"
       >
         <ArrowIcon class="" />
@@ -143,15 +143,15 @@ onMounted(() => {
             <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
           </div>
           <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
-            <h1 class="shw text-4xl text-white">
+            <h1 class="shw t1 text-white">
               {{ eventData[sampleEventIndex]?.name }}
             </h1>
-            <div class="mt-4 flex gap-2 text-sm">
+            <div class="b3 mt-4 flex gap-2">
               <button class="mt-2 rounded-2xl bg-white px-4 py-2">
                 View more
               </button>
               <button
-                class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-white backdrop-blur-sm"
+                class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-light-grey backdrop-blur-sm"
               >
                 Register
               </button>
@@ -160,7 +160,7 @@ onMounted(() => {
         </div>
       </NuxtLink>
       <div
-        class="absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white"
+        class="absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
       >
         <ArrowIcon class="rotate-180" />
       </div>
@@ -178,14 +178,14 @@ onMounted(() => {
         </button>
         <div class="flex w-full flex-col gap-3">
           <div class="flex gap-3">
-            <div class="h-[250px] w-full rounded-2xl bg-[#FBE569] p-7">
-              <h3 class="text-xl font-semibold">
+            <div class="h-[250px] w-full rounded-2xl bg-light-grey p-7">
+              <h3 class="b1 font-semibold">
                 {{ eventData[reccommentIndex]?.name }}
               </h3>
               <p>
                 {{ eventData[reccommentIndex]?.detail }}
               </p>
-              <button class="my-3 bg-beige px-4 py-2">Read more</button>
+              <button class="bg-beige my-3 px-4 py-2">Read more</button>
             </div>
             <div class="h-[250px] w-full">
               <img
@@ -197,7 +197,7 @@ onMounted(() => {
           </div>
           <div class="grid grid-cols-6 gap-3">
             <div
-              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-white"
+              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-light-grey"
             >
               <div class="flex flex-col gap-1">
                 <Calendar />
@@ -236,7 +236,7 @@ onMounted(() => {
               class="col-span-2"
             >
               <button
-                class="h-[150px] w-full rounded-2xl bg-[#8BD0FC] font-semibold"
+                class="h-[150px] w-full rounded-2xl bg-burgundy font-semibold text-light-grey"
               >
                 Get<br />Ticket<br />Now
               </button>
@@ -253,7 +253,7 @@ onMounted(() => {
     </div>
     <!-- Event List section -->
     <div class="w-full py-7">
-      <div class="flex divide-x-[2px] rounded-full bg-beige px-4 py-4">
+      <div class="bg-beige flex divide-x-[2px] rounded-full px-4 py-4">
         <button class="px-4 font-bold">Today event</button>
         <button class="px-4">Upcoming event</button>
         <button class="px-4">All event</button>
@@ -289,35 +289,29 @@ onMounted(() => {
     <!-- Explore Date section -->
     <div class="w-full py-7">
       <h1 class="t1 py-3">Explore by date</h1>
-      <div class="flex w-full justify-between gap-10">
-        <!-- Explore by Date -->
-        <div class="flex w-full">
-          <div class="w-full">
-            <div
-              class="flex w-full gap-4"
-              v-for="(events, date) in filterExploreDate"
-              :key="date"
-            >
-              <div class="flex flex-col">
-                <div class="my-4 h-3 w-3 rounded-full bg-zinc-200"></div>
-                <div class="h-full translate-x-1/2 border-l-[1px]"></div>
-              </div>
-              <div>
-                <p class="w-full py-2 text-lg font-semibold">
-                  {{ formatDate(new Date(date)) }}
-                </p>
-                <div class="flex w-full flex-col gap-3">
-                  <div v-for="event in events" class="w-full">
-                    <NuxtLink
-                      v-if="event?.slug"
-                      :to="{ name: 'event-id', params: { id: event?.slug } }"
-                    >
-                      <EventExploreDateCard
-                        :eventDetail="event"
-                        class="w-full"
-                      />
-                    </NuxtLink>
-                  </div>
+      <div class="flex w-full gap-8">
+        <div class="w-full">
+          <div
+            class="flex w-full gap-4"
+            v-for="(events, date) in filterExploreDate"
+            :key="date"
+          >
+            <div class="flex flex-col">
+              <div class="my-4 h-3 w-3 rounded-full bg-zinc-200"></div>
+              <div class="h-full translate-x-1/2 border-l-[1px]"></div>
+            </div>
+            <div>
+              <p class="w-full py-2 text-lg font-semibold">
+                {{ formatDate(new Date(date)) }}
+              </p>
+              <div class="flex w-full flex-col gap-3">
+                <div v-for="event in events" class="w-full">
+                  <NuxtLink
+                    v-if="event?.slug"
+                    :to="{ name: 'event-id', params: { id: event?.slug } }"
+                  >
+                    <EventExploreDateCard :eventDetail="event" class="w-full" />
+                  </NuxtLink>
                 </div>
               </div>
             </div>
@@ -331,8 +325,6 @@ onMounted(() => {
             :min-date="today"
             :max-date="maxDate"
           />
-          <!-- {{ today }} -->
-          <!-- {{ filterExploreDate }} -->
         </div>
       </div>
     </div>

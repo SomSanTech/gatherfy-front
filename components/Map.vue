@@ -3,7 +3,7 @@ import { GoogleMap, Marker } from 'vue3-google-map';
 const userLocation = ref(null);
 const center = ref({
   lat: 13.912834696317232,
-  lng: 100.54777395501795,
+  lng: 100.56777395501795,
   title: 'จุดที่ 1',
 });
 
@@ -14,7 +14,7 @@ const center = ref({
 // ];
 const marker = {
   lat: 13.912834696317232,
-  lng: 100.54777395501795,
+  lng: 100.56777395501795,
   title: 'จุดที่ 1',
 };
 const getUserLocation = () => {
@@ -62,10 +62,10 @@ onMounted(() => {
       :options="{ position: marker, title: 'ตำแหน่งของคุณ' }"
     />
 
-    <Marker
+    <!-- <Marker
       v-if="userLocation"
       :options="{ position: userLocation, title: 'ตำแหน่งของคุณ' }"
-    />
+    /> -->
   </GoogleMap>
 </template>
 <style scoped></style>

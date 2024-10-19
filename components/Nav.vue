@@ -12,7 +12,7 @@ const handleSearch = () => {
   <div class="w-screen bg-white/20 py-6 backdrop-blur-sm">
     <div class="mx-auto flex max-w-6xl items-center justify-between">
       <NuxtLink to="/">
-        <button class="nanum text-3xl">Gatherfy</button>
+        <button class="oooh-baby-regular text-4xl">Gatherfy</button>
       </NuxtLink>
 
       <div class="flex gap-5">

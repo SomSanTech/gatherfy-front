@@ -16,8 +16,10 @@ export default defineNuxtConfig({
     strict: true,
   },
   runtimeConfig: {
+    apiKey: process.env.API_KEY,
     public: {
       BASE_URL: process.env.BASE_URL || 'http://localhost:8080',
+      publicApiKey: process.env.PUBLIC_API_KEY,
     },
   },
 });
