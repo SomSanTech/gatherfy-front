@@ -6,7 +6,6 @@ import Location from '~/components/icons/Location.vue';
 import Organisation from '~/components/icons/Organisation.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
 import EventListCard from '~/components/EventListCard.vue';
-import ExploreByDate from '~/components/sections/ExploreByDate.vue';
 import BtnComp from '~/components/BtnComp.vue';
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';

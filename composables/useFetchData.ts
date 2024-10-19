@@ -3,7 +3,7 @@ import { useRuntimeConfig } from '#app';
 export const useFetchData = async (url: string) => {
   const config = useRuntimeConfig();
   try {
-    const response = await fetch(`${config.public.BASE_API}/api/${url}`);
+    const response = await fetch(`${config.public.baseUrl}/api/${url}`);
     if (!response.ok) {
       throw new Error(`Error fetching ${url}`);
     }
