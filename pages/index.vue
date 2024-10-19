@@ -3,13 +3,15 @@ import * as d3 from 'd3';
 import ArrowIcon from '~/components/icons/ArrowIcon.vue';
 import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
-import Clock from '~/components/icons/Clock.vue';
 import Organisation from '~/components/icons/Organisation.vue';
 import EventExploreDateCard from '~/components/EventExploreDateCard.vue';
 import EventListCard from '~/components/EventListCard.vue';
+import ExploreByDate from '~/components/sections/ExploreByDate.vue';
+import BtnComp from '~/components/BtnComp.vue';
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
+import { useFetchData } from '~/composables/useFetchData';
 
 const today = ref(new Date());
 const tagData = [
@@ -22,7 +24,7 @@ const tagData = [
 const eventData = ref<Event[]>([]);
 
 const fetchData = async () => {
-  const fetchedData = await useFetchEvent();
+  const fetchedData = await useFetchData('v1/events');
   eventData.value = fetchedData || [];
 };
 
@@ -35,20 +37,18 @@ const handleReccomEvent = (type: string) => {
   }
 };
 
+const handleSampleEvent = (type: string) => {
+  if (type === 'next' && sampleEventIndex.value !== eventData.value.length) {
+    sampleEventIndex.value += 1;
+  }
+  if (type === 'prev' && sampleEventIndex.value !== 0) {
+    sampleEventIndex.value -= 1;
+  }
+};
+
 const reccommentIndex = ref(0);
 
 const sampleEventIndex = ref(0);
-function formatDate(date: Date): string {
-  const dayOfWeek = new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-  }).format(date);
-  const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
-    date
-  );
-  const day = new Intl.DateTimeFormat('en-US', { day: 'numeric' }).format(date);
-
-  return `${month} ${day} ${dayOfWeek}`;
-}
 
 const maxDate = new Date();
 maxDate.setMonth(maxDate.getMonth() + 2);
@@ -58,8 +58,16 @@ const addDays = (date: Date, days: number) => {
   result.setDate(result.getDate() + days);
   return result;
 };
+
+const selectedEventTime: 'today' | 'upcome' | 'all' = ref('today');
+
+const selectedEventTimeStyle = {
+  active: 'text-light-grey font-semibold bg-burgundy py-2',
+  notActive: 'text-black',
+};
+
 type GroupedEvents = {
-  [date: string]: Event[]; // each key (date) maps to an array of Event
+  [date: string]: Event[];
 };
 const filterExploreDate = computed<GroupedEvents>(() => {
   const filteredData = eventData.value.filter((item) => {
@@ -70,38 +78,34 @@ const filterExploreDate = computed<GroupedEvents>(() => {
     );
   });
 
-  // If no data for today and the next 3 days, find the next available date
   if (filteredData.length === 0) {
     const nextAvailableDate = eventData.value.find(
       (item) => new Date(item.start_date).getTime() > today.value.getTime()
     );
-    // Return an empty object if no events are found
     return nextAvailableDate
       ? { [nextAvailableDate.start_date]: [nextAvailableDate] }
       : {};
   }
 
-  // Group filtered data by start_date
   const groupDateData = d3.group(filteredData, (d) => d.start_date);
   const groupedEvents: GroupedEvents = {};
 
-  // Sort the grouped keys (dates) and populate groupedEvents
   Array.from(groupDateData.entries())
     .sort(
       ([dateA], [dateB]) =>
         new Date(dateA).getTime() - new Date(dateB).getTime()
     )
     .forEach(([date, events]) => {
-      groupedEvents[date] = events as Event[]; // Type assertion to ensure TypeScript understands the type
+      groupedEvents[date] = events as Event[];
     });
 
   return groupedEvents;
 });
+
 watch([today], ([newToday]) => {
   console.log('Today changed to:', newToday);
 
-  // ตัวอย่างการเรียกใช้ฟังก์ชันกรองข้อมูลใหม่
-  filterExploreDate.value; // ถ้า filterExploreDate เป็น computed
+  filterExploreDate.value;
 });
 
 onMounted(() => {
@@ -121,12 +125,12 @@ onMounted(() => {
   <div class="mx-auto my-24 max-w-4xl">
     <!-- Header Event Banner -->
     <div class="relative">
-      <div
+      <button
         class="absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
-        @click="sampleEventIndex -= 1"
+        @click="handleSampleEvent('prev')"
       >
         <ArrowIcon class="" />
-      </div>
+      </button>
       <NuxtLink
         :to="{
           name: 'event-id',
@@ -147,28 +151,22 @@ onMounted(() => {
               {{ eventData[sampleEventIndex]?.name }}
             </h1>
             <div class="b3 mt-4 flex gap-2">
-              <button class="mt-2 rounded-2xl bg-white px-4 py-2">
-                View more
-              </button>
-              <button
-                class="mt-2 rounded-2xl bg-white/20 px-4 py-2 text-light-grey backdrop-blur-sm"
-              >
-                Register
-              </button>
+              <BtnComp text="Join now" />
             </div>
           </div>
         </div>
       </NuxtLink>
-      <div
+      <button
+        @click="handleSampleEvent('next')"
         class="absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
       >
         <ArrowIcon class="rotate-180" />
-      </div>
+      </button>
     </div>
 
     <!-- Recommend Event section -->
     <div class="w-full py-7">
-      <h1 class="t1">Reccomment Event</h1>
+      <h1 class="t2">Reccomment Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
           class="left-0 h-fit rounded-full"
@@ -176,28 +174,32 @@ onMounted(() => {
         >
           <ArrowIcon class="text-2xl text-black" />
         </button>
-        <div class="flex w-full flex-col gap-3">
-          <div class="flex gap-3">
-            <div class="h-[250px] w-full rounded-2xl bg-light-grey p-7">
-              <h3 class="b1 font-semibold">
-                {{ eventData[reccommentIndex]?.name }}
-              </h3>
-              <p>
-                {{ eventData[reccommentIndex]?.detail }}
-              </p>
-              <button class="bg-beige my-3 px-4 py-2">Read more</button>
-            </div>
-            <div class="h-[250px] w-full">
-              <img
-                :src="eventData[reccommentIndex]?.image"
-                alt=""
-                class="h-full w-full rounded-2xl object-cover"
-              />
-            </div>
-          </div>
-          <div class="grid grid-cols-6 gap-3">
+        <div class="grid w-full grid-cols-5 gap-3">
+          <div class="col-span-3 grid h-[400px] grid-rows-3 gap-3">
             <div
-              class="col-span-4 grid h-[150px] w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-light-grey"
+              class="row-span-2 flex w-full flex-col justify-between rounded-2xl bg-light-grey p-7 drop-shadow-md"
+            >
+              <div>
+                <h3 class="b1 pb-4 font-semibold">
+                  {{ eventData[reccommentIndex]?.name }}
+                </h3>
+                <p class="b2">
+                  {{ eventData[reccommentIndex]?.detail }}
+                </p>
+              </div>
+
+              <NuxtLink
+                :to="{
+                  name: 'event-id',
+                  params: { id: eventData[reccommentIndex]?.slug || 0 },
+                }"
+                class="col-span-2"
+              >
+                <BtnComp text="Registor now" color="red" />
+              </NuxtLink>
+            </div>
+            <div
+              class="row-span-1 grid w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-light-grey drop-shadow-md"
             >
               <div class="flex flex-col gap-1">
                 <Calendar />
@@ -205,9 +207,19 @@ onMounted(() => {
                   <p class="font-semibold">When</p>
 
                   <p v-if="eventData[reccommentIndex]" class="text-sm">
-                    {{ useFormatDate(eventData[reccommentIndex]?.start_date) }}
+                    {{
+                      useFormatDateTime(
+                        new Date(eventData[reccommentIndex]?.start_date),
+                        'date'
+                      )
+                    }}
                     -
-                    {{ useFormatDate(eventData[reccommentIndex]?.end_date) }}
+                    {{
+                      useFormatDateTime(
+                        new Date(eventData[reccommentIndex]?.end_date),
+                        'date'
+                      )
+                    }}
                   </p>
                 </div>
               </div>
@@ -228,19 +240,14 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <NuxtLink
-              :to="{
-                name: 'event-id',
-                params: { id: eventData[reccommentIndex]?.slug || 0 },
-              }"
-              class="col-span-2"
-            >
-              <button
-                class="h-[150px] w-full rounded-2xl bg-burgundy font-semibold text-light-grey"
-              >
-                Get<br />Ticket<br />Now
-              </button>
-            </NuxtLink>
+          </div>
+
+          <div class="col-span-2 w-full drop-shadow-md">
+            <img
+              :src="eventData[reccommentIndex]?.image"
+              alt=""
+              class="h-[400px] w-full rounded-2xl object-cover"
+            />
           </div>
         </div>
         <button
@@ -253,28 +260,51 @@ onMounted(() => {
     </div>
     <!-- Event List section -->
     <div class="w-full py-7">
-      <div class="bg-beige flex divide-x-[2px] rounded-full px-4 py-4">
-        <button class="px-4 font-bold">Today event</button>
-        <button class="px-4">Upcoming event</button>
-        <button class="px-4">All event</button>
+      <div class="flex gap-2 rounded-xl border border-black-1 p-2">
+        <button
+          @click="selectedEventTime = 'today'"
+          :class="`rounded-md px-4 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        >
+          Today event
+        </button>
+        <button
+          @click="selectedEventTime = 'upcome'"
+          :class="`rounded-md px-4 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        >
+          Upcoming event
+        </button>
+        <button
+          @click="selectedEventTime = 'all'"
+          :class="`rounded-md px-4 ${selectedEventTime === 'all' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        >
+          All event
+        </button>
       </div>
-      <h1 class="t1 py-4">Today, 5 Jan</h1>
-      <div class="w-full overflow-x-auto">
-        <div class="flex h-full w-full gap-3">
-          <div v-for="event in eventData">
-            <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
-              <EventListCard :eventDetail="event" :isVertical="true" />
-            </NuxtLink>
+      <h1 class="t2 py-4">Today, 5 Jan</h1>
+      <div class="relative">
+        <div
+          class="absolute left-0 top-0 z-20 h-full w-8 bg-gradient-to-r from-white"
+        ></div>
+        <div class="w-full overflow-x-auto px-4 pb-5">
+          <div class="flex h-full w-full gap-3">
+            <div v-for="event in eventData">
+              <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
+                <EventListCard :eventDetail="event" :isVertical="true" />
+              </NuxtLink>
+            </div>
           </div>
         </div>
+        <div
+          class="absolute right-0 top-0 z-20 h-full w-10 bg-gradient-to-l from-white"
+        ></div>
       </div>
     </div>
     <!-- Tags section -->
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
-        <div
-          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-[#F1F1F1] p-3 shadow-sm"
+        <button
+          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-light-grey p-3 drop-shadow-md duration-200 hover:bg-grey"
           v-for="data in tagData"
           :key="data.tag"
         >
@@ -283,12 +313,12 @@ onMounted(() => {
             class="h-full w-[5px] rounded"
           ></div>
           <span class="ml-2 font-semibold">{{ data.tag }}</span>
-        </div>
+        </button>
       </div>
     </div>
     <!-- Explore Date section -->
     <div class="w-full py-7">
-      <h1 class="t1 py-3">Explore by date</h1>
+      <h1 class="t2 py-3">Explore by date</h1>
       <div class="flex w-full gap-8">
         <div class="w-full">
           <div
@@ -302,7 +332,7 @@ onMounted(() => {
             </div>
             <div>
               <p class="w-full py-2 text-lg font-semibold">
-                {{ formatDate(new Date(date)) }}
+                {{ useFormatDateTime(new Date(date), 'fullDate') }}
               </p>
               <div class="flex w-full flex-col gap-3">
                 <div v-for="event in events" class="w-full">

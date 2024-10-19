@@ -9,21 +9,21 @@ const props = defineProps<{
 
 <template>
   <div
-    :class="`shrink-0 rounded-md drop-shadow-md ${isVertical ? 'w-[170px]' : 'h-[370px] w-[370px]'} `"
+    :class="`shrink-0 drop-shadow-md ${isVertical ? 'w-[180px]' : 'w-[370px]'} `"
   >
     <img
       :src="eventDetail?.image"
       alt=""
-      :class="`w-full rounded-t-lg ${isVertical ? 'h-[240px]' : 'h-[235px]'} object-cover`"
+      :class="`w-full rounded-t-lg ${isVertical ? 'h-[245px]' : 'h-[235px]'} object-cover`"
     />
     <div
-      :class="`w-full rounded-b-2xl bg-zinc-200 p-4 ${isVertical ? 'h-[135px]' : 'h-[135px]'}`"
+      :class="`w-full rounded-b-lg bg-light-grey p-2 ${isVertical ? 'h-[85px]' : 'h-[135px]'}`"
     >
-      <p v-if="eventDetail?.start_date" class="text-sm">
-        {{ useFormatDate(eventDetail?.start_date) }}
+      <p v-if="eventDetail?.start_date" class="b4">
+        {{ useFormatDateTime(new Date(eventDetail?.start_date), 'date') }}
       </p>
-      <p class="text-lg font-semibold">{{ eventDetail?.name }}</p>
-      <p class="text-sm">At {{ eventDetail?.location }}</p>
+      <p class="b3 line-clamp-[2] font-semibold">{{ eventDetail?.name }}</p>
+      <p class="b4">At {{ eventDetail?.location }}</p>
     </div>
   </div>
 </template>

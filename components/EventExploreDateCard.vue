@@ -7,24 +7,22 @@ const props = defineProps<{
 
 <template>
   <div
-    class="flex h-[200px] w-full justify-between gap-3 rounded-lg bg-[#F1F1F1] p-4"
+    class="flex h-[200px] w-full justify-between gap-3 rounded-lg bg-light-grey p-4 drop-shadow-lg"
   >
-    <div>
+    <div class="flex flex-col justify-between">
       <div>
-        <p class="text-sm text-zinc-400">11:00 AM</p>
-        <p class="w-[350px] font-semibold">
+        <p class="b3 text-zinc-400">11:00 AM</p>
+        <p class="b2 line-clamp-[2] w-[370px] font-semibold">
           {{ props.eventDetail?.name }}
         </p>
-        <p class="text-sm text-zinc-400">
-          By {{ props.eventDetail?.organizer }}
-        </p>
-        <p class="text-sm text-zinc-400">
-          At {{ props.eventDetail?.location }}
-        </p>
-        {{ props.eventDetail?.start_date }}
+        <p class="b3 text-zinc-400">By {{ props.eventDetail?.organizer }}</p>
+        <p class="b3 text-zinc-400">At {{ props.eventDetail?.location }}</p>
       </div>
-      <div class="pt-3">
-        <button class="rounded-md bg-black px-5 py-1 text-sm text-white">
+      <div class="flex gap-2 pt-3">
+        <button class="b4 rounded-md border px-5 py-1 text-black-1">
+          Concert
+        </button>
+        <button class="b4 rounded-md border px-5 py-1 text-black-1">
           Concert
         </button>
       </div>

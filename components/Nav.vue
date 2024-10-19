@@ -10,13 +10,13 @@ const handleSearch = () => {
 
 <template>
   <div class="w-screen bg-white/20 py-6 backdrop-blur-sm">
-    <div class="mx-auto flex max-w-6xl items-center justify-between">
+    <div class="mx-auto flex max-w-4xl items-center justify-between">
       <NuxtLink to="/">
         <button class="oooh-baby-regular text-4xl">Gatherfy</button>
       </NuxtLink>
 
       <div class="flex gap-5">
-        <div class="flex rounded-2xl border px-4 py-2">
+        <div class="flex rounded-2xl border border-grey px-4 py-2">
           <input
             type="text"
             name=""
@@ -30,9 +30,7 @@ const handleSearch = () => {
             <SearchIcon class="h-3 w-3 text-black" />
           </button>
         </div>
-        <button class="rounded-xl bg-black px-4 py-2 text-white">
-          Sign Up
-        </button>
+        <BtnComp text="Sign in" color="red" />
       </div>
     </div>
   </div>

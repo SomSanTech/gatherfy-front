@@ -1,0 +1,24 @@
+<script setup lang="ts">
+const props = defineProps<{
+  text?: string;
+  color?: string;
+}>();
+
+const btnColor = computed(() => {
+  if (props.color === 'red') {
+    return 'bg-burgundy hover:bg-[#A61010] text-light-grey';
+  } else if (props.color === 'black') {
+    return 'bg-black-1 hover:bg-dark-grey text-light-grey';
+  } else {
+    return 'bg-light-grey hover:bg-grey text-black-1';
+  }
+});
+</script>
+
+<template>
+  <button
+    :class="`b3 w-fit rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
+  >
+    {{ text }}
+  </button>
+</template>

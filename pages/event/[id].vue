@@ -14,27 +14,32 @@ const regis = () => {
 };
 const event = ref();
 
-const getEventDetail = async () => {
-  const { data, error } = await useFetch(
-    `http://localhost:8080/api/events/${param}`
-  );
+// const getEventDetail = async () => {
+//   const { data, error } = await useFetch(
+//     `http://localhost:8080/api/events/${param}`
+//   );
 
-  if (error.value) {
-    console.log('Error fetching events:', error.value);
-    return;
-  }
+//   if (error.value) {
+//     console.log('Error fetching events:', error.value);
+//     return;
+//   }
 
-  event.value = data.value;
-};
+//   event.value = data.value;
+// };
 onMounted(() => {
-  getEventDetail();
+  fetchData();
 });
+
+const fetchData = async () => {
+  const fetchedData = await useFetchData(`v1/events/${param}`);
+  event.value = fetchedData || [];
+};
 
 watchEffect(() => {
   if (param) {
     console.log(param);
 
-    getEventDetail();
+    fetchData();
   }
 });
 </script>
@@ -49,7 +54,7 @@ watchEffect(() => {
         <div
           class="relative z-10 bg-black bg-opacity-30 p-10 py-32 backdrop-blur-md"
         >
-          <div class="mx-auto flex w-full max-w-6xl gap-12 text-white">
+          <div class="mx-auto flex w-full max-w-4xl gap-12 text-white">
             <div class="h-[500px] w-[350px] bg-zinc-200">
               <img
                 :src="event?.image"
@@ -83,22 +88,17 @@ watchEffect(() => {
                 <p>{{ event?.location }}</p>
               </div>
               <div class="flex gap-2">
-                <button
-                  @click="isOpenPopup = true"
-                  class="rounded-xl bg-[#FEFEFE] px-5 py-2 text-black"
-                >
-                  Register event
-                </button>
+                <BtnComp @click="isOpenPopup = true" text="Registor event" />
               </div>
             </div>
           </div>
         </div>
       </div>
       <!-- content -->
-      <div class="mx-auto mt-[100px] grid max-w-6xl grid-cols-5 gap-20">
+      <div class="mx-auto mt-[100px] grid max-w-4xl grid-cols-5 gap-20">
         <div class="col-span-3 flex flex-col gap-4">
-          <h1 class="font-semibold">Event detail</h1>
-          <p>
+          <h1 class="t2 font-semibold">Event detail</h1>
+          <p class="b2">
             {{ event?.detail }}
           </p>
           <div class="h-[500px] w-full bg-zinc-200">
