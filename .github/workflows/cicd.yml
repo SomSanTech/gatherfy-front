@@ -73,7 +73,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p 22 $REMOTE_HOST >> ~/.ssh/known_hosts
-          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/sealb/capstone
+          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/somsan/Gatherfy
 
       - name: Deploy Docker container on VM
         env:
