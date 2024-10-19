@@ -3,7 +3,8 @@ name: CI/CD kub pom
 on:
   push:
     branches:
-      - 'main'
+      - 'sprint1/main'
+      - 'homepage'
 
 jobs:
   build:
@@ -81,10 +82,10 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           ssh -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            cd /home/sealb/capstone
+            cd /home/somsan/Gatherfy
             tar -xzf build.tar.gz
 
             docker stop gatherfy || true
             docker rm gatherfy || true
             docker build -t frontdockerfile:latest .
-            docker run -d --name gatherfy -p 80:3000 frontdockerfile:latest
+            docker run -d --name gatherfy -p 80:411 frontdockerfile:latest
