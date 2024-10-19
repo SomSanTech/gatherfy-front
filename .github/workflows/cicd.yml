@@ -73,7 +73,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p 22 $REMOTE_HOST >> ~/.ssh/known_hosts
-          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/somsan/Gatherfy/front
+          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/somsan/Gatherfy/front/build.tar.gz
 
       - name: Deploy Docker container on VM
         env:
@@ -87,5 +87,5 @@ jobs:
 
             docker stop gatherfy || true
             docker rm gatherfy || true
-            docker build -t frontdockerfile:latest .
-            docker run -d --name gatherfy -p 80:411 frontdockerfile:latest
+            docker build -t gatherfront:latest .
+            docker run -d --name gatherfy -p 80:411 gatherfront:latest
