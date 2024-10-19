@@ -4,6 +4,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+:root {
+  background-color: #fdfdfd;
+}
 
 .oooh-baby-regular {
   font-family: 'Oooh Baby', cursive;
@@ -36,12 +39,14 @@
 .t1 {
   font-family: 'Maitree', sans-serif;
   font-size: 36px;
+  font-weight: 600;
   line-height: 130%;
 }
 
 .t2 {
   font-family: 'Maitree', sans-serif;
   font-size: 28px;
+  font-weight: 600;
   line-height: 130%;
 }
 

@@ -13,6 +13,8 @@ export default {
       colors: {
         burgundy: '#D71515',
         'light-grey': '#F6F6F6',
+        grey: '#D0D0D0 ',
+        'dark grey': '#3A393D ',
         'black-1': '#1F1E22',
       },
     },
