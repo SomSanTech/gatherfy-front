@@ -63,18 +63,22 @@ jobs:
           username: ${{ secrets.VPN_USERNAME }}
           password: ${{ secrets.VPN_PASSWORD }}
 
-      - name: Copy build files to VM
+      - name: Copy build files to server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 22 $REMOTE_HOST >> ~/.ssh/known_hosts
-          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/somsan/Gatherfy/front
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass    
+      
 
+      - name: Copy build files to VM
+        run: |
+          sshpass -p "${{ secrets.REMOTE_PASSWORD }}" scp -P 22 build/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/somsan/Gatherfy/front
       - name: Deploy Docker container on VM
         env:
           REMOTE_PASSWORD: ${{ secrets.REMOTE_PASSWORD }}
