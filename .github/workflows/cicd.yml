@@ -25,6 +25,7 @@ jobs:
         run: |
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
+          
       - name: Build project
         run: npm run build
 
@@ -83,6 +84,7 @@ jobs:
       - name: Copy build files to VM
         run: |
           sshpass -p "${{ secrets.REMOTE_PASSWORD }}" scp -P 22 ./build/build.tar.gz ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/somsan/Gatherfy/front
+          
       - name: Deploy Docker container on VM
         env:
           REMOTE_PASSWORD: ${{ secrets.REMOTE_PASSWORD }}
