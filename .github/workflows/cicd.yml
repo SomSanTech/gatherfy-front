@@ -95,7 +95,7 @@ jobs:
             cd /home/somsan/Gatherfy/front
             tar -xzf build.tar.gz
 
-            docker stop gatherfy || true
-            docker rm gatherfy || true
+            docker stop gatherfy-web || true
+            docker rm gatherfy-web || true
             docker build -t gatherfront:latest .
             docker run -d --name gatherfy-web -p 3000:3000 gatherfront:latest
