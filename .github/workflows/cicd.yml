@@ -24,7 +24,7 @@ jobs:
       - name: Inject environment variables
         run: |
           touch .env
-          echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
+          echo "NUXT_PUBLIC_BASE_URL=http://cp24us1.sit.kmutt.ac.th:8080" >> .env
           
       - name: Build project
         run: npm run build
@@ -98,4 +98,4 @@ jobs:
             docker stop gatherfy || true
             docker rm gatherfy || true
             docker build -t gatherfront:latest .
-            docker run -d --name gatherfy -p 3000:3000 gatherfront:latest
+            docker run -d --name gatherfy-web -p 3000:3000 gatherfront:latest
