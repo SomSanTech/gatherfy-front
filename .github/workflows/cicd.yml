@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'sprint1/main'
-      - 'homepage'
 
 jobs:
   build:
@@ -24,7 +23,7 @@ jobs:
 
       - name: Inject environment variables
         run: |
-         touch .env
+          touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
       - name: Build project
         run: npm run build
