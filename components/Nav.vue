@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SearchIcon from './icons/SearchIcon.vue';
+import SearchIcon from './icons/Search.vue';
 
 const router = useRouter();
 const searchKw = ref('');
@@ -10,7 +10,7 @@ const handleSearch = () => {
 
 <template>
   <div class="w-screen bg-white/20 py-6 backdrop-blur-sm">
-    <div class="mx-auto flex max-w-4xl items-center justify-between">
+    <div class="mx-auto flex max-w-6xl items-center justify-between">
       <NuxtLink to="/">
         <button class="oooh-baby-regular text-4xl">Gatherfy</button>
       </NuxtLink>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
-import ArrowIcon from '~/components/icons/ArrowIcon.vue';
+import ArrowIcon from '~/components/icons/Arrow.vue';
 import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
 import Organisation from '~/components/icons/Organisation.vue';
@@ -11,6 +11,7 @@ import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
 import { useFetchData } from '~/composables/useFetchData';
+import ExploreBar from '~/components/ExploreBar.vue';
 
 const today = ref(new Date());
 const tagData = [
@@ -56,13 +57,6 @@ const addDays = (date: Date, days: number) => {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
-};
-
-const selectedEventTime: 'today' | 'upcome' | 'all' = ref('today');
-
-const selectedEventTimeStyle = {
-  active: 'text-light-grey font-semibold bg-burgundy py-2',
-  notActive: 'text-black',
 };
 
 type GroupedEvents = {
@@ -121,7 +115,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto my-24 max-w-4xl">
+  <div class="mx-auto my-24 max-w-6xl">
     <!-- Header Event Banner -->
     <div class="relative">
       <button
@@ -182,7 +176,7 @@ onMounted(() => {
                 <h3 class="b1 pb-4 font-semibold">
                   {{ eventData[reccommentIndex]?.name }}
                 </h3>
-                <p class="b2">
+                <p class="b2 line-clamp-[5]">
                   {{ eventData[reccommentIndex]?.detail }}
                 </p>
               </div>
@@ -259,26 +253,7 @@ onMounted(() => {
     </div>
     <!-- Event List section -->
     <div class="w-full py-7">
-      <div class="flex gap-2 rounded-xl border border-black-1 p-2">
-        <button
-          @click="selectedEventTime = 'today'"
-          :class="`rounded-md px-4 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
-        >
-          Today event
-        </button>
-        <button
-          @click="selectedEventTime = 'upcome'"
-          :class="`rounded-md px-4 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
-        >
-          Upcoming event
-        </button>
-        <button
-          @click="selectedEventTime = 'all'"
-          :class="`rounded-md px-4 ${selectedEventTime === 'all' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
-        >
-          All event
-        </button>
-      </div>
+      <ExploreBar :is-show-sort="false" />
       <h1 class="t2 py-4">Today, 5 Jan</h1>
       <div class="relative">
         <div

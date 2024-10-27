@@ -3,7 +3,6 @@ import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
 import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
-import Map from '../../components/Map.vue';
 const route = useRoute();
 const param = route.params.id;
 const isOpenPopup = ref(false);
@@ -14,18 +13,6 @@ const regis = () => {
 };
 const event = ref();
 
-// const getEventDetail = async () => {
-//   const { data, error } = await useFetch(
-//     `http://localhost:8080/api/events/${param}`
-//   );
-
-//   if (error.value) {
-//     console.log('Error fetching events:', error.value);
-//     return;
-//   }
-
-//   event.value = data.value;
-// };
 onMounted(() => {
   fetchData();
 });
@@ -37,8 +24,6 @@ const fetchData = async () => {
 
 watchEffect(() => {
   if (param) {
-    console.log(param);
-
     fetchData();
   }
 });
@@ -72,15 +57,15 @@ watchEffect(() => {
               <div class="flex items-center gap-2">
                 <Calendar />
                 <p v-if="event?.start_date && event?.end_date">
-                  {{ useFormatDate(event?.start_date) }} -
-                  {{ useFormatDate(event?.end_date) }}
+                  {{ useFormatDateTime(event?.start_date, 'date') }} -
+                  {{ useFormatDateTime(event?.end_date, 'date') }}
                 </p>
               </div>
               <div class="flex items-center gap-2">
                 <Clock />
                 <p v-if="event?.start_date && event?.end_date">
-                  {{ useFormatTime(event?.start_date) }} -
-                  {{ useFormatTime(event?.end_date) }}
+                  {{ useFormatDateTime(event?.start_date, 'time') }} -
+                  {{ useFormatDateTime(event?.end_date, 'time') }}
                 </p>
               </div>
               <div class="flex items-center gap-2">
@@ -113,7 +98,6 @@ watchEffect(() => {
           <div class="flex flex-col gap-5">
             <p>Event location</p>
             <div class="h-full w-full">
-              <!-- <Map :latitude="13.7563" :longitude="100.5018" /> -->
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30988.16801609143!2d100.55004526585483!3d13.867766604333376!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29c5a3a91d177%3A0x140b15ef77bd4508!2z4Lin4Lix4LiU4Lie4Lij4Liw4Lio4Lij4Li14Lih4Lir4Liy4LiY4Liy4LiV4Li44Lin4Lij4Lih4Lir4Liy4Lin4Li04Lir4Liy4Lij!5e0!3m2!1sth!2sth!4v1729251996890!5m2!1sth!2sth"
                 width="370"
@@ -127,7 +111,14 @@ watchEffect(() => {
           </div>
           <div class="flex flex-col gap-5">
             <p>Tags</p>
-            <div class="h-10 w-32 rounded-lg bg-slate-200"></div>
+            <div class="flex gap-2">
+              <button
+                v-for="tag in event?.tags"
+                class="b3 w-fit rounded-lg bg-light-grey px-10 py-2 text-center drop-shadow-md duration-100 hover:bg-grey"
+              >
+                {{ tag }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -148,15 +139,15 @@ watchEffect(() => {
             <div class="flex items-center gap-2">
               <Calendar />
               <p v-if="event?.start_date && event?.end_date">
-                {{ useFormatDate(event?.start_date) }} -
-                {{ useFormatDate(event?.end_date) }}
+                {{ useFormatDateTime(event?.start_date, 'date') }} -
+                {{ useFormatDateTime(event?.end_date, 'date') }}
               </p>
             </div>
             <div class="flex items-center gap-2">
               <Clock />
               <p v-if="event?.start_date && event?.end_date">
-                {{ useFormatTime(event?.start_date) }} -
-                {{ useFormatTime(event?.end_date) }}
+                {{ useFormatDateTime(event?.start_date, 'time') }} -
+                {{ useFormatDateTime(event?.end_date, 'time') }}
               </p>
             </div>
             <button
@@ -166,26 +157,6 @@ watchEffect(() => {
               Confirm
             </button>
           </div>
-
-          <!-- <div class="flex items-center gap-3">
-            <div class="flex w-fit flex-col">
-              <div
-                class="rounded-t-md border bg-zinc-200 px-3 text-[10px] font-semibold"
-              >
-                SEP
-              </div>
-              <div class="rounded-b-md border px-3 text-center font-semibold">
-                15
-              </div>
-            </div>
-            <div>
-              <p class="font-semibold">Sunday, September 15</p>
-
-              <p class="text-sm font-semibold text-zinc-500">
-                6:00 AM - 10:00 AM
-              </p>
-            </div>
-          </div> -->
         </div>
 
         <img
