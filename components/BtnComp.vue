@@ -7,8 +7,14 @@ const props = defineProps<{
 const btnColor = computed(() => {
   if (props.color === 'red') {
     return 'bg-burgundy hover:bg-[#A61010] text-light-grey';
+  } else if (props.color === 'outline-red') {
+    return ' border-2 border-burgundy hover:bg-burgundy text-burgundy hover:text-light-grey';
   } else if (props.color === 'black') {
     return 'bg-black-1 hover:bg-dark-grey text-light-grey';
+  } else if (props.color === 'green') {
+    return 'bg-[#16C098]/25  hover:bg-dark-grey text-[#008767]';
+  } else if (props.color === 'gray') {
+    return 'bg-[#E8E8E8]  hover:bg-dark-grey text-[#939393]';
   } else {
     return 'bg-light-grey hover:bg-grey text-black-1';
   }
