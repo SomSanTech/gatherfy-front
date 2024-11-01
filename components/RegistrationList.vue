@@ -9,33 +9,34 @@ const props = defineProps<{
 </script>
 
 <template>
-  <td
-    class="text-default-600 p-4 align-middle last:text-right rtl:last:text-left"
-  >
-    {{ registration?.attendee }}
+  <td class="b2 p-4 align-middle">
+    {{ registration?.firstName }} {{ registration?.lastName }}
   </td>
-  <td
-    class="text-default-600 p-4 align-middle last:text-right rtl:last:text-left"
-  >
+  <td class="b2 p-4 align-middle">
     {{ registration?.phone }}
   </td>
-  <td class="p-4 align-middle last:text-right">
+  <td class="b2 p-4 align-middle">
     {{ registration?.email }}
   </td>
-  <td class="text-default-600 p-4 align-middle font-semibold">
-    {{ registration?.event }}
+  <td class="b2 p-4 align-middle font-medium">
+    {{ registration?.eventName }}
   </td>
-  <td
-    class="text-default-600 p-4 text-center align-middle text-sm font-normal last:text-right rtl:last:text-left"
-  >
+  <td class="b2 p-4 text-center align-middle">
     <BtnComp
       :text="registration?.status"
-      :color="registration?.status == 'Going' ? 'gray' : 'green'"
+      :color="registration?.status == 'pending' ? 'gray' : 'green'"
     />
   </td>
   <td>
     <div class="flex justify-center gap-5 text-xl text-gray-600">
-      <PenEdit />
+      <NuxtLink
+        :to="{
+          name: 'backoffice-registrations-id',
+          params: { id: registration?.registrationId },
+        }"
+      >
+        <PenEdit />
+      </NuxtLink>
       <Trash />
     </div>
   </td>

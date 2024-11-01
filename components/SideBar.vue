@@ -16,21 +16,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-full w-80 bg-white px-14 py-16 drop-shadow-lg">
-    <div class="oooh-baby-regular mb-10 text-center text-5xl">Gatherfy</div>
-    <div class="flex flex-col gap-10">
-      <div class="flex items-center gap-3 text-gray-600">
-        <Dashboard class="t2" />
-        <p class="font-semibold">Dashboard</p>
-      </div>
-      <div class="flex items-center gap-3 text-gray-600">
-        <Calendar class="t2" />
-        <p class="font-semibold">Events</p>
-      </div>
-      <div class="flex items-center gap-3 text-gray-600">
-        <User class="t2" />
-        <p class="font-semibold">Registration</p>
-      </div>
+  <div class="fixed h-full w-80 bg-white px-8 py-16 drop-shadow-lg">
+    <div class="oooh-baby-regular mb-10 px-14 text-center text-5xl">
+      <NuxtLink to="/backoffice">Gatherfy</NuxtLink>
+    </div>
+    <div class="flex flex-col gap-3">
+      <NuxtLink to="">
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <Dashboard class="t2" />
+          <p class="font-semibold">Dashboard</p>
+        </div>
+      </NuxtLink>
+      <NuxtLink to="">
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <Calendar class="t2" />
+          <p class="font-semibold">Events</p>
+        </div>
+      </NuxtLink>
+      <NuxtLink to="/backoffice/registrations">
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <User class="t2" />
+          <p class="font-semibold">Registration</p>
+        </div>
+      </NuxtLink>
       <Menu as="div" class="relative inline-block text-left">
         <div>
           <MenuButton

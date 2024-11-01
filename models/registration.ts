@@ -1,7 +1,10 @@
 export interface Registration {
-  attendee: string;
-  phone: string;
+  registrationId: number;
+  eventName: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
   email: string;
-  event: string;
+  phone: string;
   status: string;
 }

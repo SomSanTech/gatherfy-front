@@ -8,7 +8,9 @@ const isBackoffice = ref(route.fullPath.includes('backoffice'));
   <div class="mx-auto w-full">
     <Nav v-if="!isBackoffice" class="fixed top-0 z-40 w-full" />
     <div>
-      <NuxtPage />
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </div>
   </div>
 </template>
