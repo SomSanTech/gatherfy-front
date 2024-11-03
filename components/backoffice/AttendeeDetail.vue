@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Registration } from '~/models/registration';
-import Arrow from './icons/Arrow.vue';
-import CheckCircle from './icons/CheckCircle.vue';
+import Arrow from '../icons/Arrow.vue';
+import CheckCircle from '../icons/CheckCircle.vue';
 
 const router = useRouter();
 const route = useRoute();

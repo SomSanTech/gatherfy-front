@@ -11,7 +11,6 @@ const registrationsData = ref<Registration[]>([]);
 const fetchData = async () => {
   const fetchedData = await useFetchData('v1/registrations');
   registrationsData.value = fetchedData || [];
-  console.log(registrationsData.value);
 };
 
 onMounted(() => {

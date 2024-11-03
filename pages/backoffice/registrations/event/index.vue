@@ -1,30 +1,29 @@
 <script setup lang="ts">
-import RegistrationList from '~/components/backoffice/RegistrationList.vue';
-import type { Registration } from '~/models/registration';
+import EventList from '~/components/backoffice/EventList.vue';
+import type { Event } from '~/models/event';
 
 definePageMeta({
   layout: 'backoffice',
 });
 
-const registrationsData = ref<Registration[]>([]);
+const eventsData = ref<Event[]>([]);
 
-const fetchData = async () => {
-  const fetchedData = await useFetchData('v1/registrations');
-  registrationsData.value = fetchedData || [];
-  console.log(registrationsData.value);
-};
+// const fetchData = async () => {
+//   const fetchedData = await useFetchData('v1/registrations/event');
+//   eventsData.value = fetchedData || [];
+// };
 
-onMounted(() => {
-  fetchData();
-  console.log(registrationsData.value);
-});
+// onMounted(() => {
+//   fetchData();
+//   console.log(eventsData.value);
+// });
 </script>
 
 <template>
   <div class="ml-80 flex h-full w-screen bg-ghost-white">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
-        <h1 class="t1">All Registrations</h1>
+        <h1 class="t1">Registrations by event</h1>
         <table
           class="mt-8 w-full table-auto caption-top overflow-scroll text-sm"
         >
@@ -33,19 +32,19 @@ onMounted(() => {
               <td
                 class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
-                Attendees Name
+                Event Name
               </td>
               <td
                 class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
-                Phone Number
+                Event Owner
               </td>
               <td
                 class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
-                Email
+                Location
               </td>
-              <td
+              <!-- <td
                 class="h-14 w-64 px-4 text-base font-semibold text-lavender-gray"
               >
                 Event
@@ -54,7 +53,7 @@ onMounted(() => {
                 class="h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
               >
                 Status
-              </td>
+              </td> -->
               <td
                 class="h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
               >
@@ -64,10 +63,10 @@ onMounted(() => {
           </thead>
           <tbody class="tbody-container overflow-y-auto">
             <tr
-              v-for="registration in registrationsData"
+              v-for="event in eventsData"
               class="border-default-300 border-b transition-colors"
             >
-              <RegistrationList :registration="registration" />
+              <EventList :event="event" />
             </tr>
           </tbody>
         </table>

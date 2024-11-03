@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AttendeeDetail from '~/components/backoffice/AttendeeDetail.vue';
+
 definePageMeta({
   layout: 'backoffice',
 });

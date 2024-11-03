@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Registration } from '~/models/registration';
-import PenEdit from './icons/PenEdit.vue';
-import Trash from './icons/Trash.vue';
+import PenEdit from '../icons/PenEdit.vue';
+import Trash from '../icons/Trash.vue';
 
 const props = defineProps<{
   registration?: Registration;
