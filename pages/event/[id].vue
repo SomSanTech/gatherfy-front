@@ -3,24 +3,53 @@ import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
 import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
+import UserProfile from '~/components/icons/UserProfile.vue';
 const route = useRoute();
 const param = route.params.id;
 const isOpenPopup = ref(false);
+const event = ref();
+const userData = ref({});
+const mockUserLogin = {
+  userId: 5,
+  firstname: 'Michael',
+  lastname: 'Brown',
+  username: 'mikeb',
+  gender: 'Male',
+  email: 'mikeb@example.com',
+  phone: '6677889900',
+  role: 'Attendee',
+};
+const registerData = ref({
+  eventId: 1, // Now it is Slug
+  userId: 5,
+  status: 'pending',
+});
 
-const regis = () => {
-  alert('you regis leaw');
+const regis = async () => {
+  const regsitered = await useFetchRegistration(
+    `v1/registrations`,
+    'POST',
+    registerData.value
+  );
+  if (regsitered === 200) {
+    alert('Register successfully');
+  } else {
+    alert('Failed!!');
+  }
   isOpenPopup.value = false;
 };
-const event = ref();
-
-onMounted(() => {
-  fetchData();
-});
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/events/${param}`);
   event.value = fetchedData || [];
+  console.log(event.value);
 };
+
+onMounted(() => {
+  localStorage.setItem('user', JSON.stringify(mockUserLogin));
+  userData.value = JSON.parse(localStorage.getItem('user'));
+  fetchData();
+});
 
 watchEffect(() => {
   if (param) {
@@ -134,7 +163,7 @@ watchEffect(() => {
       <div class="flex justify-between gap-5">
         <div>
           <div>
-            <p class="text-sm font-semibold">Register in</p>
+            <p class="font-semibold">Registration</p>
             <h1 class="py-2 text-2xl font-semibold">{{ event?.name }}</h1>
             <div class="flex items-center gap-2">
               <Calendar />
@@ -150,11 +179,17 @@ watchEffect(() => {
                 {{ useFormatDateTime(event?.end_date, 'time') }}
               </p>
             </div>
+            <div class="mt-3 flex items-center gap-2">
+              <UserProfile class="b1" />
+              <p class="b2">
+                <span class="font-semibold">{{ userData.username }}</span>
+              </p>
+            </div>
             <button
               class="my-4 rounded-lg bg-black px-4 py-1 text-sm text-white"
               @click="regis"
             >
-              Confirm
+              One-click Register
             </button>
           </div>
         </div>

@@ -5,18 +5,32 @@ import type { Event } from '~/models/event';
 definePageMeta({
   layout: 'backoffice',
 });
-
+const mockAdminLogin = {
+  userId: 3,
+  firstname: 'Jane',
+  lastname: 'Smith',
+  username: 'Janesmith',
+  gender: 'Female',
+  email: 'janesmith@example.com',
+  phone: '0987654321',
+  role: 'Organization',
+};
 const eventsData = ref<Event[]>([]);
+const adminData = ref();
+const fetchData = async () => {
+  const fetchedData = await useFetchData(
+    `v1/events/registration/${adminData.value.userId}`
+  );
+  eventsData.value = fetchedData || [];
+  console.log(eventsData.value);
+};
 
-// const fetchData = async () => {
-//   const fetchedData = await useFetchData('v1/registrations/event');
-//   eventsData.value = fetchedData || [];
-// };
-
-// onMounted(() => {
-//   fetchData();
-//   console.log(eventsData.value);
-// });
+onMounted(() => {
+  localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
+  adminData.value = JSON.parse(localStorage.getItem('admin'));
+  console.log(adminData.value.userId);
+  fetchData();
+});
 </script>
 
 <template>
@@ -33,11 +47,6 @@ const eventsData = ref<Event[]>([]);
                 class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Event Name
-              </td>
-              <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
-              >
-                Event Owner
               </td>
               <td
                 class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"

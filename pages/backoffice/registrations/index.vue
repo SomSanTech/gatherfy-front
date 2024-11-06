@@ -7,6 +7,7 @@ definePageMeta({
 });
 
 const registrationsData = ref<Registration[]>([]);
+const isLoading = ref(true);
 
 const fetchData = async () => {
   const fetchedData = await useFetchData('v1/registrations');
@@ -15,8 +16,13 @@ const fetchData = async () => {
 };
 
 onMounted(() => {
-  fetchData();
-  console.log(registrationsData.value);
+  try {
+    isLoading.value = true;
+    fetchData();
+    console.log(registrationsData.value);
+  } finally {
+    isLoading.value = false;
+  }
 });
 </script>
 
@@ -25,7 +31,11 @@ onMounted(() => {
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
         <h1 class="t1">All Registrations</h1>
+        <div v-if="isLoading" class="my-16 flex items-center justify-center">
+          <span class="loader"></span>
+        </div>
         <table
+          v-else
           class="mt-8 w-full table-auto caption-top overflow-scroll text-sm"
         >
           <thead class="">

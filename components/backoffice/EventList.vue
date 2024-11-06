@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import type { Event } from '~/models/event';
 import PenEdit from '../icons/PenEdit.vue';
 import Trash from '../icons/Trash.vue';
 
 const props = defineProps<{
   event?: Event;
 }>();
+
+interface Event {
+  eventId: number;
+  eventName: string;
+  eventLocation: string;
+}
 </script>
 
 <template>
   <td class="b2 p-4 align-middle">
-    {{ event?.name }}
+    {{ event?.eventName }}
   </td>
   <td class="b2 p-4 align-middle">
-    {{ event?.organizer }}
-  </td>
-  <td class="b2 p-4 align-middle">
-    {{ event?.location }}
+    {{ event?.eventLocation }}
   </td>
   <!-- <td class="b2 p-4 text-center align-middle">
     <BtnComp
@@ -26,14 +28,14 @@ const props = defineProps<{
   </td> -->
   <td>
     <div class="flex justify-center gap-5 text-xl text-gray-600">
-      <!-- <NuxtLink
+      <NuxtLink
         :to="{
           name: 'backoffice-registrations-event-id',
-          params: { id: event?.slug },
+          params: { id: event?.eventId },
         }"
       >
         <PenEdit />
-      </NuxtLink> -->
+      </NuxtLink>
       <Trash />
     </div>
   </td>

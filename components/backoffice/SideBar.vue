@@ -75,7 +75,7 @@ onMounted(() => {});
           aria-labelledby="registration-accordion"
         >
           <div class="ps-2 pt-2">
-            <NuxtLink to="/backoffice">
+            <NuxtLink to="/backoffice/registrations/event">
               <div
                 class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-100"
               >
