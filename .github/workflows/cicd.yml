@@ -98,4 +98,4 @@ jobs:
             docker stop gatherfy-web || true
             docker rm gatherfy-web || true
             docker build -t gatherfront:latest .
-            docker run -d --name gatherfy-web --network gatherfy-net -p 3000:3000 gatherfront:latest
+            docker run -d --name gatherfy-web --network gatherfy_gatherfy-net -p 3000:3000 gatherfront:latest
