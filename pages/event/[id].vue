@@ -4,13 +4,15 @@ import Location from '~/components/icons/Location.vue';
 import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import UserProfile from '~/components/icons/UserProfile.vue';
+import type { User } from '~/models/user';
 const route = useRoute();
 const param = route.params.id;
 const isOpenPopup = ref(false);
 const event = ref();
-const userData = ref({});
+const userData = ref<User | null>(null);
+const registrationBody = ref({});
 const mockUserLogin = {
-  userId: 5,
+  userId: 2,
   firstname: 'Michael',
   lastname: 'Brown',
   username: 'mikeb',
@@ -19,17 +21,12 @@ const mockUserLogin = {
   phone: '6677889900',
   role: 'Attendee',
 };
-const registerData = ref({
-  eventId: 1, // Now it is Slug
-  userId: 5,
-  status: 'pending',
-});
 
 const regis = async () => {
   const regsitered = await useFetchRegistration(
     `v1/registrations`,
     'POST',
-    registerData.value
+    registrationBody.value
   );
   if (regsitered === 200) {
     alert('Register successfully');
@@ -42,12 +39,18 @@ const regis = async () => {
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/events/${param}`);
   event.value = fetchedData || [];
-  console.log(event.value);
 };
 
 onMounted(() => {
+  // Pretend to have authentication
   localStorage.setItem('user', JSON.stringify(mockUserLogin));
-  userData.value = JSON.parse(localStorage.getItem('user'));
+  const storedUser = localStorage.getItem('user');
+  userData.value = storedUser ? JSON.parse(storedUser) : {};
+  registrationBody.value = {
+    eventId: 5, // Now it is Slug
+    userId: userData.value?.userId,
+    status: 'pending',
+  };
   fetchData();
 });
 
@@ -163,30 +166,31 @@ watchEffect(() => {
       <div class="flex justify-between gap-5">
         <div>
           <div>
-            <p class="font-semibold">Registration</p>
-            <h1 class="py-2 text-2xl font-semibold">{{ event?.name }}</h1>
-            <div class="flex items-center gap-2">
+            <p class="b2 font-semibold">Registration</p>
+            <h1 class="t3 py-2 text-2xl font-semibold">{{ event?.name }}</h1>
+            <div class="b2 flex items-center gap-2 py-1">
               <Calendar />
               <p v-if="event?.start_date && event?.end_date">
                 {{ useFormatDateTime(event?.start_date, 'date') }} -
                 {{ useFormatDateTime(event?.end_date, 'date') }}
               </p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="b2 flex items-center gap-2 py-1">
               <Clock />
               <p v-if="event?.start_date && event?.end_date">
                 {{ useFormatDateTime(event?.start_date, 'time') }} -
                 {{ useFormatDateTime(event?.end_date, 'time') }}
               </p>
             </div>
-            <div class="mt-3 flex items-center gap-2">
+            <div class="mt-2 flex items-center gap-2">
               <UserProfile class="b1" />
               <p class="b2">
-                <span class="font-semibold">{{ userData.username }}</span>
+                <span class="mr-3 font-semibold">{{ userData?.username }}</span
+                >{{ userData?.email }}
               </p>
             </div>
             <button
-              class="my-4 rounded-lg bg-black px-4 py-1 text-sm text-white"
+              class="b3 mt-4 rounded-lg bg-black px-4 py-1 text-white"
               @click="regis"
             >
               One-click Register

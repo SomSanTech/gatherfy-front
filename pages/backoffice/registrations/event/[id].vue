@@ -5,17 +5,23 @@ import type { Registration } from '~/models/registration';
 definePageMeta({
   layout: 'backoffice',
 });
-
+const route = useRoute();
+const param = route.params.id;
 const registrationsData = ref<Registration[]>([]);
+const isLoading = ref(true);
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData('v1/registrations');
+  const fetchedData = await useFetchData(`v1/registrations/event/${param}`);
   registrationsData.value = fetchedData || [];
 };
 
 onMounted(() => {
-  fetchData();
-  console.log(registrationsData.value);
+  try {
+    isLoading.value = true;
+    fetchData();
+  } finally {
+    isLoading.value = false;
+  }
 });
 </script>
 
@@ -24,7 +30,11 @@ onMounted(() => {
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
         <h1 class="t1">All Registrations</h1>
+        <div v-if="isLoading" class="my-16 flex items-center justify-center">
+          <span class="loader"></span>
+        </div>
         <table
+          v-else
           class="mt-8 w-full table-auto caption-top overflow-scroll text-sm"
         >
           <thead class="">
@@ -63,6 +73,13 @@ onMounted(() => {
           </thead>
           <tbody class="tbody-container overflow-y-auto">
             <tr
+              v-if="!isLoading && registrationsData.length === 0"
+              class="text-center"
+            >
+              <td colspan="6" class="b1 py-20">No Registration</td>
+            </tr>
+            <tr
+              v-else-if="!isLoading && registrationsData.length != 0"
               v-for="registration in registrationsData"
               class="border-default-300 border-b transition-colors"
             >

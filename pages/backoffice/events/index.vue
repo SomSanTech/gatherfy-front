@@ -6,10 +6,6 @@ import type { User } from '~/models/user';
 definePageMeta({
   layout: 'backoffice',
 });
-const eventsData = ref<Event[]>([]);
-const adminData = ref<User | null>(null);
-const isLoading = ref(true);
-
 const mockAdminLogin = {
   userId: 1,
   firstname: 'Jane',
@@ -20,7 +16,9 @@ const mockAdminLogin = {
   phone: '0987654321',
   role: 'Organization',
 };
-
+const eventsData = ref<Event[]>([]);
+const adminData = ref<User | null>(null);
+const isLoading = ref(true);
 const fetchData = async () => {
   const fetchedData = await useFetchData(
     `v1/events/registration/${adminData.value?.userId}`
@@ -76,14 +74,14 @@ onMounted(() => {
           </thead>
           <tbody class="tbody-container overflow-y-auto">
             <tr v-if="eventsData.length === 0" class="text-center">
-              <td colspan="6" class="b1 py-20">No Event</td>
+              <td colspan="3" class="b1 py-20">No Event</td>
             </tr>
             <tr
               v-else
               v-for="event in eventsData"
               class="border-default-300 border-b transition-colors"
             >
-              <EventList :event="event" :type="'registration'" />
+              <EventList :event="event" :type="'event'" />
             </tr>
           </tbody>
         </table>

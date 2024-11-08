@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import PenEdit from '../icons/PenEdit.vue';
 import Trash from '../icons/Trash.vue';
+import UserList from '../icons/UserList.vue';
 
 const props = defineProps<{
   event?: Event;
+  type?: string;
 }>();
 
 interface Event {
@@ -20,23 +22,35 @@ interface Event {
   <td class="b2 p-4 align-middle">
     {{ event?.eventLocation }}
   </td>
-  <!-- <td class="b2 p-4 text-center align-middle">
-    <BtnComp
-      :text="event?.status"
-      :color="event?.status == 'pending' ? 'gray' : 'green'"
-    />
-  </td> -->
   <td>
-    <div class="flex justify-center gap-5 text-xl text-gray-600">
+    <div
+      v-if="type === 'event'"
+      class="flex justify-center gap-5 text-xl text-gray-600"
+    >
       <NuxtLink
         :to="{
-          name: 'backoffice-registrations-event-id',
+          name: '',
           params: { id: event?.eventId },
         }"
       >
         <PenEdit />
       </NuxtLink>
       <Trash />
+    </div>
+    <div
+      v-else-if="type === 'registration'"
+      class="flex= justify-center gap-5 text-xl text-gray-600"
+    >
+      <NuxtLink
+        :to="{
+          name: 'backoffice-registrations-event-id',
+          params: { id: event?.eventId },
+        }"
+        class="flex items-center justify-center gap-2"
+      >
+        <UserList class="t3" />
+        <p class="b3">Registration list</p>
+      </NuxtLink>
     </div>
   </td>
 </template>

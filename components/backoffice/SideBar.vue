@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue';
 import Calendar from '../icons/Calendar.vue';
 import Dashboard from '../icons/Dashboard.vue';
 import User from '../icons/User.vue';
+import UserList from '../icons/UserList.vue';
+import UserScreen from '../icons/UserScreen.vue';
 
 onMounted(() => {});
 </script>
@@ -20,7 +22,7 @@ onMounted(() => {});
           <p class="font-semibold">Dashboard</p>
         </div>
       </NuxtLink>
-      <NuxtLink to="/backoffice/registrations/event">
+      <NuxtLink to="/backoffice/events">
         <div
           class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
         >
@@ -79,15 +81,15 @@ onMounted(() => {});
               <div
                 class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-100"
               >
-                <User class="t2" />
-                <p class="font-semibold">Event List</p>
+                <UserScreen class="t2" />
+                <p class="font-semibold">Event Registration</p>
               </div>
             </NuxtLink>
             <NuxtLink to="/backoffice/registrations">
               <div
                 class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-100"
               >
-                <User class="t2" />
+                <UserList class="t2" />
                 <p class="font-semibold">All Registration</p>
               </div>
             </NuxtLink>
