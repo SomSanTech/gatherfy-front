@@ -2,6 +2,21 @@
 definePageMeta({
   layout: 'backoffice',
 });
+
+const mockAdminLogin = {
+  userId: 3,
+  firstname: 'Jane',
+  lastname: 'Smith',
+  username: 'Janesmith',
+  gender: 'Female',
+  email: 'janesmith@example.com',
+  phone: '0987654321',
+  role: 'Organization',
+};
+
+onMounted(() => {
+  localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
+});
 </script>
 
 <template>

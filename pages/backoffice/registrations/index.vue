@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import RegistrationList from '~/components/backoffice/RegistrationList.vue';
 import type { Registration } from '~/models/registration';
+import type { User } from '~/models/user';
 
 definePageMeta({
   layout: 'backoffice',
 });
-
 const registrationsData = ref<Registration[]>([]);
+const adminData = ref<User | null>(null);
 const isLoading = ref(true);
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData('v1/registrations');
+  const fetchedData = await useFetchData(
+    `v1/registrations/owner/${adminData.value?.userId}`
+  );
   registrationsData.value = fetchedData || [];
   console.log(registrationsData.value);
 };
@@ -18,6 +21,8 @@ const fetchData = async () => {
 onMounted(() => {
   try {
     isLoading.value = true;
+    const storedUser = localStorage.getItem('admin');
+    adminData.value = storedUser ? JSON.parse(storedUser) : {};
     fetchData();
     console.log(registrationsData.value);
   } finally {

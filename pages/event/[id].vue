@@ -41,17 +41,18 @@ const fetchData = async () => {
   event.value = fetchedData || [];
 };
 
-onMounted(() => {
+onMounted(async () => {
   // Pretend to have authentication
   localStorage.setItem('user', JSON.stringify(mockUserLogin));
   const storedUser = localStorage.getItem('user');
   userData.value = storedUser ? JSON.parse(storedUser) : {};
+
+  await fetchData();
   registrationBody.value = {
-    eventId: 5, // Now it is Slug
+    eventId: event.value?.eventId,
     userId: userData.value?.userId,
     status: 'pending',
   };
-  fetchData();
 });
 
 watchEffect(() => {

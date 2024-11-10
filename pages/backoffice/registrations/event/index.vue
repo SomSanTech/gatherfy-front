@@ -10,17 +10,6 @@ const eventsData = ref<Event[]>([]);
 const adminData = ref<User | null>(null);
 const isLoading = ref(true);
 
-const mockAdminLogin = {
-  userId: 1,
-  firstname: 'Jane',
-  lastname: 'Smith',
-  username: 'Janesmith',
-  gender: 'Female',
-  email: 'janesmith@example.com',
-  phone: '0987654321',
-  role: 'Organization',
-};
-
 const fetchData = async () => {
   const fetchedData = await useFetchData(
     `v1/events/registration/${adminData.value?.userId}`
@@ -32,7 +21,6 @@ const fetchData = async () => {
 onMounted(() => {
   try {
     isLoading.value = true;
-    localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
     console.log(adminData.value?.userId);
