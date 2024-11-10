@@ -20,4 +20,7 @@ export default defineNuxtConfig({
       baseUrl: process.env.NUXT_PUBLIC_BASE_URL || '',
     },
   },
+  app: {
+    baseURL: '/us1/', // กำหนด base path เป็น /us1/
+  },
 });
