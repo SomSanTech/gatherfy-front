@@ -2,8 +2,12 @@ import { useRuntimeConfig } from '#app';
 
 export const useFetchData = async (url: string) => {
   const config = useRuntimeConfig();
+  console.log(`${config.public.baseUrl}/api/${url}`);
   try {
-    const response = await fetch(`${config.public.baseUrl}/api/${url}`);
+    const response = await fetch(
+      `https://capstone24.sit.kmutt.ac.th/us1/api/${url}`
+    );
+
     if (!response.ok) {
       throw new Error(`Error fetching ${url}`);
     }
