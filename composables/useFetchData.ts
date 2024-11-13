@@ -2,6 +2,8 @@ import { useRuntimeConfig } from '#app';
 
 export const useFetchData = async (url: string) => {
   const config = useRuntimeConfig();
+  console.log(`${config.public.baseUrl}/api/${url}`);
+
   try {
     const response = await fetch(`${config.public.baseUrl}/api/${url}`);
     if (!response.ok) {
