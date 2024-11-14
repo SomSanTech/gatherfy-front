@@ -1,98 +1,112 @@
 <script setup lang="ts">
+import FilterEvent from '~/components/FilterEvent.vue';
 import EventList from '~/components/EventList.vue';
-import { DatePicker } from 'v-calendar';
-import 'v-calendar/style.css';
+import ExploreBar from '~/components/ExploreBar.vue';
+
 const route = useRoute();
-const searchTerm = route.query.k;
+const searchTerm = ref(route.query.k);
 const eventSearch = ref();
-const searchEvent = async () => {
-  const fetchedSearchData = await useSearchEvent(searchTerm);
+const formattedDate = ref();
+const selectedTags = ref(new Set());
+const selectedStatus = ref(new Set());
+const tags = ref([]);
+const showFilter = ref(true);
+const sortFilter = ref('');
 
-  eventSearch.value = fetchedSearchData;
+const handleDateUpdate = (newDate: Date) => {
+  formattedDate.value = newDate.toISOString().slice(0, 10);
 };
-const date = ref(new Date());
-const tagData = [
-  { tag: 'Technology', color: '#FF5733' },
-  { tag: 'Music', color: '#33FF57' },
-  { tag: 'Art', color: '#3357FF' },
-  { tag: 'Sports1', color: '#FF33A1' },
-  { tag: 'Sports2', color: '#FF33A1' },
-  { tag: 'Sports3', color: '#FF33A1' },
-  { tag: 'Sports4', color: '#FF33A1' },
-  { tag: 'Sports5', color: '#FF33A1' },
-  { tag: 'Sports6', color: '#FF33A1' },
-];
+const toggleSetItem = <T,>(set: Set<T>, item: T) => {
+  set.has(item) ? set.delete(item) : set.add(item);
+};
+const selectTag = (tag: string) => {
+  toggleSetItem(selectedTags.value, tag);
+};
+const selectStatus = (status: string) => {
+  toggleSetItem(selectedStatus.value, status);
+};
+const buildFilterUrl = () => {
+  const tags =
+    [...selectedTags.value].length > 0
+      ? [...selectedTags.value].map((tag) => `tags=${tag}`).join('&')
+      : '';
+  const status =
+    [...selectedStatus.value].length > 0
+      ? [...selectedStatus.value].map((stat) => `status=${stat}`).join('&')
+      : '';
+  const date = formattedDate.value ? `date=${formattedDate.value}` : '';
+  const sort = sortFilter.value ? `sort=${sortFilter.value}` : '';
 
-const selectTag = ref([]);
-
-const dateToday = new Date();
-console.log(dateToday);
-
-const statusData = ['Soon', 'Available', 'Unavailable'];
-const selectStauts = ref([]);
-onMounted(() => {
-  searchEvent();
-});
-
-watchEffect(() => {
-  if (searchTerm) {
-    searchEvent();
+  return [tags, status, date, sort].filter(Boolean).join('&');
+};
+const filterAndSearchEvents = async () => {
+  let url;
+  if (searchTerm.value) {
+    url = `v1/events?keyword=${searchTerm.value}&${buildFilterUrl()}`;
+  } else {
+    url = `v1/events?${buildFilterUrl()}`;
   }
+  eventSearch.value = await useFetchData(url);
+};
+const handleShowFilter = () => {
+  showFilter.value = !showFilter.value;
+};
+const handleSortFilter = (sortByOption: any) => {
+  sortFilter.value = sortByOption;
+};
+onMounted(async () => {
+  tags.value = await useFetchData('v1/tags');
+  eventSearch.value = await useFetchData(
+    `v1/events?keyword=${searchTerm.value}`
+  );
 });
+watch(
+  () => route.query.k,
+  (newValue) => {
+    searchTerm.value = newValue;
+  }
+);
+watch(
+  [
+    () => searchTerm.value,
+    () => Array.from(selectedTags.value),
+    () => Array.from(selectedStatus.value),
+    () => formattedDate.value,
+    () => sortFilter.value,
+  ],
+  () => filterAndSearchEvents(),
+  { immediate: true }
+);
 </script>
 
 <template>
   <div class="py-24">
-    <div class="w-full overflow-x-auto">
-      <h1 class="text-[40px] font-semibold">
+    <div class="mx-auto w-full max-w-6xl">
+      <h1 class="t1 font-semibold">
         {{ eventSearch?.length }} Events for "{{ searchTerm }}"
       </h1>
-      <div class="flex items-center justify-between rounded-lg border p-2">
-        <div class="flex gap-3">
-          <button class="rounded-md bg-zinc-200 p-4">Today event</button>
-          <button class="p-4">Upcomig event</button>
-          <button class="p-4">All event</button>
-        </div>
-        <div class="flex gap-3">
-          <button>Hide filter</button>
-          <button>Sort by</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-4 gap-5 py-4">
-        <div class="col-span-1 rounded-md border">
-          <div v-for="tagChoice in tagData">
-            <input
-              type="checkbox"
-              name=""
-              id=""
-              :value="tagChoice?.tag"
-              v-model="selectTag"
-            />
-            <label for="checkbox">{{ tagChoice?.tag }}</label>
-          </div>
-          {{ selectTag }}
-          <div>
-            <p>Status</p>
-            <div v-for="status in statusData">
-              <input
-                type="checkbox"
-                name=""
-                id=""
-                :value="status"
-                v-model="selectStauts"
-              />
-              <label for="checkbox">{{ status }}</label>
-            </div>
-            {{ selectStauts }}
-          </div>
-          <div>
-            <p>date</p>
-            <DatePicker v-model="date" mode="date" />
-            {{ date }}
-          </div>
-        </div>
-        <EventList :events="eventSearch" class="col-span-3" />
+      <ExploreBar
+        class="my-4"
+        :is-show-sort="true"
+        @handleShowFilter="handleShowFilter"
+        @sort-changed="handleSortFilter"
+      />
+      <div class="flex gap-3">
+        <FilterEvent
+          v-if="showFilter"
+          @selectTag="selectTag"
+          @selectStatus="selectStatus"
+          @update-date="handleDateUpdate"
+          :selectedTags="[...selectedTags]"
+          :selectedStatus="[...selectedStatus]"
+        />
+        <EventList
+          :events="eventSearch"
+          :class="{ 'w-full': !showFilter, 'w-[calc(100%-200px)]': showFilter }"
+        />
       </div>
     </div>
   </div>
 </template>
+
+<style scoped></style>
