@@ -234,7 +234,7 @@ onMounted(() => {
               <div class="flex flex-col gap-1">
                 <Organisation />
                 <div>
-                  <p class="font-semibold">Who?</p>
+                  <p class="font-semibold">Who</p>
                   <p class="text-sm">SomSan Tech</p>
                 </div>
               </div>
