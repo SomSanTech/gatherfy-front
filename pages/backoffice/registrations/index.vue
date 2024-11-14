@@ -80,7 +80,7 @@ onMounted(() => {
           <tbody class="tbody-container overflow-y-auto">
             <tr
               v-for="registration in registrationsData"
-              class="border-default-300 border-b transition-colors"
+              class="border-default-300 cursor-default border-b transition-colors"
             >
               <RegistrationList :registration="registration" />
             </tr>

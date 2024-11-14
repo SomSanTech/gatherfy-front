@@ -72,7 +72,7 @@ onMounted(() => {});
         </button>
         <div
           id="registration-accordion"
-          class="hs-accordion-content bg-dark-grey hidden w-full overflow-hidden rounded-lg shadow-inner transition-[height] duration-300"
+          class="hs-accordion-content hidden w-full overflow-hidden rounded-lg shadow-inner transition-[height] duration-300"
           role="region"
           aria-labelledby="registration-accordion"
         >

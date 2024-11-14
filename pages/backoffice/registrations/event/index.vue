@@ -66,13 +66,18 @@ onMounted(() => {
             <tr v-if="eventsData.length === 0" class="text-center">
               <td colspan="6" class="b1 py-20">No Event</td>
             </tr>
-            <tr
+            <NuxtLink
               v-else
               v-for="event in eventsData"
-              class="border-default-300 border-b transition-colors"
+              :to="{
+                name: 'backoffice-registrations-event-id',
+                params: { id: event?.eventId },
+              }"
+              class="border-default-300 cursor-pointer border-b transition-colors hover:bg-gray-100"
+              style="display: table-row"
             >
               <EventList :event="event" :type="'registration'" />
-            </tr>
+            </NuxtLink>
           </tbody>
         </table>
       </div>

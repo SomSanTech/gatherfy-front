@@ -39,18 +39,12 @@ interface Event {
     </div>
     <div
       v-else-if="type === 'registration'"
-      class="flex= justify-center gap-5 text-xl text-gray-600"
+      class="flex justify-center gap-5 text-xl text-gray-600"
     >
-      <NuxtLink
-        :to="{
-          name: 'backoffice-registrations-event-id',
-          params: { id: event?.eventId },
-        }"
-        class="flex items-center justify-center gap-2"
-      >
+      <div class="flex items-center justify-center gap-2 p-4">
         <UserList class="t3" />
         <p class="b3">Registration list</p>
-      </NuxtLink>
+      </div>
     </div>
   </td>
 </template>

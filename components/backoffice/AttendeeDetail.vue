@@ -180,8 +180,6 @@ watchEffect(() => {
       </div>
       <div class="">
         <p class="b1">Checked in</p>
-        <!-- <input type="text" class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner"
-        :value="registration?.status" /> -->
         <div class="" v-show="isShowStatus">
           <div class="relative">
             <button
@@ -215,9 +213,6 @@ watchEffect(() => {
     </div>
     <div class="flex justify-end gap-5">
       <BtnComp text="Save" @click="fetchRegistration" color="green" />
-      <NuxtLink to="/backoffice/registrations">
-        <BtnComp text="Cancle" color="outline-red" />
-      </NuxtLink>
     </div>
   </div>
 </template>

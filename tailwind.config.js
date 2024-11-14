@@ -15,7 +15,7 @@ export default {
         burgundy: '#D71515',
         'light-grey': '#F6F6F6',
         grey: '#D0D0D0 ',
-        'dark grey': '#3A393D ',
+        'dark-grey': '#3A393D ',
         'black-1': '#1F1E22',
         'ghost-white': '#fafbff',
         'cool-gray': '#9197B3',

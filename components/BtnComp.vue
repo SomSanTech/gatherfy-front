@@ -12,9 +12,9 @@ const btnColor = computed(() => {
   } else if (props.color === 'black') {
     return 'bg-black-1 hover:bg-dark-grey text-light-grey';
   } else if (props.color === 'green') {
-    return 'bg-[#16C098]/25  hover:bg-dark-grey text-[#008767]';
+    return 'bg-[#16C098]/25 text-[#008767]';
   } else if (props.color === 'gray') {
-    return 'bg-[#E8E8E8]  hover:bg-dark-grey text-[#939393]';
+    return 'bg-[#E8E8E8] text-[#939393]';
   } else {
     return 'bg-light-grey hover:bg-grey text-black-1';
   }

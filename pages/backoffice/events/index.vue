@@ -7,7 +7,7 @@ definePageMeta({
   layout: 'backoffice',
 });
 const mockAdminLogin = {
-  userId: 1,
+  userId: 3,
   firstname: 'Jane',
   lastname: 'Smith',
   username: 'Janesmith',
@@ -79,7 +79,7 @@ onMounted(() => {
             <tr
               v-else
               v-for="event in eventsData"
-              class="border-default-300 border-b transition-colors"
+              class="border-default-300 cursor-default border-b transition-colors"
             >
               <EventList :event="event" :type="'event'" />
             </tr>

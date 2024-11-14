@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import RegistrationList from '~/components/backoffice/RegistrationList.vue';
+import Arrow from '~/components/icons/Arrow.vue';
 import type { Registration } from '~/models/registration';
 
 definePageMeta({
@@ -29,7 +30,14 @@ onMounted(() => {
   <div class="ml-80 flex h-full w-screen bg-ghost-white">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
-        <h1 class="t1">All Registrations</h1>
+        <NuxtLink
+          to="/backoffice/registrations/event"
+          class="mb-5 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
+        >
+          <Arrow />
+          <p class="b2">Back to event list</p>
+        </NuxtLink>
+        <h1 class="t1">Event Registration</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
         </div>
@@ -81,7 +89,7 @@ onMounted(() => {
             <tr
               v-else-if="!isLoading && registrationsData.length != 0"
               v-for="registration in registrationsData"
-              class="border-default-300 border-b transition-colors"
+              class="border-default-300 cursor-default border-b transition-colors"
             >
               <RegistrationList :registration="registration" />
             </tr>
