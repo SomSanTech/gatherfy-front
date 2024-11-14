@@ -9,4 +9,16 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  components: {
+    dirs: ['~/components'],
+  },
+  typescript: {
+    strict: true,
+  },
+  runtimeConfig: {
+    public: {
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || '',
+    },
+  },
+  plugins: ['~/plugins/preline.client.ts'],
 });

@@ -3,7 +3,7 @@ name: CI/CD kub pom
 on:
   push:
     branches:
-      - 'main'
+      - 'sprint2/main'
 
 jobs:
   build:
@@ -21,6 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Inject environment variables
+        run: |
+          touch .env
+          echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
+          
       - name: Build project
         run: npm run build
 
@@ -62,29 +67,35 @@ jobs:
           username: ${{ secrets.VPN_USERNAME }}
           password: ${{ secrets.VPN_PASSWORD }}
 
-      - name: Copy build files to VM
+      - name: Copy build files to server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | sed 's/\\n/\n/g' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 22 $REMOTE_HOST >> ~/.ssh/known_hosts
-          scp -P 22 -i ~/.ssh/id_rsa build/build.tar.gz $REMOTE_USER@$REMOTE_HOST:/home/sealb/capstone
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass    
 
+      - name: Copy build files to VM
+        run: |
+          sshpass -p "${{ secrets.REMOTE_PASSWORD }}" scp -P 22 ./build/build.tar.gz ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/somsan/Gatherfy/front
+          
       - name: Deploy Docker container on VM
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_PASSWORD: ${{ secrets.REMOTE_PASSWORD }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
-          ssh -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            cd /home/sealb/capstone
+          sshpass -p "$REMOTE_PASSWORD" ssh -t -o StrictHostKeyChecking=no -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
+            cd /home/somsan/Gatherfy/front
             tar -xzf build.tar.gz
 
-            docker stop gatherfy || true
-            docker rm gatherfy || true
-            docker build -t frontdockerfile:latest .
-            docker run -d --name gatherfy -p 80:3000 frontdockerfile:latest
+            docker stop gatherfy-web || true
+            docker rm gatherfy-web || true
+            docker build -t gatherfront:latest .
+            docker run -d --name gatherfy-web -p 3000:3000 gatherfront:latest
