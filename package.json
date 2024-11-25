@@ -15,7 +15,11 @@
     "*.{js,ts,vue,json,css,scss,md}": "prettier --write"
   },
   "dependencies": {
+    "@ag-grid-community/core": "^32.3.3",
+    "@ag-grid-community/styles": "^32.3.3",
+    "@ag-grid-community/vue3": "^32.3.3",
     "@popperjs/core": "^2.11.8",
+    "chart.js": "^4.4.6",
     "d3": "^7.9.0",
     "leaflet": "^1.9.4",
     "minio": "^8.0.1",

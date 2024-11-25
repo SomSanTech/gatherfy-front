@@ -2,6 +2,7 @@
 import PenEdit from '../icons/PenEdit.vue';
 import Trash from '../icons/Trash.vue';
 import UserList from '../icons/UserList.vue';
+import Dashboard from '../icons/Dashboard.vue';
 
 const props = defineProps<{
   event?: Event;
@@ -45,6 +46,21 @@ interface Event {
         <UserList class="t3" />
         <p class="b3">Registration list</p>
       </div>
+    </div>
+    <div
+      v-else-if="type === 'dashboard'"
+      class="flex justify-center gap-5 text-xl text-gray-600"
+    >
+      <NuxtLink
+        :to="{
+          path: `/backoffice/dashboard/${event?.eventId}`,
+        }"
+      >
+        <div class="flex items-center justify-center gap-2 p-4">
+          <Dashboard class="t3" />
+          <p class="b3">View dashboard</p>
+        </div></NuxtLink
+      >
     </div>
   </td>
 </template>
