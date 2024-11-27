@@ -1,4 +1,4 @@
-name: CI/CD kub pom
+name: deploy staging
 
 on:
   push:
