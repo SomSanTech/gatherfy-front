@@ -93,7 +93,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           sshpass -p "$REMOTE_PASSWORD" ssh -t -o StrictHostKeyChecking=no -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            cd /home/somsan/Gatherfy/front
+            cd /home/somsan/Gatherfy
             # tar -xzf build.tar.gz
 
             # docker stop gatherfy-web-prod || true
