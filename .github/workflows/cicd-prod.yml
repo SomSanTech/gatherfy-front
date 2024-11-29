@@ -101,4 +101,4 @@ jobs:
             # docker rm gatherfy-web-prod || true
             # docker build -t gatherfront:latest .
             # docker run -d --name gatherfy-web-prod --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 80:3000 gatherfront:latest
-            docker compose -f compose.prod.yml restart front
+            docker compose -f compose.prod.yml -p prod restart front
