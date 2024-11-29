@@ -8,4 +8,5 @@ export interface Registration {
   email: string;
   phone: string;
   status: string;
+  age: number;
 }

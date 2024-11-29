@@ -42,7 +42,6 @@ const fetchData = async () => {
 };
 
 onMounted(async () => {
-  // Pretend to have authentication
   localStorage.setItem('user', JSON.stringify(mockUserLogin));
   const storedUser = localStorage.getItem('user');
   userData.value = storedUser ? JSON.parse(storedUser) : {};
@@ -83,8 +82,12 @@ watchEffect(() => {
 
             <div class="flex w-fit flex-col justify-center gap-3">
               <div class="tag-group flex gap-2">
-                <button class="bg-zin-200 rounded-md text-sm">Tag 1</button>
-                <button class="bg-zin-200 rounded-md text-sm">Tag 2</button>
+                <button
+                  v-for="tag in event?.tags"
+                  class="bg-zin-200 rounded-md border border-light-grey px-3"
+                >
+                  {{ tag }}
+                </button>
               </div>
               <p class="text-3xl font-semibold">{{ event?.name }}</p>
               <div class="flex items-center gap-2">
