@@ -99,4 +99,4 @@ jobs:
             # docker rm gatherfy-web || true
             # docker build -t gatherfront:latest .
             # docker run -d --name gatherfy-web --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 3000:3000 gatherfront:latest
-            docker compose -f compose.staging.yml restart qafront
+            docker compose -f compose.staging.yml -p staging restart qafront
