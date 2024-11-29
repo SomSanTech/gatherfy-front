@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     },
   },
   components: {
-    dirs: ['~/components'],
+    dirs: ['~/components', '~/components/backoffice'],
   },
   typescript: {
     strict: true,

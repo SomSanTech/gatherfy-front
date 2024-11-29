@@ -14,7 +14,7 @@ onMounted(() => {});
       <NuxtLink to="/backoffice">Gatherfy</NuxtLink>
     </div>
     <div class="flex flex-col gap-3">
-      <NuxtLink to="">
+      <NuxtLink to="/backoffice/dashboard">
         <div
           class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
         >

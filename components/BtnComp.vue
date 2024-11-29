@@ -13,6 +13,8 @@ const btnColor = computed(() => {
     return 'bg-black-1 hover:bg-dark-grey text-light-grey';
   } else if (props.color === 'green') {
     return 'bg-[#16C098]/25 text-[#008767]';
+  } else if (props.color === 'status-red') {
+    return 'bg-[#F25C5C]/25 text-[#D22F2F]';
   } else if (props.color === 'gray') {
     return 'bg-[#E8E8E8] text-[#939393]';
   } else {
@@ -25,6 +27,6 @@ const btnColor = computed(() => {
   <button
     :class="`b3 w-fit rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
   >
-    {{ text }}
+    <p v-html="text"></p>
   </button>
 </template>

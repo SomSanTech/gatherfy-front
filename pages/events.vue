@@ -5,6 +5,7 @@ import ExploreBar from '~/components/ExploreBar.vue';
 
 const route = useRoute();
 const searchTerm = ref(route.query.k);
+const tagsTerm = ref(route.query.tag);
 const eventSearch = ref();
 const formattedDate = ref();
 const selectedTags = ref(new Set());
@@ -12,19 +13,33 @@ const selectedStatus = ref(new Set());
 const tags = ref([]);
 const showFilter = ref(true);
 const sortFilter = ref('');
+const isLoading = ref(false);
+const isInitializing = ref(true);
 
 const handleDateUpdate = (newDate: Date) => {
-  formattedDate.value = newDate.toISOString().slice(0, 10);
+  console.log(newDate);
+  if (newDate) {
+    formattedDate.value = newDate
+      .toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' })
+      .replaceAll('/', '-');
+  } else {
+    formattedDate.value = '';
+    filterAndSearchEvents();
+  }
 };
+
 const toggleSetItem = <T,>(set: Set<T>, item: T) => {
   set.has(item) ? set.delete(item) : set.add(item);
 };
+
 const selectTag = (tag: string) => {
   toggleSetItem(selectedTags.value, tag);
 };
+
 const selectStatus = (status: string) => {
   toggleSetItem(selectedStatus.value, status);
 };
+
 const buildFilterUrl = () => {
   const tags =
     [...selectedTags.value].length > 0
@@ -39,26 +54,56 @@ const buildFilterUrl = () => {
 
   return [tags, status, date, sort].filter(Boolean).join('&');
 };
+
 const filterAndSearchEvents = async () => {
-  let url;
-  if (searchTerm.value) {
-    url = `v1/events?keyword=${searchTerm.value}&${buildFilterUrl()}`;
-  } else {
-    url = `v1/events?${buildFilterUrl()}`;
+  isLoading.value = true;
+  try {
+    let url;
+    if (searchTerm.value) {
+      url = `v1/events?keyword=${searchTerm.value}&${buildFilterUrl()}`;
+    } else {
+      url = `v1/events?${buildFilterUrl()}`;
+    }
+    eventSearch.value = await useFetchData(url);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  } finally {
+    isLoading.value = false;
+    isInitializing.value = false;
   }
-  eventSearch.value = await useFetchData(url);
 };
+
 const handleShowFilter = () => {
   showFilter.value = !showFilter.value;
 };
+
 const handleSortFilter = (sortByOption: any) => {
   sortFilter.value = sortByOption;
 };
+
 onMounted(async () => {
-  tags.value = await useFetchData('v1/tags');
-  eventSearch.value = await useFetchData(
-    `v1/events?keyword=${searchTerm.value}`
-  );
+  isLoading.value = true;
+  try {
+    tags.value = await useFetchData('v1/tags');
+    if (tagsTerm.value) {
+      console.log('tag', tagsTerm.value);
+
+      selectedTags.value.add(tagsTerm.value);
+      console.log(selectedTags.value);
+
+      await filterAndSearchEvents();
+    } else if (searchTerm.value) {
+      eventSearch.value = await useFetchData(
+        `v1/events?keyword=${searchTerm.value}`
+      );
+    } else {
+      eventSearch.value = await useFetchData(`v1/events`);
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  } finally {
+    isLoading.value = false;
+  }
 });
 watch(
   () => route.query.k,
@@ -69,12 +114,17 @@ watch(
 watch(
   [
     () => searchTerm.value,
+    () => tagsTerm.value,
     () => Array.from(selectedTags.value),
     () => Array.from(selectedStatus.value),
     () => formattedDate.value,
     () => sortFilter.value,
   ],
-  () => filterAndSearchEvents(),
+  () => {
+    if (!isInitializing.value || !tagsTerm.value) {
+      filterAndSearchEvents();
+    }
+  },
   { immediate: true }
 );
 </script>
@@ -82,25 +132,37 @@ watch(
 <template>
   <div class="py-24">
     <div class="mx-auto w-full max-w-6xl">
-      <h1 class="t1 font-semibold">
-        {{ eventSearch?.length }} Events for "{{ searchTerm }}"
+      <h1 v-if="searchTerm" class="t1 font-semibold">
+        {{ eventSearch?.length }} Events for "{{
+          decodeURIComponent(searchTerm)
+        }}"
       </h1>
+      <h1 v-else-if="tagsTerm" class="t1 font-semibold">
+        Events in tag "{{ decodeURIComponent(tagsTerm) }}"
+      </h1>
+      <h1 v-else class="t1 font-semibold">All events</h1>
       <ExploreBar
         class="my-4"
         :is-show-sort="true"
+        :showFilter
         @handleShowFilter="handleShowFilter"
         @sort-changed="handleSortFilter"
       />
       <div class="flex gap-3">
         <FilterEvent
           v-if="showFilter"
+          :tags
           @selectTag="selectTag"
           @selectStatus="selectStatus"
           @update-date="handleDateUpdate"
           :selectedTags="[...selectedTags]"
           :selectedStatus="[...selectedStatus]"
         />
+        <div v-if="isLoading" class="flex w-full items-center justify-center">
+          <span class="loader"></span>
+        </div>
         <EventList
+          v-else
           :events="eventSearch"
           :class="{ 'w-full': !showFilter, 'w-[calc(100%-200px)]': showFilter }"
         />

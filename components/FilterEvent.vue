@@ -7,6 +7,7 @@ import 'v-calendar/style.css';
 const props = defineProps<{
   selectedTags?: any;
   selectedStatus?: any;
+  tags: any;
 }>();
 const emit = defineEmits(['update-date', 'selectTag', 'selectStatus']);
 
@@ -16,9 +17,9 @@ interface Tag {
   tag_code: string;
 }
 
-const date = ref(new Date());
+const date = ref();
 const statusData = ['Soon', 'Available', 'Unavailable'];
-const tags = ref<Tag[]>([]);
+// const tags = ref<Tag[]>([]);
 const filterShowOrNot = ref({
   tag: true,
   status: true,
@@ -31,7 +32,7 @@ const updateDate = (newDate: Date) => {
 };
 
 onMounted(async () => {
-  tags.value = await useFetchData('v1/tags');
+  // tags.value = await useFetchData('v1/tags');
 });
 </script>
 
@@ -40,6 +41,7 @@ onMounted(async () => {
     class="flex h-fit w-fit flex-col gap-4 divide-y-[1px] divide-grey rounded-xl border border-black-1 p-4"
   >
     <div class="flex w-full flex-col gap-[9px]">
+      <p class="b1">Tags</p>
       <button
         v-for="tagChoice in tags"
         :class="`${selectedTags?.includes(tagChoice?.tag_title) ? 'bg-burgundy pl-2 text-light-grey' : ''} b2 flex items-center rounded-md py-[5px] pl-4`"
@@ -55,7 +57,7 @@ onMounted(async () => {
       </button>
     </div>
 
-    <div class="w-full pt-4">
+    <!-- <div class="w-full pt-4">
       <button
         @click="filterShowOrNot.status = !filterShowOrNot.status"
         class="flex w-full items-center justify-between"
@@ -80,7 +82,7 @@ onMounted(async () => {
           </p>
         </button>
       </div>
-    </div>
+    </div> -->
 
     <div :class="`w-[254px] pt-4 ${filterShowOrNot.date ? '' : ''} `">
       <button

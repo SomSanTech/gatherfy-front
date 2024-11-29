@@ -4,7 +4,13 @@ import SearchIcon from './icons/Search.vue';
 const router = useRouter();
 const searchKw = ref('');
 const handleSearch = () => {
-  router.push({ path: '/search', query: { k: searchKw.value } });
+  if (searchKw.value.length > 0) {
+    router.push({
+      path: '/events',
+      query: { k: encodeURIComponent(searchKw.value) },
+    });
+    searchKw.value = '';
+  }
 };
 </script>
 

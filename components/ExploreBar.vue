@@ -1,15 +1,24 @@
 <script setup lang="ts">
 import Filter from './icons/Filter.vue';
 import Arrow from './icons/Arrow.vue';
-const emit = defineEmits(['sort-changed', 'handleShowFilter']);
+const emit = defineEmits([
+  'sort-changed',
+  'handleShowFilter',
+  'handleSelectTime',
+]);
 const props = defineProps<{
   isShowSort: Boolean;
+  selectedEventTime?: string;
+  showFilter?: boolean;
 }>();
 
-const selectedEventTime = ref('today');
 const selectedEventTimeStyle = {
   active: 'text-light-grey font-semibold bg-burgundy',
   notActive: 'text-black',
+};
+
+const selectTime = (timeSelected: string) => {
+  emit('handleSelectTime', timeSelected);
 };
 
 interface SortOption {
@@ -20,6 +29,7 @@ const selectedSortBy = ref('');
 const selectSortOption = (sortOption: SortOption) => {
   selectedSortBy.value = sortOption.name;
   emit('sort-changed', sortOption.urlSend);
+  isShowSortBy.value = !isShowSortBy.value;
 };
 
 const isShowSortBy = ref(false);
@@ -40,10 +50,6 @@ const sortByData = [
     name: 'Z-A',
     urlSend: 'name_desc',
   },
-  {
-    name: 'Status',
-    urlSend: '',
-  },
 ];
 </script>
 
@@ -51,32 +57,37 @@ const sortByData = [
   <div
     class="flex items-center justify-between rounded-xl border border-black-1 p-2 pr-4"
   >
-    <div class="flex gap-2">
+    <div
+      :class="`flex gap-2 ${isShowSort ? 'pointer-events-none opacity-0' : ''}`"
+    >
       <button
-        @click="selectedEventTime = 'today'"
-        :class="`rounded-md px-4 py-2 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        @click="selectTime('today')"
+        :class="`b3 rounded-md px-4 py-2 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
       >
         Today event
       </button>
       <button
-        @click="selectedEventTime = 'upcome'"
-        :class="`rounded-md px-4 py-2 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        @click="selectTime('upcome')"
+        :class="`b3 rounded-md px-4 py-2 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
       >
         Upcoming event
       </button>
-      <button
-        @click="selectedEventTime = 'all'"
-        :class="`rounded-md px-4 py-2 ${selectedEventTime === 'all' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
-      >
-        All event
-      </button>
     </div>
-    <div class="flex gap-4" v-show="isShowSort">
+    <div v-if="!isShowSort">
+      <NuxtLink to="/events">
+        <button
+          :class="`b3 flex items-center gap-1 rounded-md px-4 py-2 duration-500 hover:translate-x-2`"
+        >
+          See all event<Arrow class="b4 rotate-180" />
+        </button>
+      </NuxtLink>
+    </div>
+    <div class="b2 flex gap-4" v-show="isShowSort">
       <button
         @click="$emit('handleShowFilter')"
         class="flex items-center gap-1"
       >
-        Hide filter <Filter class="text-black" />
+        {{ showFilter ? 'Hide' : 'Show' }} filter <Filter class="text-black" />
       </button>
       <div class="relative">
         <button

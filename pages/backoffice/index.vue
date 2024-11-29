@@ -4,7 +4,7 @@ definePageMeta({
 });
 
 const mockAdminLogin = {
-  userId: 3,
+  userId: 2,
   firstname: 'Jane',
   lastname: 'Smith',
   username: 'Janesmith',
@@ -14,8 +14,30 @@ const mockAdminLogin = {
   role: 'Organization',
 };
 
+function parseJSONSafe(value: string | null) {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    console.error('Failed to parse JSON:', error);
+    return null;
+  }
+}
+
+const user = useState('user', () =>
+  process.client ? parseJSONSafe(localStorage.getItem('admin')) || {} : {}
+);
+
 onMounted(() => {
-  localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
+  if (process.client) {
+    const storedAdmin = localStorage.getItem('admin');
+    if (!storedAdmin) {
+      localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
+      user.value = mockAdminLogin;
+    } else {
+      user.value = parseJSONSafe(storedAdmin) || {};
+    }
+    console.log('user:', user.value);
+  }
 });
 </script>
 

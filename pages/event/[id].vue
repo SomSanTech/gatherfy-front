@@ -42,7 +42,6 @@ const fetchData = async () => {
 };
 
 onMounted(async () => {
-  // Pretend to have authentication
   localStorage.setItem('user', JSON.stringify(mockUserLogin));
   const storedUser = localStorage.getItem('user');
   userData.value = storedUser ? JSON.parse(storedUser) : {};
@@ -73,7 +72,7 @@ watchEffect(() => {
           class="relative z-10 bg-black bg-opacity-30 p-10 py-32 backdrop-blur-md"
         >
           <div class="mx-auto flex w-full max-w-4xl gap-12 text-white">
-            <div class="h-[500px] w-[350px] bg-zinc-200">
+            <div class="h-[500px] w-[400px] bg-zinc-200">
               <img
                 :src="event?.image"
                 alt=""
@@ -83,8 +82,13 @@ watchEffect(() => {
 
             <div class="flex w-fit flex-col justify-center gap-3">
               <div class="tag-group flex gap-2">
-                <button class="bg-zin-200 rounded-md text-sm">Tag 1</button>
-                <button class="bg-zin-200 rounded-md text-sm">Tag 2</button>
+                <div v-for="tag in event?.tags">
+                  <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                    <button class="b3 rounded-md border border-light-grey px-4">
+                      {{ tag }}
+                    </button>
+                  </NuxtLink>
+                </div>
               </div>
               <p class="text-3xl font-semibold">{{ event?.name }}</p>
               <div class="flex items-center gap-2">
@@ -102,7 +106,7 @@ watchEffect(() => {
                 </p>
               </div>
               <div class="flex items-center gap-2">
-                <Location />
+                <Location class="shrink-0" />
                 <p>{{ event?.location }}</p>
               </div>
               <div class="flex gap-2">
@@ -119,17 +123,13 @@ watchEffect(() => {
           <p class="b2">
             {{ event?.detail }}
           </p>
-          <div class="h-[500px] w-full bg-zinc-200">
-            <img
-              :src="event?.image"
-              alt=""
-              class="h-[500px] w-full object-cover"
-            />
+          <div class="w-full bg-zinc-200">
+            <img :src="event?.image" alt="" class="w-full object-cover" />
           </div>
         </div>
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
-            <p>Event location</p>
+            <p class="t3 font-semibold">Event location</p>
             <div class="h-full w-full">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30988.16801609143!2d100.55004526585483!3d13.867766604333376!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29c5a3a91d177%3A0x140b15ef77bd4508!2z4Lin4Lix4LiU4Lie4Lij4Liw4Lio4Lij4Li14Lih4Lir4Liy4LiY4Liy4LiV4Li44Lin4Lij4Lih4Lir4Liy4Lin4Li04Lir4Liy4Lij!5e0!3m2!1sth!2sth!4v1729251996890!5m2!1sth!2sth"
@@ -143,14 +143,17 @@ watchEffect(() => {
             </div>
           </div>
           <div class="flex flex-col gap-5">
-            <p>Tags</p>
-            <div class="flex gap-2">
-              <button
-                v-for="tag in event?.tags"
-                class="b3 w-fit rounded-lg bg-light-grey px-10 py-2 text-center drop-shadow-md duration-100 hover:bg-grey"
-              >
-                {{ tag }}
-              </button>
+            <p class="t3 font-semibold">Tags</p>
+            <div class="tag-group flex gap-2">
+              <div v-for="tag in event?.tags">
+                <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                  <button
+                    class="b3 w-fit rounded-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
+                  >
+                    {{ tag }}
+                  </button>
+                </NuxtLink>
+              </div>
             </div>
           </div>
         </div>
