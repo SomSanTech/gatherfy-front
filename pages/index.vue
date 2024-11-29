@@ -14,35 +14,42 @@ import { useFetchData } from '~/composables/useFetchData';
 import ExploreBar from '~/components/ExploreBar.vue';
 
 const today = ref(new Date());
-const tagData = [
-  { tag: 'Technology', color: '#FF5733' },
-  { tag: 'Music', color: '#33FF57' },
-  { tag: 'Art', color: '#3357FF' },
-  { tag: 'Sports', color: '#FF33A1' },
-];
 
 const eventData = ref<Event[]>([]);
+const tagsData = ref<Event[]>([]);
 
 const fetchData = async () => {
   const fetchedData = await useFetchData('v1/events');
-  eventData.value = fetchedData || [];
+  const fetchTagData = await useFetchData('v1/tags');
+  eventData.value = (await fetchedData) || [];
+  tagsData.value = (await fetchTagData) || [];
+  console.log(tagsData.value);
 };
 
 const handleReccomEvent = (type: string) => {
-  if (type === 'next' && reccommentIndex.value !== eventData.value.length) {
-    reccommentIndex.value += 1;
+  if (type === 'next') {
+    reccommentIndex.value =
+      (reccommentIndex.value + 1) % eventData.value.length;
   }
-  if (type === 'prev' && reccommentIndex.value !== 0) {
-    reccommentIndex.value -= 1;
+  if (type === 'prev') {
+    reccommentIndex.value =
+      (reccommentIndex.value - 1 + eventData.value.length) %
+      eventData.value.length;
   }
 };
 
+const isFirstClickSampleEvent = ref(false);
+
 const handleSampleEvent = (type: string) => {
-  if (type === 'next' && sampleEventIndex.value !== eventData.value.length) {
-    sampleEventIndex.value += 1;
+  isFirstClickSampleEvent.value = true;
+  if (type === 'next') {
+    sampleEventIndex.value =
+      (sampleEventIndex.value + 1) % eventData.value.length;
   }
-  if (type === 'prev' && sampleEventIndex.value !== 0) {
-    sampleEventIndex.value -= 1;
+  if (type === 'prev') {
+    sampleEventIndex.value =
+      (sampleEventIndex.value - 1 + eventData.value.length) %
+      eventData.value.length;
   }
 };
 
@@ -62,25 +69,23 @@ const addDays = (date: Date, days: number) => {
 type GroupedEvents = {
   [date: string]: Event[];
 };
+
 const filterExploreDate = computed<GroupedEvents>(() => {
+  const dateFocus = new Date(today.value);
+
   const filteredData = eventData.value.filter((item) => {
-    const itemDate = new Date(item.start_date).getTime();
+    const itemStartDate = new Date(item.start_date);
+    const itemEndDate = new Date(item.end_date);
     return (
-      itemDate >= today.value.getTime() &&
-      itemDate <= addDays(today.value, 3).getTime()
+      itemStartDate.getTime() >= dateFocus.getTime() ||
+      itemEndDate.getTime() >= dateFocus.getTime()
     );
   });
 
-  if (filteredData.length === 0) {
-    const nextAvailableDate = eventData.value.find(
-      (item) => new Date(item.start_date).getTime() > today.value.getTime()
-    );
-    return nextAvailableDate
-      ? { [nextAvailableDate.start_date]: [nextAvailableDate] }
-      : {};
-  }
+  const groupDateData = d3.group(filteredData, (d) => {
+    return d.start_date;
+  });
 
-  const groupDateData = d3.group(filteredData, (d) => d.start_date);
   const groupedEvents: GroupedEvents = {};
 
   Array.from(groupDateData.entries())
@@ -100,22 +105,72 @@ watch([today], ([newToday]) => {
 
   filterExploreDate.value;
 });
+const selectedEventTime = ref('today');
+const handleSelectTime = (time: string) => {
+  selectedEventTime.value = time;
+};
+const isLoading = ref(false);
+onMounted(async () => {
+  isLoading.value = true;
+  try {
+    await fetchData();
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  } finally {
+    isLoading.value = false;
+    filterTimeEventData(selectedEventTime.value);
+    // console.log(eventData.value);
 
-onMounted(() => {
-  fetchData();
-  const intervalId = setInterval(() => {
-    sampleEventIndex.value =
-      (sampleEventIndex.value + 1) % eventData?.value?.length;
-  }, 5000);
+    const intervalId = setInterval(() => {
+      if (!isFirstClickSampleEvent.value) {
+        sampleEventIndex.value =
+          (sampleEventIndex.value + 1) % eventData?.value?.length;
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 5000);
+  }
+});
+const filteredTimeData = ref();
+const filterTimeEventData = (time: string) => {
+  console.log(time);
+  let filter;
+  if (time === 'today') {
+    console.log('filter today');
 
-  onUnmounted(() => {
-    clearInterval(intervalId);
-  });
+    filter = eventData.value.filter((e) => {
+      return (
+        new Date(e?.start_date)?.getTime() === new Date().getTime() ||
+        new Date(e?.end_date)?.getTime() <= new Date().getTime()
+      );
+    });
+  } else {
+    console.log('filter upcome');
+
+    filter = eventData.value.filter((e) => {
+      return new Date(e?.start_date)?.getTime() > new Date().getTime();
+    });
+  }
+
+  filteredTimeData.value = filter;
+  console.log('filter', filteredTimeData.value);
+};
+watch(selectedEventTime, (newValue) => {
+  if (newValue) {
+    selectedEventTime.value = newValue;
+    filterTimeEventData(newValue);
+  }
 });
 </script>
 
 <template>
-  <div class="mx-auto my-24 max-w-6xl">
+  <div
+    v-if="isLoading"
+    class="flex h-screen w-full items-center justify-center"
+  >
+    <span class="loader"></span>
+  </div>
+  <div v-else class="relative mx-auto my-24 max-w-6xl">
     <!-- Header Event Banner -->
     <div class="relative">
       <button
@@ -140,6 +195,17 @@ onMounted(() => {
             <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
           </div>
           <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
+            <div class="flex gap-1 pb-2">
+              <div v-for="tag in eventData[sampleEventIndex]?.tags">
+                <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                  <button
+                    class="b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
+                  >
+                    {{ tag }}
+                  </button>
+                </NuxtLink>
+              </div>
+            </div>
             <h1 class="shw t1 text-white">
               {{ eventData[sampleEventIndex]?.name }}
             </h1>
@@ -173,10 +239,22 @@ onMounted(() => {
               class="row-span-2 flex w-full flex-col justify-between rounded-2xl bg-light-grey p-7 drop-shadow-md"
             >
               <div>
-                <h3 class="b1 pb-4 font-semibold">
+                <div class="flex gap-1 pb-1">
+                  <div v-for="tag in eventData[reccommentIndex]?.tags">
+                    <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                      <button
+                        class="b4 rounded-md border border-dark-grey/60 px-4 drop-shadow-md duration-200 hover:bg-dark-grey/20"
+                      >
+                        {{ tag }}
+                      </button>
+                    </NuxtLink>
+                  </div>
+                </div>
+                <h3 class="b1 pb-2 font-semibold">
                   {{ eventData[reccommentIndex]?.name }}
                 </h3>
-                <p class="b2 line-clamp-[5]">
+
+                <p class="b2 line-clamp-[4]">
                   {{ eventData[reccommentIndex]?.detail }}
                 </p>
               </div>
@@ -192,35 +270,50 @@ onMounted(() => {
               </NuxtLink>
             </div>
             <div
-              class="row-span-1 grid w-full grid-cols-3 place-content-center rounded-2xl bg-black p-7 text-light-grey drop-shadow-md"
+              class="row-span-1 grid w-full grid-cols-3 place-content-center gap-10 rounded-2xl bg-black p-7 text-light-grey drop-shadow-md"
             >
               <div class="flex flex-col gap-1">
                 <Calendar />
                 <div>
-                  <p class="font-semibold">When</p>
+                  <p class="b3 font-semibold">When</p>
 
-                  <p v-if="eventData[reccommentIndex]" class="text-sm">
-                    {{
+                  <p v-if="eventData[reccommentIndex]" class="b4">
+                    <span>{{
                       useFormatDateTime(
                         new Date(eventData[reccommentIndex]?.start_date),
                         'date'
                       )
-                    }}
-                    -
-                    {{
-                      useFormatDateTime(
-                        new Date(eventData[reccommentIndex]?.end_date),
-                        'date'
-                      )
-                    }}
+                    }}</span>
+                    <br />
+
+                    <span
+                      v-if="
+                        useFormatDateTime(
+                          new Date(eventData[reccommentIndex]?.end_date),
+                          'date'
+                        ) !==
+                        useFormatDateTime(
+                          new Date(eventData[reccommentIndex]?.start_date),
+                          'date'
+                        )
+                      "
+                    >
+                      -
+                      {{
+                        useFormatDateTime(
+                          new Date(eventData[reccommentIndex]?.end_date),
+                          'date'
+                        )
+                      }}</span
+                    >
                   </p>
                 </div>
               </div>
               <div class="flex flex-col gap-1">
                 <Location />
                 <div>
-                  <p class="font-semibold">Where</p>
-                  <p class="text-sm">
+                  <p class="b3 font-semibold">Where</p>
+                  <p class="b4 line-clamp-2">
                     {{ eventData[reccommentIndex]?.location }}
                   </p>
                 </div>
@@ -228,8 +321,8 @@ onMounted(() => {
               <div class="flex flex-col gap-1">
                 <Organisation />
                 <div>
-                  <p class="font-semibold">Who</p>
-                  <p class="text-sm">SomSan Tech</p>
+                  <p class="b3 font-semibold">Who</p>
+                  <p class="b4">{{ eventData[reccommentIndex]?.owner }}</p>
                 </div>
               </div>
             </div>
@@ -253,15 +346,35 @@ onMounted(() => {
     </div>
     <!-- Event List section -->
     <div class="w-full py-7">
-      <ExploreBar :is-show-sort="false" />
-      <h1 class="t2 py-4">Today, 5 Jan</h1>
+      <ExploreBar
+        :is-show-sort="false"
+        @handle-select-time="handleSelectTime"
+        :selectedEventTime
+      />
+      <h1 class="t2 py-4">
+        {{
+          selectedEventTime === 'today'
+            ? `Today, ${useFormatDateTime(new Date(), 'fullDate').slice(0, 6)}`
+            : 'Upcomming'
+        }}
+      </h1>
       <div class="relative">
         <div
-          class="absolute left-0 top-0 z-20 h-full w-8 bg-gradient-to-r from-white"
+          class="absolute left-0 top-0 z-20 h-full w-6 bg-gradient-to-r from-white"
         ></div>
         <div class="w-full overflow-x-auto px-4 pb-5">
-          <div class="flex h-full w-full gap-3">
-            <div v-for="event in eventData">
+          <div class="pt-14" v-if="filteredTimeData?.length === 0">
+            <p class="b2">
+              No
+              {{
+                selectedEventTime === 'today'
+                  ? 'events today'
+                  : 'upcoming events'
+              }}
+            </p>
+          </div>
+          <div v-else class="flex h-full w-full gap-3">
+            <div v-for="event in filteredTimeData">
               <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
                 <EventListCard :eventDetail="event" :isVertical="true" />
               </NuxtLink>
@@ -277,17 +390,19 @@ onMounted(() => {
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
-        <button
-          class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-light-grey p-3 drop-shadow-md duration-200 hover:bg-grey"
-          v-for="data in tagData"
-          :key="data.tag"
-        >
-          <div
-            :style="{ backgroundColor: data?.color }"
-            class="h-full w-[5px] rounded"
-          ></div>
-          <span class="ml-2 font-semibold">{{ data.tag }}</span>
-        </button>
+        <div v-for="tag in tagsData" :key="tag.tag_id">
+          <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
+            <button
+              class="flex h-[60px] w-[160px] items-center gap-3 rounded-md bg-light-grey p-3 drop-shadow-md duration-200 hover:bg-grey"
+            >
+              <div
+                :style="{ backgroundColor: tag.tag_code }"
+                class="h-full w-[5px] rounded"
+              ></div>
+              <span class="b3 ml-2 font-semibold">{{ tag.tag_title }}</span>
+            </button>
+          </NuxtLink>
+        </div>
       </div>
     </div>
     <!-- Explore Date section -->
@@ -295,7 +410,11 @@ onMounted(() => {
       <h1 class="t2 py-3">Explore by date</h1>
       <div class="flex w-full gap-8">
         <div class="w-full">
+          <div v-if="Object.keys(filterExploreDate).length === 0">
+            <p class="b1 mt-8">There are no events during this period</p>
+          </div>
           <div
+            v-else
             class="flex w-full gap-4"
             v-for="(events, date) in filterExploreDate"
             :key="date"
@@ -305,7 +424,7 @@ onMounted(() => {
               <div class="h-full translate-x-1/2 border-l-[1px]"></div>
             </div>
             <div>
-              <p class="w-full py-2 text-lg font-semibold">
+              <p class="b2 w-full py-2 font-semibold">
                 {{ useFormatDateTime(new Date(date), 'fullDate') }}
               </p>
               <div class="flex w-full flex-col gap-3">
@@ -322,13 +441,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <div>
-          <DatePicker
-            v-model="today"
-            mode="date"
-            :min-date="today"
-            :max-date="maxDate"
-          />
+        <div class="sticky top-28 self-start">
+          <DatePicker v-model="today" mode="date" />
         </div>
       </div>
     </div>

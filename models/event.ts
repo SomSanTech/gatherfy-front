@@ -11,4 +11,5 @@ export interface Event {
   slug: string;
   image: string;
   organizer: string;
+  tags: any;
 }

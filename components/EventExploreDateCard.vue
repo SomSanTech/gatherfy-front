@@ -12,26 +12,32 @@ const props = defineProps<{
     <div class="flex flex-col justify-between">
       <div>
         <p class="b3 text-zinc-400">11:00 AM</p>
-        <p class="b2 line-clamp-[2] w-[370px] font-semibold">
+        <p class="b2 line-clamp-[2] w-[390px] font-semibold">
           {{ props.eventDetail?.name }}
         </p>
-        <p class="b3 text-zinc-400">By {{ props.eventDetail?.organizer }}</p>
-        <p class="b3 text-zinc-400">At {{ props.eventDetail?.location }}</p>
+        <p class="b3 text-zinc-400">By {{ props.eventDetail?.owner }}</p>
+        <p class="b3 text-zinc-400">By {{ props.eventDetail?.start_date }}</p>
+        <p class="b3 line-clamp-1 w-[390px] text-zinc-400">
+          At {{ props.eventDetail?.location }}
+        </p>
       </div>
       <div class="flex gap-2 pt-3">
-        <button class="b4 rounded-md border px-5 py-1 text-black-1">
-          Concert
-        </button>
-        <button class="b4 rounded-md border px-5 py-1 text-black-1">
-          Concert
-        </button>
+        <div v-for="tag in eventDetail?.tags">
+          <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+            <button
+              class="b4 rounded-md border px-5 py-1 text-black-1 duration-200 hover:border-dark-grey/60"
+            >
+              {{ tag }}
+            </button>
+          </NuxtLink>
+        </div>
       </div>
     </div>
-    <div class="rounded-md bg-zinc-200">
+    <div class="w-[120px] rounded-md">
       <img
         :src="props?.eventDetail?.image"
         alt=""
-        class="h-full w-auto rounded-md object-cover"
+        class="h-full w-full rounded-md object-cover"
       />
     </div>
   </div>

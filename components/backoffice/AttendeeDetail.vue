@@ -32,19 +32,19 @@ const statusStyle = {
 };
 const statusData = [
   {
-    name: 'Pending',
-    urlSend: 'pending',
+    name: 'Unattended',
+    urlSend: 'Unattended',
   },
   {
-    name: 'Going',
-    urlSend: 'Going',
+    name: 'Awaiting Check-in',
+    urlSend: 'Awaiting Check-in',
   },
   {
     name: 'Checked in',
     urlSend: 'Checked in',
   },
 ];
-
+// ENUM('Awaiting Check-in', 'Checked in', 'Unattended')
 const props = defineProps<{
   registration?: Registration;
 }>();

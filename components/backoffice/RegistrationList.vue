@@ -24,8 +24,18 @@ const props = defineProps<{
   <td class="b2 p-4 text-center align-middle">
     <BtnComp
       class="cursor-default"
-      :text="registration?.status"
-      :color="registration?.status == 'pending' ? 'gray' : 'green'"
+      :text="
+        registration?.status === 'Awaiting Check-in'
+          ? 'Awaiting<br/>Check-in'
+          : registration?.status
+      "
+      :color="
+        registration?.status == 'Awaiting Check-in'
+          ? 'gray'
+          : registration?.status === 'Checked in'
+            ? 'green'
+            : 'status-red'
+      "
     />
   </td>
   <td>
