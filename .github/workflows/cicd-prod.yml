@@ -1,4 +1,4 @@
-name: Deploy staging
+name: deploy production
 
 on:
   push:
@@ -25,6 +25,7 @@ jobs:
         run: |
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
+          echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL}}" >> .env
           
       - name: Build project
         run: npm run build
@@ -95,7 +96,7 @@ jobs:
             cd /home/somsan/Gatherfy/front
             tar -xzf build.tar.gz
 
-            docker stop gatherfy-web || true
-            docker rm gatherfy-web || true
+            docker stop gatherfy-web-prod || true
+            docker rm gatherfy-web-prod || true
             docker build -t gatherfront:latest .
-            docker run -d --name gatherfy-web --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 3000:3000 gatherfront:latest
+            docker run -d --name gatherfy-web-prod --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 80:3000 gatherfront:latest
