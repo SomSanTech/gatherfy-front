@@ -11,12 +11,13 @@ const props = defineProps<{
   >
     <div class="flex flex-col justify-between">
       <div>
-        <p class="b3 text-zinc-400">11:00 AM</p>
+        <p class="b3 text-zinc-400">
+          {{ useFormatDateTime(props?.eventDetail?.start_date, 'time') }}
+        </p>
         <p class="b2 line-clamp-[2] w-[390px] font-semibold">
           {{ props.eventDetail?.name }}
         </p>
         <p class="b3 text-zinc-400">By {{ props.eventDetail?.owner }}</p>
-        <p class="b3 text-zinc-400">By {{ props.eventDetail?.start_date }}</p>
         <p class="b3 line-clamp-1 w-[390px] text-zinc-400">
           At {{ props.eventDetail?.location }}
         </p>
