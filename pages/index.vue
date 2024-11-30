@@ -136,14 +136,13 @@ const filterTimeEventData = (time: string) => {
   console.log(time);
   let filter;
   if (time === 'today') {
-    console.log('filter today');
-
     filter = eventData.value.filter((e) => {
-      return (
-        new Date(e?.start_date)?.getTime() === new Date().getTime() ||
-        new Date(e?.end_date)?.getTime() <= new Date().getTime()
-      );
+      const start = new Date(e?.start_date)?.getTime();
+      const today = new Date().getTime();
+      const end = new Date(e?.end_date)?.getTime();
+      return start <= today && end >= today;
     });
+    console.log(filter);
   } else {
     console.log('filter upcome');
 
@@ -174,7 +173,7 @@ watch(selectedEventTime, (newValue) => {
     <!-- Header Event Banner -->
     <div class="relative">
       <button
-        class="absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+        class="header-btn-prev absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
         @click="handleSampleEvent('prev')"
       >
         <ArrowIcon class="" />
@@ -206,7 +205,7 @@ watch(selectedEventTime, (newValue) => {
                 </NuxtLink>
               </div>
             </div>
-            <h1 class="shw t1 text-white">
+            <h1 class="event-name shw t1 text-white">
               {{ eventData[sampleEventIndex]?.name }}
             </h1>
             <div class="b3 mt-4 flex gap-2">
@@ -217,7 +216,7 @@ watch(selectedEventTime, (newValue) => {
       </NuxtLink>
       <button
         @click="handleSampleEvent('next')"
-        class="absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+        class="header-btn-next absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
       >
         <ArrowIcon class="rotate-180" />
       </button>
@@ -228,7 +227,7 @@ watch(selectedEventTime, (newValue) => {
       <h1 class="t2">Reccomment Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
-          class="left-0 h-fit rounded-full"
+          class="recommended-btn-prev left-0 h-fit rounded-full"
           @click="handleReccomEvent('prev')"
         >
           <ArrowIcon class="text-2xl text-black" />
@@ -250,11 +249,11 @@ watch(selectedEventTime, (newValue) => {
                     </NuxtLink>
                   </div>
                 </div>
-                <h3 class="b1 pb-2 font-semibold">
+                <h3 class="reccom-name b1 pb-2 font-semibold">
                   {{ eventData[reccommentIndex]?.name }}
                 </h3>
 
-                <p class="b2 line-clamp-[4]">
+                <p class="reccom-detail b2 line-clamp-[4]">
                   {{ eventData[reccommentIndex]?.detail }}
                 </p>
               </div>
@@ -277,7 +276,7 @@ watch(selectedEventTime, (newValue) => {
                 <div>
                   <p class="b3 font-semibold">When</p>
 
-                  <p v-if="eventData[reccommentIndex]" class="b4">
+                  <p v-if="eventData[reccommentIndex]" class="reccom-when b4">
                     <span>{{
                       useFormatDateTime(
                         new Date(eventData[reccommentIndex]?.start_date),
@@ -313,7 +312,7 @@ watch(selectedEventTime, (newValue) => {
                 <Location />
                 <div>
                   <p class="b3 font-semibold">Where</p>
-                  <p class="b4 line-clamp-2">
+                  <p class="b4 reccom-where line-clamp-2">
                     {{ eventData[reccommentIndex]?.location }}
                   </p>
                 </div>
@@ -322,7 +321,9 @@ watch(selectedEventTime, (newValue) => {
                 <Organisation />
                 <div>
                   <p class="b3 font-semibold">Who</p>
-                  <p class="b4">{{ eventData[reccommentIndex]?.owner }}</p>
+                  <p class="b4 reccom-who">
+                    {{ eventData[reccommentIndex]?.owner }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -337,7 +338,7 @@ watch(selectedEventTime, (newValue) => {
           </div>
         </div>
         <button
-          class="right-0 h-fit rounded-full"
+          class="recommended-btn-next right-0 h-fit rounded-full"
           @click="handleReccomEvent('next')"
         >
           <ArrowIcon class="rotate-180 text-2xl text-black" />
@@ -351,7 +352,7 @@ watch(selectedEventTime, (newValue) => {
         @handle-select-time="handleSelectTime"
         :selectedEventTime
       />
-      <h1 class="t2 py-4">
+      <h1 class="time-title t2 py-4">
         {{
           selectedEventTime === 'today'
             ? `Today, ${useFormatDateTime(new Date(), 'fullDate').slice(0, 6)}`
