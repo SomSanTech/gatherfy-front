@@ -206,6 +206,7 @@ const fetchAllEventData = async () => {
     `v1/events/owner/${adminData.value?.userId}`
   );
   eventsData.value = fetchedData || [];
+  // eventsData.value =  [];
   console.log(eventsData.value);
 };
 const fetchAllViewData = async () => {
@@ -271,6 +272,14 @@ watch(chartCanvasRef, (newValue) => {
     >
       <span class="loader"></span>
     </div>
+    <div
+      v-else-if="eventsData.length === 0"
+      class="error-msg flex h-screen w-full items-center justify-center"
+    >
+      <p class="t3">
+        No events to display. Create your first event to get started!
+      </p>
+    </div>
     <div v-else class="ml-80 flex h-full">
       <div class="mx-20 mt-32 flex w-full flex-col gap-3">
         <SumaryOfView
@@ -283,7 +292,7 @@ watch(chartCanvasRef, (newValue) => {
 
         <div class="grid grid-cols-10 gap-3">
           <div
-            class="col-span-6 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-month col-span-6 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
           >
             <p class="b1 pb-5 font-semibold">
               Monthly Event View Counts (4 months)
@@ -291,7 +300,7 @@ watch(chartCanvasRef, (newValue) => {
             <canvas ref="chartCanvasRef" class=""></canvas>
           </div>
           <div
-            class="col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
             v-if="groupedByAgeRangeAndGender"
           >
             <StackBarChart
@@ -305,7 +314,7 @@ watch(chartCanvasRef, (newValue) => {
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div> -->
         </div>
-        <div class="grid h-[350px] grid-cols-10 gap-3">
+        <div class="event-list-div grid h-[350px] grid-cols-10 gap-3">
           <div
             class="col-span-10 flex flex-col gap-2 rounded-[20px] bg-white px-8 py-6 pb-10 drop-shadow-md"
           >
@@ -342,23 +351,13 @@ watch(chartCanvasRef, (newValue) => {
                 <tr
                   v-else
                   v-for="event in eventsData"
-                  class="border-default-300 cursor-default border-b transition-colors"
+                  class="event-list border-default-300 cursor-default border-b transition-colors"
                 >
                   <EventList :event="event" :type="'dashboard'" />
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <!-- <div
-            class="col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
-            v-if="groupedByAgeRangeAndGender"
-          >
-            <StackBarChart
-              :groupedByAgeRangeAndGender="groupedByAgeRangeAndGender"
-              :colors="colors"
-            />
-          </div> -->
         </div>
       </div>
     </div>

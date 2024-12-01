@@ -9,7 +9,7 @@ import type { Registration } from '~/models/registration';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import PieChart from '~/components/backoffice/PieChart.vue';
-
+const error = useError();
 definePageMeta({
   layout: 'backoffice',
 });
@@ -93,7 +93,11 @@ const fetchRegisData = async () => {
   console.log(param);
 
   const fetchedData = await useFetchData(`v1/registrations/event/${param}`);
-  registrationsData.value = fetchedData || [];
+  if (fetchedData.error) {
+    error.value = 'error';
+  } else {
+    registrationsData.value = fetchedData || [];
+  }
   console.log('regis', registrationsData.value);
 
   groupedByGender.value = Object.fromEntries(
@@ -202,25 +206,25 @@ onMounted(async () => {
             :to="{ name: 'event-id', params: { id: eventDetail?.slug } }"
           >
             <button
-              class="flex items-center gap-1 text-3xl font-semibold duration-300 hover:underline"
+              class="dash-event-name flex items-center gap-1 text-3xl font-semibold duration-300 hover:underline"
             >
               {{ eventDetail?.name }} <Arrow class="t3 rotate-180" /></button
           ></NuxtLink>
-          <div class="b2 flex items-center gap-2">
+          <div class="dash-event-date b2 flex items-center gap-2">
             <Calendar />
             <p v-if="eventDetail?.start_date && eventDetail?.end_date">
               {{ useFormatDateTime(eventDetail?.start_date, 'date') }} -
               {{ useFormatDateTime(eventDetail?.end_date, 'date') }}
             </p>
           </div>
-          <div class="b2 flex items-center gap-2">
+          <div class="dash-event-time b2 flex items-center gap-2">
             <Clock />
             <p v-if="eventDetail?.start_date && eventDetail?.end_date">
               {{ useFormatDateTime(eventDetail?.start_date, 'time') }} -
               {{ useFormatDateTime(eventDetail?.end_date, 'time') }}
             </p>
           </div>
-          <div class="b2 flex items-center gap-2">
+          <div class="dash-event-location b2 flex items-center gap-2">
             <Location />
             <p>{{ eventDetail?.location }}</p>
           </div>
@@ -232,7 +236,7 @@ onMounted(async () => {
           class="col-span-5 flex flex-col gap-5 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
         >
           <h1 class="b1 font-semibold">Engagement last 7 days</h1>
-          <div class="flex h-full flex-col justify-center">
+          <div class="view-by-7day flex h-full flex-col justify-center">
             <div class="flex justify-center gap-5">
               <div
                 class="b4 flex flex-col items-end justify-between text-dark-grey/60"
@@ -278,7 +282,7 @@ onMounted(async () => {
         >
           <p class="b1 self-start font-semibold">Registration</p>
           <div
-            class="flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] drop-shadow-md"
+            class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] drop-shadow-md"
           >
             <div class="relative flex w-full items-center justify-center">
               <div
@@ -319,7 +323,7 @@ onMounted(async () => {
       <div class="grid grid-cols-12 gap-3">
         <div class="col-span-7 flex flex-col gap-3">
           <div
-            class="rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender-age rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
             v-if="groupedByAgeRangeAndGender"
           >
             <StackBarChart
@@ -328,7 +332,7 @@ onMounted(async () => {
             />
           </div>
           <div
-            class="flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
+            class="view-by-checkin flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -390,12 +394,12 @@ onMounted(async () => {
 
         <div class="col-span-5 flex flex-col gap-3">
           <div
-            class="flex flex-grow flex-col gap-2 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
           <div
-            class="flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
+            class="view-by-feedback flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div

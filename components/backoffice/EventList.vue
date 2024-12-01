@@ -52,6 +52,7 @@ interface Event {
       class="flex justify-center gap-5 text-xl text-gray-600"
     >
       <NuxtLink
+        class="go-to-dashboard"
         :to="{
           path: `/backoffice/dashboard/${event?.eventId}`,
         }"
