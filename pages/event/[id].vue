@@ -6,11 +6,13 @@ import Cancle from '~/components/icons/Cancle.vue';
 import UserProfile from '~/components/icons/UserProfile.vue';
 import type { User } from '~/models/user';
 const route = useRoute();
+const error = useError();
 const param = route.params.id;
 const isOpenPopup = ref(false);
 const event = ref();
 const userData = ref<User | null>(null);
 const registrationBody = ref({});
+const isLoading = ref(true);
 const mockUserLogin = {
   userId: 2,
   firstname: 'Michael',
@@ -38,20 +40,29 @@ const regis = async () => {
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/events/${param}`);
-  event.value = fetchedData || [];
+  if (fetchedData.error) {
+    error.value = fetchData;
+  } else {
+    event.value = fetchedData || [];
+  }
 };
 
 onMounted(async () => {
-  localStorage.setItem('user', JSON.stringify(mockUserLogin));
-  const storedUser = localStorage.getItem('user');
-  userData.value = storedUser ? JSON.parse(storedUser) : {};
+  try {
+    isLoading.value = true;
+    localStorage.setItem('user', JSON.stringify(mockUserLogin));
+    const storedUser = localStorage.getItem('user');
+    userData.value = storedUser ? JSON.parse(storedUser) : {};
 
-  await fetchData();
-  registrationBody.value = {
-    eventId: event.value?.eventId,
-    userId: userData.value?.userId,
-    status: 'pending',
-  };
+    await fetchData();
+    registrationBody.value = {
+      eventId: event.value?.eventId,
+      userId: userData.value?.userId,
+      status: 'Awaiting Check-in',
+    };
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 watchEffect(() => {
@@ -62,7 +73,10 @@ watchEffect(() => {
 </script>
 <template>
   <div class="relative my-24 w-full">
-    <div class="mx-auto my-20 w-full">
+    <div v-if="isLoading" class="my-52 flex items-center justify-center">
+      <span class="loader"></span>
+    </div>
+    <div v-else class="mx-auto my-20 w-full">
       <!-- header -->
       <div
         :style="{ backgroundImage: `url(${event?.image})` }"
