@@ -12,7 +12,7 @@ const isLoading = ref(true);
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(
-    `v1/events/registration/${adminData.value?.userId}`
+    `v1/events/owner/${adminData.value?.userId}`
   );
   eventsData.value = fetchedData || [];
   console.log(eventsData.value);

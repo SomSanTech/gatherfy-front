@@ -24,7 +24,7 @@ jobs:
       - name: Inject environment variables
         run: |
           touch .env
-          echo "NUXT_PUBLIC_BASE_URL_QA=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
+          echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
           echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
           
       - name: Build project

@@ -62,9 +62,11 @@ const selectStatus = (statusOption: CheckedInOption) => {
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/registrations/${param}`);
-  registration.value = fetchedData || [];
-  if (registration.value.error) {
-    error.value = registration.value.error;
+
+  if (fetchedData.error) {
+    // error.value = fetchData;
+  } else {
+    registration.value = fetchedData || [];
   }
 };
 
@@ -110,7 +112,7 @@ watchEffect(() => {
         :class="`col-span-3 flex items-center gap-2 rounded-lg px-4 py-2 ${isChangeStatusComplete === true ? statusStyle.success.style : statusStyle.failed.style}`"
       >
         <CheckCircle />
-        <p class="b2">
+        <p class="alert-text b2">
           {{
             isChangeStatusComplete === true
               ? statusStyle.success.text
@@ -205,7 +207,7 @@ watchEffect(() => {
               <button
                 v-for="statusOption in statusData"
                 @click="selectStatus(statusOption)"
-                :class="`w-full rounded-md px-4 py-1 text-start font-semibold ${selectedStatus.status === statusOption.name ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+                :class="`status-choice w-full rounded-md px-4 py-1 text-start font-semibold ${selectedStatus.status === statusOption.name ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
               >
                 {{ statusOption.name }}
               </button>
