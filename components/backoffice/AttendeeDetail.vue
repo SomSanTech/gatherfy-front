@@ -2,7 +2,7 @@
 import type { Registration } from '~/models/registration';
 import Arrow from '../icons/Arrow.vue';
 import CheckCircle from '../icons/CheckCircle.vue';
-
+const error = useError();
 const route = useRoute();
 const param = route.params.id;
 const isLoading = ref(true);
@@ -63,6 +63,9 @@ const selectStatus = (statusOption: CheckedInOption) => {
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/registrations/${param}`);
   registration.value = fetchedData || [];
+  if (registration.value.error) {
+    error.value = registration.value.error;
+  }
 };
 
 const fetchRegistration = async () => {
@@ -119,7 +122,7 @@ watchEffect(() => {
         <p class="b1">Event</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.eventName"
           disabled
         />
@@ -128,7 +131,7 @@ watchEffect(() => {
         <p class="b1">First name</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-firstname b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.firstName"
           disabled
         />
@@ -137,7 +140,7 @@ watchEffect(() => {
         <p class="b1">Last name</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-lastname b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.lastName"
           disabled
         />
@@ -146,7 +149,7 @@ watchEffect(() => {
         <p class="b1">Username</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-username b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.username"
           disabled
         />
@@ -155,7 +158,7 @@ watchEffect(() => {
         <p class="b1">Email</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-email b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.email"
           disabled
         />
@@ -164,7 +167,7 @@ watchEffect(() => {
         <p class="b1">Phone</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-phone b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.phone"
           disabled
         />
@@ -173,7 +176,7 @@ watchEffect(() => {
         <p class="b1">Gender</p>
         <input
           type="text"
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
+          class="regis-detail-gender b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 text-[#818181] shadow-inner"
           :value="registration?.gender"
           disabled
         />
@@ -184,7 +187,7 @@ watchEffect(() => {
           <div class="relative">
             <button
               @click="isShowStatusBy = !isShowStatusBy"
-              class="b2 border-1 my-4 flex w-full items-center justify-between gap-1 rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner"
+              class="regis-detail-status b2 border-1 my-4 flex w-full items-center justify-between gap-1 rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner"
             >
               {{
                 selectedStatus.status

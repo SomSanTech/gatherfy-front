@@ -9,21 +9,21 @@ const props = defineProps<{
 </script>
 
 <template>
-  <td class="b2 p-4 align-middle">
+  <td class="back-regis-name b2 p-4 align-middle">
     {{ registration?.firstName }} {{ registration?.lastName }}
   </td>
-  <td class="b2 p-4 align-middle">
+  <td class="back-regis-phone b2 p-4 align-middle">
     {{ registration?.phone }}
   </td>
-  <td class="b2 p-4 align-middle">
+  <td class="back-regis-email b2 p-4 align-middle">
     {{ registration?.email }}
   </td>
-  <td class="b2 p-4 align-middle font-medium">
+  <td class="back-regis-event-name b2 p-4 align-middle font-medium">
     {{ registration?.eventName }}
   </td>
   <td class="b2 p-4 text-center align-middle">
     <BtnComp
-      class="cursor-default"
+      class="back-regis-status cursor-default"
       :text="
         registration?.status === 'Awaiting Check-in'
           ? 'Awaiting<br/>Check-in'
@@ -41,6 +41,7 @@ const props = defineProps<{
   <td>
     <div class="flex justify-center gap-5 text-xl text-gray-600">
       <NuxtLink
+        class="regis-edit"
         :to="{
           name: 'backoffice-registrations-id',
           params: { id: registration?.registrationId },

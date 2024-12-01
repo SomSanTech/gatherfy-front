@@ -34,7 +34,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
+    "@playwright/test": "^1.49.0",
     "@types/d3": "^7.4.3",
+    "@types/node": "^22.10.1",
     "autoprefixer": "^10.4.20",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.9",

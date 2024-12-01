@@ -37,7 +37,7 @@ onMounted(() => {
           <Arrow />
           <p class="b2">Back to event list</p>
         </NuxtLink>
-        <h1 class="t1">Event Registration</h1>
+        <h1 class="back-regis-title t1">Event Registration</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
         </div>

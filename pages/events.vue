@@ -161,6 +161,12 @@ watch(
         <div v-if="isLoading" class="flex w-full items-center justify-center">
           <span class="loader"></span>
         </div>
+        <h1
+          v-else-if="eventSearch?.length === 0"
+          class="no-event-search t3 mx-auto flex items-center justify-center font-semibold"
+        >
+          Can't Find Events You're Looking For
+        </h1>
         <EventList
           v-else
           :events="eventSearch"

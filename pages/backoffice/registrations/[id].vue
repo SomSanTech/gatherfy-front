@@ -20,7 +20,7 @@ definePageMeta({
           <Arrow />
           <p class="b2">Back to registration list</p>
         </NuxtLink>
-        <h1 class="t1">Registrations Detail</h1>
+        <h1 class="regis-detail-title t1">Registrations Detail</h1>
         <AttendeeDetail />
       </div>
     </div>

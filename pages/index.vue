@@ -346,7 +346,7 @@ watch(selectedEventTime, (newValue) => {
       </div>
     </div>
     <!-- Event List section -->
-    <div class="w-full py-7">
+    <div id="time-list" class="w-full py-7">
       <ExploreBar
         :is-show-sort="false"
         @handle-select-time="handleSelectTime"
@@ -365,7 +365,7 @@ watch(selectedEventTime, (newValue) => {
         ></div>
         <div class="w-full overflow-x-auto px-4 pb-5">
           <div class="pt-14" v-if="filteredTimeData?.length === 0">
-            <p class="b2">
+            <p class="no-card-message b2">
               No
               {{
                 selectedEventTime === 'today'
@@ -374,7 +374,7 @@ watch(selectedEventTime, (newValue) => {
               }}
             </p>
           </div>
-          <div v-else class="flex h-full w-full gap-3">
+          <div id="time-list-card" v-else class="flex h-full w-full gap-3">
             <div v-for="event in filteredTimeData">
               <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
                 <EventListCard :eventDetail="event" :isVertical="true" />
@@ -407,12 +407,14 @@ watch(selectedEventTime, (newValue) => {
       </div>
     </div>
     <!-- Explore Date section -->
-    <div class="w-full py-7">
-      <h1 class="t2 py-3">Explore by date</h1>
+    <div id="explore-date" class="w-full py-7">
+      <h1 class="explore-title t2 py-3">Explore by date</h1>
       <div class="flex w-full gap-8">
         <div class="w-full">
           <div v-if="Object.keys(filterExploreDate).length === 0">
-            <p class="b1 mt-8">There are no events during this period</p>
+            <p class="no-explore-message b1 mt-8">
+              There are no events during this period
+            </p>
           </div>
           <div
             v-else
@@ -442,7 +444,7 @@ watch(selectedEventTime, (newValue) => {
           </div>
         </div>
 
-        <div class="sticky top-28 self-start">
+        <div class="DatePicker sticky top-28 self-start">
           <DatePicker v-model="today" mode="date" />
         </div>
       </div>

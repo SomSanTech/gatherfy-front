@@ -15,6 +15,7 @@ const fetchData = async () => {
     `v1/registrations/owner/${adminData.value?.userId}`
   );
   registrationsData.value = fetchedData || [];
+  // registrationsData.value =  [];
   console.log(registrationsData.value);
 };
 
@@ -35,9 +36,15 @@ onMounted(() => {
   <div class="ml-80 flex h-full w-screen bg-ghost-white">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
-        <h1 class="t1">All Registrations</h1>
+        <h1 class="back-regis-title t1">All Registrations</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
+        </div>
+        <div
+          v-else-if="registrationsData.length === 0"
+          class="my-16 flex items-center justify-center"
+        >
+          <p class="error-text b1">No Registration</p>
         </div>
         <table
           v-else
@@ -46,27 +53,27 @@ onMounted(() => {
           <thead class="">
             <tr class="border-default-300 border-b transition-colors">
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-name h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Attendees Name
               </td>
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-phone h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Phone Number
               </td>
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-email h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Email
               </td>
               <td
-                class="h-14 w-64 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-event-name h-14 w-64 px-4 text-base font-semibold text-lavender-gray"
               >
                 Event
               </td>
               <td
-                class="h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
+                class="regis-list-status h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
               >
                 Status
               </td>
@@ -80,7 +87,7 @@ onMounted(() => {
           <tbody class="tbody-container overflow-y-auto">
             <tr
               v-for="registration in registrationsData"
-              class="border-default-300 cursor-default border-b transition-colors"
+              class="regis-list border-default-300 cursor-default border-b transition-colors"
             >
               <RegistrationList :registration="registration" />
             </tr>
