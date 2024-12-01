@@ -25,7 +25,7 @@ jobs:
         run: |
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL }}" >> .env
-          echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
+          echo "NUXT_BASE_URL=" >> .env
           
       - name: Build project
         run: npm run build
@@ -94,10 +94,11 @@ jobs:
         run: |
           sshpass -p "$REMOTE_PASSWORD" ssh -t -o StrictHostKeyChecking=no -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
             cd /home/somsan/Gatherfy
-            # tar -xzf build.tar.gz
+            tar -xzf .front/build.tar.gz
 
             # docker stop gatherfy-web-prod || true
             # docker rm gatherfy-web-prod || true
             # docker build -t gatherfront:latest .
             # docker run -d --name gatherfy-web-prod --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 80:3000 gatherfront:latest
-            docker compose -f compose.prod.yml -p prod restart front
+            docker compose -f compose.prod.yml -p prod stop front
+            docker compose -f compose.prod.yml -p prod up --build -d
