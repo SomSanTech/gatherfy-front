@@ -155,7 +155,7 @@ watchEffect(() => {
       <!-- content -->
       <div
         id="content"
-        class="mx-auto mt-[50px] flex grid-cols-5 flex-col gap-20 px-12 lg:mt-[100px] lg:grid lg:max-w-4xl lg:px-0"
+        class="mx-auto mt-[50px] flex grid-cols-5 flex-col gap-20 px-12 lg:mt-[100px] lg:grid lg:max-w-6xl lg:px-0"
       >
         <div class="col-span-3 flex flex-col gap-2 lg:gap-4">
           <h1 class="t2 font-semibold">Event detail</h1>
