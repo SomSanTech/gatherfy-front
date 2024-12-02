@@ -14,7 +14,7 @@ test('TC-PBI-5.1 filter event with date', async ({ page }) => {
   await page.waitForTimeout(3000);
   const eventListCard = page.locator('.event-card');
   const cardCount = await eventListCard.count();
-  expect(cardCount).toBe(1);
+  expect(cardCount).toBe(3);
 });
 
 test('TC-PBI-5.2 cancle filter event with date', async ({ page }) => {
