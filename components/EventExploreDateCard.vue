@@ -7,7 +7,7 @@ const props = defineProps<{
 
 <template>
   <div
-    class="explore-card flex h-[200px] w-full justify-between gap-3 rounded-lg bg-light-grey p-4 drop-shadow-lg"
+    class="explore-card flex h-[150px] w-fit gap-3 rounded-lg bg-light-grey p-4 drop-shadow-lg lg:h-[200px] lg:w-full lg:justify-between"
   >
     <div class="flex flex-col justify-between">
       <div>
@@ -15,30 +15,15 @@ const props = defineProps<{
           {{ useFormatDateTime(props?.eventDetail?.start_date, 'time') }}
         </p>
         <p
-          class="explore-card-name b2 line-clamp-[2] w-[390px] pb-1 font-semibold"
+          class="explore-card-name b2 line-clamp-[2] w-[200px] pb-1 font-semibold lg:w-[390px]"
         >
           {{ props.eventDetail?.name }}
         </p>
-        <!-- <p class="explore-card-date b3 text-zinc-400">
-          {{
-            useFormatDateTime(props?.eventDetail?.start_date, 'date')?.slice(
-              0,
-              -4
-            )
-          }}
-          -
-          {{
-            useFormatDateTime(props?.eventDetail?.end_date, 'date')?.slice(
-              0,
-              -4
-            )
-          }}
-        </p> -->
         <p class="explore-card-owner b3 text-zinc-400">
           By {{ props.eventDetail?.owner }}
         </p>
         <p
-          class="explore-card-location b3 line-clamp-1 w-[390px] text-zinc-400"
+          class="explore-card-location b3 line-clamp-1 w-[200px] text-zinc-400 lg:w-[390px]"
         >
           At {{ props.eventDetail?.location }}
         </p>

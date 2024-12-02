@@ -74,21 +74,25 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div class="relative my-24 w-full">
+  <div class="relative w-full lg:my-24">
     <div v-if="isLoading" class="my-52 flex items-center justify-center">
       <span class="loader"></span>
     </div>
-    <div v-else class="mx-auto my-20 w-full">
+    <div v-else class="mx-auto my-16 w-full lg:my-20">
       <!-- header -->
       <div
         :style="{ backgroundImage: `url(${event?.image})` }"
         class="w-screen bg-opacity-75 bg-cover bg-center backdrop-blur-md"
       >
         <div
-          class="relative z-10 bg-black bg-opacity-30 p-10 py-32 backdrop-blur-md"
+          class="relative z-10 bg-black bg-opacity-30 p-10 backdrop-blur-md lg:py-32"
         >
-          <div class="mx-auto flex w-full max-w-4xl gap-12 text-white">
-            <div class="h-[500px] w-[400px] bg-zinc-200">
+          <div
+            class="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 text-white lg:flex-row"
+          >
+            <div
+              class="h-[330px] w-[220px] bg-zinc-200 lg:h-[500px] lg:w-[350px]"
+            >
               <img
                 :src="event?.image"
                 alt=""
@@ -108,16 +112,16 @@ watchEffect(() => {
                   </NuxtLink>
                 </div>
               </div>
-              <p class="detail-name text-3xl font-semibold">
+              <p class="detail-name t1 font-semibold">
                 {{ event?.name }}
               </p>
               <div class="flex items-center gap-2">
                 <Organisation />
-                <p class="detail-owner">
+                <p class="detail-owner b2">
                   {{ event?.owner }}
                 </p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="b2 flex items-center gap-2">
                 <Calendar />
                 <p
                   class="detail-time"
@@ -127,7 +131,7 @@ watchEffect(() => {
                   {{ useFormatDateTime(event?.end_date, 'date') }}
                 </p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="b2 flex items-center gap-2">
                 <Clock />
                 <p
                   class="detail-date"
@@ -137,7 +141,7 @@ watchEffect(() => {
                   {{ useFormatDateTime(event?.end_date, 'time') }}
                 </p>
               </div>
-              <div class="detail-location flex items-center gap-2">
+              <div class="detail-location b2 flex items-center gap-2">
                 <Location class="shrink-0" />
                 <p>{{ event?.location }}</p>
               </div>
@@ -151,9 +155,9 @@ watchEffect(() => {
       <!-- content -->
       <div
         id="content"
-        class="mx-auto mt-[100px] grid max-w-4xl grid-cols-5 gap-20"
+        class="mx-auto mt-[50px] flex grid-cols-5 flex-col gap-20 px-12 lg:mt-[100px] lg:grid lg:max-w-4xl lg:px-0"
       >
-        <div class="col-span-3 flex flex-col gap-4">
+        <div class="col-span-3 flex flex-col gap-2 lg:gap-4">
           <h1 class="t2 font-semibold">Event detail</h1>
           <p class="b2 detail-detail">
             {{ event?.detail }}
@@ -165,11 +169,11 @@ watchEffect(() => {
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
             <p class="t3 font-semibold">Event location</p>
-            <div class="">
+            <div class="h-[37x] w-[370x]">
               <div v-html="event?.map" class="detail-map"></div>
             </div>
           </div>
-          <div class="flex flex-col gap-5">
+          <div class="flex flex-col gap-2 lg:gap-5">
             <p class="t3 font-semibold">Tags</p>
             <div class="tag-group flex gap-2">
               <div v-for="tag in event?.tags">
@@ -189,7 +193,7 @@ watchEffect(() => {
     <!-- pop up -->
     <div
       v-show="isOpenPopup"
-      class="regis-popup fixed right-1/2 top-1/2 z-50 w-[600px] -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-7 shadow-2xl"
+      class="regis-popup fixed right-1/2 top-1/2 z-50 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[600px] lg:p-7"
     >
       <button
         @click="isOpenPopup = false"
@@ -197,7 +201,7 @@ watchEffect(() => {
       >
         <Cancle />
       </button>
-      <div class="flex justify-between gap-5">
+      <div class="flex justify-between gap-3 lg:gap-5">
         <div>
           <div>
             <p class="b2 font-semibold">Registration</p>
@@ -236,7 +240,7 @@ watchEffect(() => {
 
         <img
           :src="event?.image"
-          class="max-w-[150px] self-end rounded-lg"
+          class="max-w-[120px] self-end rounded-lg lg:max-w-[150px]"
           alt=""
         />
       </div>

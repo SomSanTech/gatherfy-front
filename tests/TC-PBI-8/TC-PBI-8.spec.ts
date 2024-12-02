@@ -10,49 +10,6 @@ test('TC-PBI-8.1 admin view all registration', async ({ page }) => {
   await page.waitForTimeout(3000);
 
   await expect(page.locator('.back-regis-title ')).toContainText(
-    'Event Registration'
-  );
-
-  // check table field name
-  await expect(page.locator('.regis-list-name ')).toContainText(
-    'Attendees Name'
-  );
-  await expect(page.locator('.regis-list-phone ')).toContainText(
-    'Phone Number'
-  );
-  await expect(page.locator('.regis-list-email ')).toContainText('Email');
-  await expect(page.locator('.regis-list-event-name ')).toContainText('Event');
-  await expect(page.locator('.regis-list-status ')).toContainText('Status');
-
-  const regisList = page.locator('.regis-list');
-
-  const regisCount = await regisList.count();
-  expect(regisCount).toBe(11);
-
-  // check data in table is exist
-  for (let i = 0; i < regisCount; ++i) {
-    const card = regisList.nth(i);
-    expect(card.locator('.back-regis-name')).toBeVisible();
-    expect(card.locator('.back-regis-phone')).toBeVisible();
-    expect(card.locator('.back-regis-email')).toBeVisible();
-    expect(card.locator('.back-regis-event-name')).toBeVisible();
-    expect(card.locator('.back-regis-status')).toBeVisible();
-  }
-});
-
-test('TC-PBI-8.2 admin view all registration', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice');
-
-  await page.getByRole('button', { name: 'Registration' }).click();
-  await page.waitForTimeout(3000);
-
-  await page.getByRole('link', { name: 'Event Registration' }).click();
-  await page.waitForTimeout(3000);
-
-  await page.getByRole('link', { name: '200 Years Journey Through' }).click();
-  await page.waitForTimeout(3000);
-
-  await expect(page.locator('.back-regis-title ')).toContainText(
     'All Registrations'
   );
 
@@ -70,12 +27,53 @@ test('TC-PBI-8.2 admin view all registration', async ({ page }) => {
   const regisList = page.locator('.regis-list');
 
   const regisCount = await regisList.count();
-  expect(regisCount).toBe(43);
+  expect(regisCount).toBe(42);
 
   // check data in table is exist
   for (let i = 0; i < regisCount; ++i) {
     const card = regisList.nth(i);
-    expect(card.locator('.back-regis-name')).toContainText(
+    expect(card.locator('.back-regis-name')).toBeVisible();
+    expect(card.locator('.back-regis-phone')).toBeVisible();
+    expect(card.locator('.back-regis-email')).toBeVisible();
+    expect(card.locator('.back-regis-event-name')).toBeVisible();
+    expect(card.locator('.back-regis-status')).toBeVisible();
+  }
+});
+
+test('TC-PBI-8.2 admin view  registration', async ({ page }) => {
+  await page.goto('/backoffice');
+
+  await page.getByRole('button', { name: 'Registration' }).click();
+  await page.waitForTimeout(3000);
+
+  await page.getByRole('link', { name: 'Event Registration' }).click();
+  await page.waitForTimeout(3000);
+
+  await page.getByRole('link', { name: '200 Years Journey Through' }).click();
+  await page.waitForTimeout(3000);
+
+  await expect(page.locator('.back-regis-title ')).toContainText(
+    'Event Registration'
+  );
+
+  // check table field name
+  await expect(page.locator('.regis-list-name')).toContainText(
+    'Attendees Name'
+  );
+  await expect(page.locator('.regis-list-phone')).toContainText('Phone Number');
+  await expect(page.locator('.regis-list-email')).toContainText('Email');
+  await expect(page.locator('.regis-list-event-name')).toContainText('Event');
+  await expect(page.locator('.regis-list-status')).toContainText('Status');
+
+  const regisList = page.locator('.regis-list');
+
+  const regisCount = await regisList.count();
+  expect(regisCount).toBe(11);
+
+  // check data in table is exist
+  for (let i = 0; i < regisCount; ++i) {
+    const card = regisList.nth(i);
+    expect(card.locator('.back-regis-event-name')).toContainText(
       '200 Years Journey Through Thai Modern Art History'
     );
     expect(card.locator('.back-regis-phone')).toBeVisible();
@@ -86,7 +84,7 @@ test('TC-PBI-8.2 admin view all registration', async ({ page }) => {
 });
 
 test('TC-PBI-8.3 admin edit status', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice');
+  await page.goto('/backoffice');
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);
 
@@ -118,7 +116,7 @@ test('TC-PBI-8.3 admin edit status', async ({ page }) => {
 
   // ----------------------------------------------------------------------------
 
-  await page.goto('http://localhost:3000/backoffice');
+  await page.goto('/backoffice');
 
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);
@@ -165,8 +163,8 @@ test('TC-PBI-8.3 admin edit status', async ({ page }) => {
   expect(page.locator('.regis-detail-status')).toBeVisible();
 });
 
-test('TC-PBI-8.4 admin no event', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice');
+test('TC-PBI-8.4 admin no registrations', async ({ page }) => {
+  await page.goto('/backoffice');
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);
 
@@ -179,8 +177,8 @@ test('TC-PBI-8.4 admin no event', async ({ page }) => {
   await expect(page.locator('.error-text')).toContainText('No Registration');
 });
 
-test('TC-PBI-8.ถ admin no regis detail', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice/registrations/99');
+test('TC-PBI-8.5 admin no regis detail', async ({ page }) => {
+  await page.goto('/backoffice/registrations/99');
   await page.waitForTimeout(3000);
 
   await expect(page.locator('.error-text')).toContainText(

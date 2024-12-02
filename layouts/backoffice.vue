@@ -1,7 +1,7 @@
 <!-- layouts/backoffice.vue -->
 <template>
   <div class="backoffice-layout">
-    <SideBar v-if="!isErrorPage" />
+    <SideBar />
     <slot />
   </div>
 </template>

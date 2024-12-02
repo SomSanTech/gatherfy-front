@@ -8,7 +8,7 @@ import EventListCard from './EventListCard.vue';
 </script>
 
 <template>
-  <div class="flex h-fit flex-wrap gap-3">
+  <div class="flex h-fit flex-wrap gap-2 lg:gap-3">
     <div v-for="event in events" class="h-full shrink-0 rounded-md">
       <NuxtLink
         v-if="event?.slug"

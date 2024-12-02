@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-1.7 no event in today', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
   await page.waitForTimeout(3000);
   const section = page.locator('div#time-list');
   await section.scrollIntoViewIfNeeded();
@@ -11,7 +11,7 @@ test('TC-PBI-1.7 no event in today', async ({ page }) => {
 });
 
 test('TC-PBI-1.8 no event in upcomming', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
   await page.waitForTimeout(3000);
   const section = page.locator('div#time-list');
   await section.scrollIntoViewIfNeeded();
@@ -32,13 +32,12 @@ test('TC-PBI-1.8 no event in upcomming', async ({ page }) => {
 });
 
 test('TC-PBI-1.9 no event in explore', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
   await page.waitForTimeout(3000);
   const section = page.locator('div#explore-date');
   await section.scrollIntoViewIfNeeded();
 
-  const dateButton = page.locator('div[aria-label="Wednesday, Jan 1, 2025"]');
-  await dateButton.click();
+  await page.getByLabel('Tuesday, Dec 31,').click();
   await page.waitForTimeout(2000);
 
   const noCardText = page.locator('.no-explore-message');

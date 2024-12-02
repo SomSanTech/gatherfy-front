@@ -19,7 +19,6 @@ interface Tag {
 
 const date = ref();
 const statusData = ['Soon', 'Available', 'Unavailable'];
-// const tags = ref<Tag[]>([]);
 const filterShowOrNot = ref({
   tag: true,
   status: true,
@@ -30,21 +29,17 @@ const updateDate = (newDate: Date) => {
   date.value = newDate;
   emit('update-date', newDate);
 };
-
-onMounted(async () => {
-  // tags.value = await useFetchData('v1/tags');
-});
 </script>
 
 <template>
   <div
-    class="flex h-fit w-fit flex-col gap-4 divide-y-[1px] divide-grey rounded-xl border border-black-1 p-4"
+    class="flex h-fit w-fit flex-col gap-4 divide-y-[1px] divide-grey rounded-xl border border-black-1 bg-white p-4"
   >
     <div class="flex w-full flex-col gap-[9px]">
       <p class="b1">Tags</p>
       <button
         v-for="tagChoice in tags"
-        :class="`${selectedTags?.includes(tagChoice?.tag_title) ? 'bg-burgundy pl-2 text-light-grey' : ''} b2 flex items-center rounded-md py-[5px] pl-4`"
+        :class="`${selectedTags?.includes(tagChoice?.tag_title) ? 'bg-burgundy pl-2 text-light-grey hover:bg-dark-grey/60' : 'hover:bg-zinc-200'} b2 flex items-center rounded-md py-[5px] pl-4 duration-300`"
         @click="$emit('selectTag', tagChoice?.tag_title)"
       >
         <Check
@@ -84,14 +79,16 @@ onMounted(async () => {
       </div>
     </div> -->
 
-    <div :class="`w-[254px] pt-4 ${filterShowOrNot.date ? '' : ''} `">
+    <div
+      :class="`w-[254px] pt-4 ${filterShowOrNot.date ? '' : ''} duration-1000`"
+    >
       <button
         @click="filterShowOrNot.date = !filterShowOrNot.date"
         class="flex h-fit w-full items-center justify-between"
       >
         <p class="b1">Date</p>
         <Arrow
-          :class="`${filterShowOrNot.date ? 'rotate-90' : '-rotate-90'} `"
+          :class="`${filterShowOrNot.date ? 'rotate-90' : '-rotate-90'} duration-300`"
         />
       </button>
       <div :class="`w-[254px] pt-4`" v-if="filterShowOrNot?.date">

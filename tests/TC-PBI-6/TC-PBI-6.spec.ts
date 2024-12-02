@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-6.1 sort event with date', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -35,7 +35,7 @@ test('TC-PBI-6.1 sort event with date', async ({ page }) => {
 });
 
 test('TC-PBI-6.2 sort event with date old to new', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -69,7 +69,7 @@ test('TC-PBI-6.2 sort event with date old to new', async ({ page }) => {
 });
 
 test('TC-PBI-6.3 sort event with A-Z', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -102,7 +102,7 @@ test('TC-PBI-6.3 sort event with A-Z', async ({ page }) => {
 });
 
 test('TC-PBI-6.4 sort event with Z-A', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -135,7 +135,7 @@ test('TC-PBI-6.4 sort event with Z-A', async ({ page }) => {
 });
 
 test('TC-PBI-6.4 sort event with date and A-Z', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 

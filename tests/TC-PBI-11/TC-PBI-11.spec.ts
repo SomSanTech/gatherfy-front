@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice');
+  await page.goto('/backoffice');
 
   await page.getByRole('link', { name: 'Dashboard' }).click();
   await page.waitForTimeout(3000);
@@ -14,7 +14,7 @@ test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
 
   const currentUrl = await page.url();
   console.log('currentUrl', currentUrl);
-  await expect(currentUrl).toBe('http://localhost:3000/backoffice/dashboard/3');
+  await expect(currentUrl).toContain('/backoffice/dashboard/3');
 
   await expect(page.locator('.dash-event-name')).toContainText(
     '200 Years Journey Through Thai Modern Art History'
@@ -32,7 +32,7 @@ test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
 });
 
 test('TC-PBI-11.2 admin see no dashboard', async ({ page }) => {
-  await page.goto('http://localhost:3000/backoffice/dashboard/99');
+  await page.goto('/backoffice/dashboard/99');
 
   await page.waitForTimeout(3000);
 

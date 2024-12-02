@@ -16,7 +16,6 @@ const fetchData = async () => {
   );
   registrationsData.value = fetchedData || [];
   // registrationsData.value =  [];
-  console.log(registrationsData.value);
 };
 
 onMounted(() => {
@@ -42,7 +41,10 @@ onMounted(() => {
           <span class="loader"></span>
         </div>
         <div
-          v-else-if="!isLoading && registrationsData?.length === 0"
+          v-else-if="
+            (!isLoading && registrationsData.error) ||
+            (!isLoading && registrationsData.length === 0)
+          "
           class="my-16 flex items-center justify-center"
         >
           <p class="error-text b1">No Registration</p>

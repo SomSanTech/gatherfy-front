@@ -17,7 +17,6 @@ const isLoading = ref(false);
 const isInitializing = ref(true);
 
 const handleDateUpdate = (newDate: Date) => {
-  console.log(newDate);
   if (newDate) {
     formattedDate.value = newDate
       .toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' })
@@ -86,10 +85,7 @@ onMounted(async () => {
   try {
     tags.value = await useFetchData('v1/tags');
     if (tagsTerm.value) {
-      console.log('tag', tagsTerm.value);
-
       selectedTags.value.add(tagsTerm.value);
-      console.log(selectedTags.value);
 
       await filterAndSearchEvents();
     } else if (searchTerm.value) {
@@ -131,7 +127,7 @@ watch(
 
 <template>
   <div class="py-24">
-    <div class="mx-auto w-full max-w-6xl">
+    <div class="mx-auto w-full px-5 lg:max-w-6xl lg:px-0">
       <h1 v-if="searchTerm" class="t1 font-semibold">
         {{ eventSearch?.length }} Events for "{{
           decodeURIComponent(searchTerm)
@@ -152,6 +148,7 @@ watch(
         <FilterEvent
           v-if="showFilter"
           :tags
+          :class="`absolute left-5 z-50 lg:static`"
           @selectTag="selectTag"
           @selectStatus="selectStatus"
           @update-date="handleDateUpdate"

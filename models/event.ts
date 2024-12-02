@@ -1,4 +1,5 @@
 export interface Event {
+  eventId: number;
   name: string;
   description: string;
   detail: string;
@@ -10,6 +11,6 @@ export interface Event {
   status: string;
   slug: string;
   image: string;
-  organizer: string;
+  owner: string;
   tags: any;
 }

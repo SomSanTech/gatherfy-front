@@ -57,14 +57,13 @@ interface CheckedInOption {
 const selectStatus = (statusOption: CheckedInOption) => {
   selectedStatus.value.status = statusOption.urlSend;
   isShowStatusBy.value = !isShowStatusBy.value;
-  console.log(selectedStatus.value);
 };
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(`v1/registrations/${param}`);
 
   if (fetchedData.error) {
-    // error.value = fetchData;
+    error.value = fetchData;
   } else {
     registration.value = fetchedData || [];
   }

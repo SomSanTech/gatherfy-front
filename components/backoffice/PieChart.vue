@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
   groupedByGender?: any;
-  colors?: Object;
+  colors?: Record<string, string>;
 }>();
-const isDataReady = ref(false);
 const conicGradientStyle = ref();
+
 watch(
   () => props.groupedByGender,
   (newValue) => {
@@ -14,12 +14,10 @@ watch(
   },
   { immediate: true }
 );
+
 onMounted(() => {
-  console.log('groupedByGender:', props.groupedByGender);
-  console.log('colors:', props.colors);
   if (props.groupedByGender && props.colors) {
     conicGradientStyle.value = `conic-gradient(${generateConicGradient(props.groupedByGender, props.colors)})`;
-    console.log('conicGradientStyle');
   }
 });
 </script>
@@ -51,18 +49,23 @@ onMounted(() => {
           <li
             v-for="(data, index) in Object.keys(groupedByGender).sort(
               (a, b) => {
-                const genderOrder = {
-                  Male: 1,
-                  Female: 2,
-                  Other: 3,
-                };
-                return genderOrder[a] - genderOrder[b];
+                const genderOrder: Record<'Male' | 'Female' | 'Other', number> =
+                  {
+                    Male: 1,
+                    Female: 2,
+                    Other: 3,
+                  };
+                return (
+                  genderOrder[a as keyof typeof genderOrder] -
+                  genderOrder[b as keyof typeof genderOrder]
+                );
               }
             )"
             :key="index"
             class="b3 flex items-center gap-2"
           >
             <span
+              v-if="colors"
               :style="{ backgroundColor: colors[data] }"
               class="h-3 w-3 rounded-full drop-shadow-sm"
             ></span>

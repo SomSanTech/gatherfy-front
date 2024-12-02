@@ -24,7 +24,14 @@ export const calculateWidth = (allData: any, data: number) => {
   } else if (typeof allData === 'object') {
     max =
       Math.max(
-        ...Object.values(allData).flatMap((group: any) => Object.values(group))
+        ...Object.values(allData).flatMap((group) => {
+          if (typeof group === 'object' && group !== null) {
+            return Object.values(group).map((value) =>
+              typeof value === 'number' ? value : 0
+            );
+          }
+          return [];
+        })
       ) * 1.25;
   }
 

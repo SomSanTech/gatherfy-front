@@ -83,7 +83,7 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
   });
 
   upcomeEventBtn.click();
-
+  await page.waitForTimeout(3000);
   const eventCard = await page.locator('.event-card').first();
   const eventCardName = await page.locator('.event-card-name').first();
   const eventCardNameText = await eventCardName.innerText();
@@ -112,7 +112,7 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 });
 
 test('TC-PBI-2.2 go to event detail by url', async ({ page }) => {
-  await page.goto('http://localhost:3000/event/tech-conference-2024');
+  await page.goto('/event/tech-conference-2024');
   await page.waitForTimeout(3000);
 
   await expect(page.locator('.detail-name')).toBeVisible();
@@ -132,10 +132,10 @@ test('TC-PBI-2.2 go to event detail by url', async ({ page }) => {
 });
 
 test('TC-PBI-2.3 can not go to event detail by url', async ({ page }) => {
-  await page.goto('http://localhost:3000/event/tech-conference-2024');
+  await page.goto('/event/ling-orm-fanmeet');
   await page.waitForTimeout(3000);
 
-  await expect(page.locator('.error-msg')).toContainText(
-    'It looks like something broke.'
+  await expect(page.locator('.error-text')).toContainText(
+    'The page you are looking for cannot be found'
   );
 });
