@@ -9,4 +9,19 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  components: {
+    dirs: ['~/components', '~/components/backoffice'],
+  },
+  typescript: {
+    strict: true,
+  },
+  runtimeConfig: {
+    public: {
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL,
+    },
+  },
+  app: {
+    baseURL: '',
+  },
+  plugins: ['~/plugins/preline.client.ts'],
 });
