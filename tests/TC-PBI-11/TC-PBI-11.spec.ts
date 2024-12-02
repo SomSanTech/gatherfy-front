@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
-  await page.goto('/backoffice');
+  await page.goto('/us1/backoffice');
 
   await page.getByRole('link', { name: 'Dashboard' }).click();
   await page.waitForTimeout(3000);
@@ -32,7 +32,7 @@ test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
 });
 
 test('TC-PBI-11.2 admin see no dashboard', async ({ page }) => {
-  await page.goto('/backoffice/dashboard/99');
+  await page.goto('/us1/backoffice/dashboard/99');
 
   await page.waitForTimeout(3000);
 

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test('TC-PBI-1.1 view event in banner', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.1 user view section banner', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const prevButton = await page.locator('.header-btn-prev');
@@ -9,35 +9,33 @@ test('TC-PBI-1.1 view event in banner', async ({ page }) => {
 
   await prevButton.click();
   await expect(page.locator('.event-name')).toHaveText(
-    'THAILAND ART & DESIGN EXHIBITION'
+    '200 Years Journey Through Thai Modern Art History'
   );
   await page.waitForSelector('.btn');
   const joinButton1 = await page.locator('button', { hasText: 'Join now' });
   await expect(joinButton1).toHaveText('Join now');
 
   await nextButton.click();
-  await expect(page.locator('.event-name')).toHaveText('Tech Conference 2024');
+  await expect(page.locator('.event-name')).toHaveText('HOMECOMING');
   await page.waitForSelector('.btn');
   const joinButton2 = await page.locator('button', { hasText: 'Join now' });
   await expect(joinButton2).toHaveText('Join now');
 
   await nextButton.click();
-  await expect(page.locator('.event-name')).toHaveText('Music Festival');
+  await expect(page.locator('.event-name')).toHaveText('ART EXHIBITION 2024');
   await page.waitForSelector('.btn');
   const joinButton3 = await page.locator('button', { hasText: 'Join now' });
   await expect(joinButton3).toHaveText('Join now');
 
   await nextButton.click();
-  await expect(page.locator('.event-name')).toHaveText(
-    '200 Years Journey Through Thai Modern Art History'
-  );
+  await expect(page.locator('.event-name')).toHaveText('Startup Pitch Night');
   await page.waitForSelector('.btn');
   const joinButton4 = await page.locator('button', { hasText: 'Join now' });
   await expect(joinButton4).toHaveText('Join now');
 });
 
-test('TC-PBI-1.2 view event in recoomended event', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.2 user view section recommended ', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const prevButton = await page.locator('.recommended-btn-prev');
@@ -47,16 +45,31 @@ test('TC-PBI-1.2 view event in recoomended event', async ({ page }) => {
   await expect(page.locator('.reccom-name')).toBeVisible();
   await expect(page.locator('.reccom-detail')).toBeVisible();
   await page.waitForSelector('.btn');
-  const regisNowBtn = await page.locator('button', { hasText: 'Registor now' });
-  await expect(regisNowBtn).toHaveText('Registor now');
+  const regisNowBtn1 = await page.locator('button', {
+    hasText: 'Registor now',
+  });
+  await expect(regisNowBtn1).toHaveText('Registor now');
+
+  await expect(page.locator('.reccom-when')).toBeVisible();
+  await expect(page.locator('.reccom-where')).toBeVisible();
+  await expect(page.locator('.reccom-who')).toBeVisible();
+
+  await nextButton.click();
+  await expect(page.locator('.reccom-name')).toBeVisible();
+  await expect(page.locator('.reccom-detail')).toBeVisible();
+  await page.waitForSelector('.btn');
+  const regisNowBtn2 = await page.locator('button', {
+    hasText: 'Registor now',
+  });
+  await expect(regisNowBtn2).toHaveText('Registor now');
 
   await expect(page.locator('.reccom-when')).toBeVisible();
   await expect(page.locator('.reccom-where')).toBeVisible();
   await expect(page.locator('.reccom-who')).toBeVisible();
 });
 
-test('TC-PBI-1.3 view event in today event', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.3 user view section today events', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
   const section = page.locator('div#time-list');
   await section.scrollIntoViewIfNeeded();
@@ -65,16 +78,12 @@ test('TC-PBI-1.3 view event in today event', async ({ page }) => {
   const todayEventBtn = await page.locator('button', {
     hasText: 'Today event',
   });
-  const upcomeEventBtn = await page.locator('button', {
-    hasText: 'Upcoming event',
-  });
 
   await expect(page.locator('.time-title')).toContainText(/Today/i);
 
   await todayEventBtn.click();
   await page.waitForTimeout(3000);
   const eventListCard = page.locator('.event-card');
-  const noCardText = page.locator('.no-card-message');
 
   const sectionCard = page.locator('div#time-list-card');
   await sectionCard.scrollIntoViewIfNeeded();
@@ -93,7 +102,7 @@ test('TC-PBI-1.3 view event in today event', async ({ page }) => {
     expect(cardStartDate).toBeLessThanOrEqual(today);
     expect(cardImage).toBeVisible();
 
-    if (i === 2) {
+    if (i === 0) {
       await expect(cardName).toHaveText(
         '200 Years Journey Through Thai Modern Art History'
       );
@@ -103,15 +112,15 @@ test('TC-PBI-1.3 view event in today event', async ({ page }) => {
     } else if (i === 1) {
       await expect(cardName).toContainText('Music Festival');
       await expect(cardLocation).toContainText('Beachside, Phuket');
-    } else if (i === 0) {
+    } else if (i === 2) {
       await expect(cardName).toContainText('Tech Conference 2024');
       await expect(cardLocation).toContainText('Convention Center, Bangkok');
     }
   }
 });
 
-test('TC-PBI-1.4 view event in upcome event', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.4 user view section upcoming events', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
   const section = page.locator('div#time-list');
   await section.scrollIntoViewIfNeeded();
@@ -126,7 +135,6 @@ test('TC-PBI-1.4 view event in upcome event', async ({ page }) => {
   await expect(page.locator('.time-title')).toContainText(/Upcomming/i);
 
   const eventListCard = page.locator('.event-card');
-  const noCardText = page.locator('.no-card-message');
 
   const sectionCard = page.locator('div#time-list-card');
   await sectionCard.scrollIntoViewIfNeeded();
@@ -145,26 +153,26 @@ test('TC-PBI-1.4 view event in upcome event', async ({ page }) => {
     expect(cardStartDate).toBeGreaterThan(today);
     expect(cardImage).toBeVisible();
 
-    if (i === 2) {
+    if (i === 1) {
       await expect(cardName).toHaveText('ART EXHIBITION 2024');
       await expect(cardLocation).toContainText('Art Gallery, Bangkok');
-    } else if (i === 3) {
+    } else if (i === 0) {
       await expect(cardName).toContainText('HOMECOMING');
       await expect(cardLocation).toContainText(
         'Seacon Square Srinakarin, Prawet, Bangkok 10250'
       );
-    } else if (i === 0) {
+    } else if (i === 2) {
       await expect(cardName).toContainText('Startup Pitch Night');
       await expect(cardLocation).toContainText('Co-Working Space, Chiang Mai');
-    } else if (i === 1) {
+    } else if (i === 3) {
       await expect(cardName).toContainText('THAILAND ART & DESIGN EXHIBITION');
       await expect(cardLocation).toContainText('One Bangkok');
     }
   }
 });
 
-test('TC-PBI-1.5 view event in explore date event', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.5 user view section explore by date', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(5000);
   const section = page.locator('div#explore-date');
   await section.scrollIntoViewIfNeeded();
@@ -174,10 +182,7 @@ test('TC-PBI-1.5 view event in explore date event', async ({ page }) => {
   );
 
   const exploreListCard = page.locator('.explore-card');
-  const noExploreText = page.locator('.no-explore-message');
 
-  // const sectionCard = page.locator('div#time-list-card');
-  // await sectionCard.scrollIntoViewIfNeeded();
   const cardCount = await exploreListCard.count();
   await page.waitForTimeout(3000);
 
@@ -189,18 +194,11 @@ test('TC-PBI-1.5 view event in explore date event', async ({ page }) => {
     const cardLocation = card.locator('.explore-card-location');
     const cardTime = card.locator('.explore-card-time');
     const cardOwner = card.locator('.explore-card-owner');
-    const cardDate = card.locator('.explore-card-date');
     const cardImage = card.locator('.explore-card-img');
-    // const cardTextDate = await card.locator('.explore-card-date').innerText();
-    // const today = new Date().getTime();
-    // const cardStartDate = new Date(cardTextDate).getTime();
 
-    // expect(cardStartDate).toBeGreaterThan(today);
-    // expect(cardName).toBeVisible();
     expect(cardLocation).toBeVisible();
     expect(cardTime).toBeVisible();
     expect(cardOwner).toBeVisible();
-    // expect(cardDate).toBeVisible();
     expect(cardImage).toBeVisible();
 
     if (i === 0) {
@@ -223,8 +221,8 @@ test('TC-PBI-1.5 view event in explore date event', async ({ page }) => {
   }
 });
 
-test('TC-PBI-1.6 view event in explore date 20', async ({ page }) => {
-  await page.goto('/');
+test('TC-PBI-1.6  explore by date 20 Dec 2024', async ({ page }) => {
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
   const section = page.locator('div#explore-date');
   await section.scrollIntoViewIfNeeded();
@@ -232,14 +230,6 @@ test('TC-PBI-1.6 view event in explore date 20', async ({ page }) => {
   await expect(page.locator('.explore-title')).toContainText(
     /Explore by date/i
   );
-
-  const noExploreText = page.locator('.no-explore-message');
-
-  // const sectionCard = page.locator('div#time-list-card');
-  // await sectionCard.scrollIntoViewIfNeeded();
-
-  // const datePicker = page.locator('div[class*="DatePicker"]');
-  // await datePicker.click(); // เปิด DatePicker
 
   const dateButton = page.locator('div[aria-label="Friday, Dec 20, 2024"]');
   await dateButton.click();
@@ -254,19 +244,11 @@ test('TC-PBI-1.6 view event in explore date 20', async ({ page }) => {
     const cardLocation = card.locator('.explore-card-location');
     const cardTime = card.locator('.explore-card-time');
     const cardOwner = card.locator('.explore-card-owner');
-    const cardDate = card.locator('.explore-card-date');
     const cardImage = card.locator('.explore-card-img');
 
-    // const cardTextDate = await card.locator('.explore-card-date').innerText();
-    // const today = new Date().getTime();
-    // const cardStartDate = new Date(cardTextDate).getTime();
-
-    // expect(cardStartDate).toBeGreaterThan(today);
-    // expect(cardName).toBeVisible();
     expect(cardLocation).toBeVisible();
     expect(cardTime).toBeVisible();
     expect(cardOwner).toBeVisible();
-    // expect(cardDate).toBeVisible();
     expect(cardImage).toBeVisible();
 
     if (i === 0) {
@@ -279,9 +261,6 @@ test('TC-PBI-1.6 view event in explore date 20', async ({ page }) => {
       await expect(cardName).toContainText('ART EXHIBITION 2024');
     } else if (i === 3) {
       await expect(cardName).toContainText('HOMECOMING');
-    } else if (i === 4) {
-    } else if (i === 5) {
-    } else if (i === 6) {
     }
   }
 });

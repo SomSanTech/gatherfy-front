@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-5.1 filter event with date', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -14,11 +14,11 @@ test('TC-PBI-5.1 filter event with date', async ({ page }) => {
   await page.waitForTimeout(3000);
   const eventListCard = page.locator('.event-card');
   const cardCount = await eventListCard.count();
-  expect(cardCount).toBe(3);
+  expect(cardCount).toBe(1);
 });
 
 test('TC-PBI-5.2 cancle filter event with date', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -37,7 +37,7 @@ test('TC-PBI-5.2 cancle filter event with date', async ({ page }) => {
 });
 
 test('TC-PBI-5.3 filter with no  event date', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
