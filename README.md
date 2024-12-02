@@ -5,7 +5,7 @@ Gatherfy-eiei
 ### 📦 Installation
 1. Clone the Repository
 ```bash
-git clone [https://github.com/your-username/your-repository.git](https://github.com/SomSanTech/gatherfy-front.git)
+git clone https://github.com/SomSanTech/gatherfy-front.git
 cd project
 ```
 2. Install Dependencies
