@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     },
   },
   app: {
-    baseURL: process.env.NUXT_BASE_URL,
+    baseURL: '',
   },
   plugins: ['~/plugins/preline.client.ts'],
 });
