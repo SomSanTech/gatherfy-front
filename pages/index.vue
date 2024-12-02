@@ -29,7 +29,7 @@ const fetchData = async () => {
   recommendedData.value = (await fetchRecommendedData) || [];
 
   bannerEventData.value = eventData.value
-    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+    .sort((a, b) => new Date(b.start_date) - new Date(a.start_date))
     .slice(0, 5);
 };
 
