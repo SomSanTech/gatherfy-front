@@ -11,7 +11,7 @@ const formattedDate = ref();
 const selectedTags = ref(new Set());
 const selectedStatus = ref(new Set());
 const tags = ref([]);
-const showFilter = ref(true);
+const showFilter = ref();
 const sortFilter = ref('');
 const isLoading = ref(false);
 const isInitializing = ref(true);
@@ -79,8 +79,16 @@ const handleShowFilter = () => {
 const handleSortFilter = (sortByOption: any) => {
   sortFilter.value = sortByOption;
 };
+const viewportWidth = computed(() => window.innerWidth);
 
+const isMobile = computed(() => viewportWidth.value <= 450);
 onMounted(async () => {
+  console.log(viewportWidth.value);
+  if (isMobile.value) {
+    showFilter.value = false;
+  } else {
+    showFilter.value = true;
+  }
   isLoading.value = true;
   try {
     tags.value = await useFetchData('v1/tags');
@@ -141,6 +149,7 @@ watch(
         class="my-4"
         :is-show-sort="true"
         :showFilter
+        :isMobile
         @handleShowFilter="handleShowFilter"
         @sort-changed="handleSortFilter"
       />
@@ -148,7 +157,8 @@ watch(
         <FilterEvent
           v-if="showFilter"
           :tags
-          :class="`absolute left-5 z-50 lg:static`"
+          :isMobile
+          @handleShowFilter="handleShowFilter"
           @selectTag="selectTag"
           @selectStatus="selectStatus"
           @update-date="handleDateUpdate"

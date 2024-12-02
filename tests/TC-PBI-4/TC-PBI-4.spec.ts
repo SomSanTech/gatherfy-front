@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-4.1 select tag music', async ({ page }) => {
-  await page.goto('/us1');
+  // await page.goto('/us1');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -18,7 +19,8 @@ test('TC-PBI-4.1 select tag music', async ({ page }) => {
 });
 
 test('TC-PBI-4.2 select tag music and art', async ({ page }) => {
-  await page.goto('/us1');
+  // await page.goto('/us1');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -36,7 +38,8 @@ test('TC-PBI-4.2 select tag music and art', async ({ page }) => {
 });
 
 test('TC-PBI-4.3 unselect tag', async ({ page }) => {
-  await page.goto('/us1');
+  // await page.goto('/us1');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 
@@ -57,7 +60,8 @@ test('TC-PBI-4.3 unselect tag', async ({ page }) => {
 });
 
 test('TC-PBI-4.4 no event in tag', async ({ page }) => {
-  await page.goto('/us1');
+  // await page.goto('/us1');
+  await page.goto('/');
 
   await page.waitForTimeout(3000);
 

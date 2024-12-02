@@ -169,8 +169,11 @@ watchEffect(() => {
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
             <p class="t3 font-semibold">Event location</p>
-            <div class="h-[37x] w-[370x]">
-              <div v-html="event?.map" class="detail-map"></div>
+            <div class="">
+              <div
+                v-html="event?.map"
+                class="detail-map lg:h-[370px] lg:w-[370px]"
+              ></div>
             </div>
           </div>
           <div class="flex flex-col gap-2 lg:gap-5">
@@ -247,3 +250,5 @@ watchEffect(() => {
     </div>
   </div>
 </template>
+
+<style scoped></style>
