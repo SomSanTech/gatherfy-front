@@ -37,7 +37,7 @@ onMounted(() => {
           <Arrow />
           <p class="b2">Back to event list</p>
         </NuxtLink>
-        <h1 class="t1">Event Registration</h1>
+        <h1 class="back-regis-title t1">Event Registration</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
         </div>
@@ -48,27 +48,27 @@ onMounted(() => {
           <thead class="">
             <tr class="border-default-300 border-b transition-colors">
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-name h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Attendees Name
               </td>
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-phone h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Phone Number
               </td>
               <td
-                class="h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-email h-14 w-52 px-4 text-base font-semibold text-lavender-gray"
               >
                 Email
               </td>
               <td
-                class="h-14 w-64 px-4 text-base font-semibold text-lavender-gray"
+                class="regis-list-event-name h-14 w-64 px-4 text-base font-semibold text-lavender-gray"
               >
                 Event
               </td>
               <td
-                class="h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
+                class="regis-list-status h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
               >
                 Status
               </td>
@@ -89,7 +89,7 @@ onMounted(() => {
             <tr
               v-else-if="!isLoading && registrationsData.length != 0"
               v-for="registration in registrationsData"
-              class="border-default-300 cursor-default border-b transition-colors"
+              class="regis-list border-default-300 cursor-default border-b transition-colors"
             >
               <RegistrationList :registration="registration" />
             </tr>

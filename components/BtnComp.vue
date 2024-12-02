@@ -25,7 +25,7 @@ const btnColor = computed(() => {
 
 <template>
   <button
-    :class="`b3 w-fit rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
+    :class="`btn b3 w-fit rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
   >
     <p v-html="text"></p>
   </button>

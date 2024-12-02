@@ -1,35 +1,33 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
-import RegisPeople from '~/components/icons/RegisPeople.vue';
-import AllViews from '~/components/icons/AllViews.vue';
-import AvgViews from '~/components/icons/AvgViews.vue';
+
 import Chart from 'chart.js/auto';
 import EventList from '~/components/backoffice/EventList.vue';
 import type { Registration } from '~/models/registration';
 import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
-import PieChart from '~/components/backoffice/PieChart.vue';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
+
 definePageMeta({
   layout: 'backoffice',
 });
 
 const eventsData = ref<Event[]>([]);
-const adminData = ref<User | null>(null);
+const adminData: any = ref<User | null>(null);
 const isLoading = ref(true);
 const registrationsData = ref<Registration[]>([]);
-const colors: any = {
+const colors: Record<string, string> = {
   Female: '#989898',
   Male: '#D71515',
   Other: '#cccccc',
 };
-const sumOfGender = ref(0);
+const sumOfGender: any = ref(0);
 const groupedByGender = ref();
 const groupedByAgeRangeAndGender = ref();
-const sumOfViews = ref(0);
+const sumOfViews: any = ref(0);
 const chartCanvasRef = ref<HTMLCanvasElement | null>(null);
-const chartData = ref({
+const chartData: any = ref({
   labels: [],
   datasets: [] as Array<any>,
 });
@@ -37,9 +35,9 @@ const viewsData = ref();
 
 const sumAllViews = (data: any) => {
   return data.reduce(
-    (acc, event) => {
+    (acc: { totalViews: number; totalEntries: number }, event: any) => {
       const eventViewCount = event.views.reduce(
-        (sum, view) => sum + view.count,
+        (sum: number, view: any) => sum + view.count,
         0
       );
       const eventViewLength = event.views.length;
@@ -53,23 +51,19 @@ const sumAllViews = (data: any) => {
   );
 };
 
-const prepareViewsData = (views, type: string) => {
-  const labels = [];
-  const data = [];
+const prepareViewsData = (views: any, type: string) => {
+  const labels: any[] = [];
+  const data: any[] = [];
 
   if (type === 'daily') {
-    console.log('daily');
-
-    views.forEach((view) => {
+    views.forEach((view: any) => {
       const date = view.date.split(' ')[0];
       if (!labels.includes(date)) labels.push(date);
       data.push(view.count);
     });
   } else if (type === 'weekly') {
-    console.log('weekly');
-
-    const weeks = {};
-    views.forEach((view) => {
+    const weeks: any = {};
+    views.forEach((view: any) => {
       const week = new Date(view.date).toISOString().slice(0, 10).slice(0, 7);
       if (!weeks[week]) weeks[week] = [];
       weeks[week].push(view.count);
@@ -77,13 +71,14 @@ const prepareViewsData = (views, type: string) => {
     Object.keys(weeks).forEach((week) => {
       labels.push(week);
       data.push(
-        Math.round(weeks[week].reduce((a, b) => a + b, 0) / weeks[week].length)
+        Math.round(
+          weeks[week].reduce((a: any, b: any) => a + b, 0) / weeks[week].length
+        )
       );
     });
   } else if (type === 'monthly') {
-    console.log('monthly');
-    const months = {};
-    views.forEach((view) => {
+    const months: any = {};
+    views.forEach((view: any) => {
       const month = view.date.slice(0, 7);
       if (!months[month]) months[month] = [];
       months[month].push(view.count);
@@ -111,7 +106,7 @@ const prepareViewsData = (views, type: string) => {
       const monthLabel = `${monthAbbreviations[monthIndex]} ${year}`;
 
       labels.push(monthLabel);
-      data.push(months[month].reduce((a, b) => a + b, 0));
+      data.push(months[month].reduce((a: any, b: any) => a + b, 0));
     });
   }
   return { labels, data };
@@ -119,7 +114,6 @@ const prepareViewsData = (views, type: string) => {
 
 const initializeChart = () => {
   nextTick(() => {
-    console.log('chartCanvas:', chartCanvasRef.value);
     if (chartCanvasRef.value) {
       new Chart(chartCanvasRef.value, {
         type: 'line',
@@ -156,7 +150,6 @@ const fetchAllRegisData = async () => {
     `v1/registrations/owner/${adminData.value?.userId}`
   );
   registrationsData.value = fetchedData || [];
-  console.log('regis', registrationsData.value);
 
   groupedByGender.value = Object.fromEntries(
     d3.rollup(
@@ -166,14 +159,10 @@ const fetchAllRegisData = async () => {
     )
   );
 
-  console.log('groupedByGender ja', groupedByGender.value);
-
   sumOfGender.value = Object.values(groupedByGender.value).reduce(
-    (sum, value) => sum + value,
+    (sum: any, value: any) => sum + value,
     0
   );
-
-  console.log(sumOfGender.value);
 
   const groupedByAgeRangeAndGenderData = d3.rollup(
     registrationsData.value,
@@ -198,33 +187,29 @@ const fetchAllRegisData = async () => {
       Object.fromEntries(genderMap),
     ])
   );
-
-  console.log(groupedByAgeRangeAndGender.value);
 };
 const fetchAllEventData = async () => {
   const fetchedData = await useFetchData(
     `v1/events/owner/${adminData.value?.userId}`
   );
   eventsData.value = fetchedData || [];
-  console.log(eventsData.value);
+  // eventsData.value =  [];
 };
 const fetchAllViewData = async () => {
   if (eventsData.value) {
     const eventIds = eventsData.value.map((event) => event.eventId).join(',');
     const fetchedData = await useFetchData(`v1/views?eventIds=${eventIds}`);
     viewsData.value = fetchedData || [];
-    console.log(viewsData.value);
     sumOfViews.value = sumAllViews(viewsData.value);
-    console.log(sumOfViews.value);
 
-    viewsData.value.forEach((event: Event, index: number) => {
+    viewsData.value.forEach((event: any, index: number) => {
       const eventViews = event.views || [];
       const { labels, data } = prepareViewsData(eventViews, 'monthly');
 
       if (index === 0) {
         chartData.value.labels = labels;
       }
-      const eventData = eventsData.value.find(
+      const eventData: any = eventsData.value.find(
         (e) => e.eventId === event.event_id
       );
 
@@ -236,7 +221,6 @@ const fetchAllViewData = async () => {
         fill: false,
       });
     });
-    console.log('chartData.value', chartData.value);
   }
 };
 
@@ -245,7 +229,6 @@ onMounted(async () => {
     isLoading.value = true;
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
-    console.log('adminData', adminData.value);
 
     await fetchAllRegisData();
     await fetchAllEventData();
@@ -271,6 +254,14 @@ watch(chartCanvasRef, (newValue) => {
     >
       <span class="loader"></span>
     </div>
+    <div
+      v-else-if="eventsData.length === 0"
+      class="error-msg flex h-screen w-full items-center justify-center"
+    >
+      <p class="t3">
+        No events to display. Create your first event to get started!
+      </p>
+    </div>
     <div v-else class="ml-80 flex h-full">
       <div class="mx-20 mt-32 flex w-full flex-col gap-3">
         <SumaryOfView
@@ -283,7 +274,7 @@ watch(chartCanvasRef, (newValue) => {
 
         <div class="grid grid-cols-10 gap-3">
           <div
-            class="col-span-6 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-month col-span-6 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
           >
             <p class="b1 pb-5 font-semibold">
               Monthly Event View Counts (4 months)
@@ -291,7 +282,7 @@ watch(chartCanvasRef, (newValue) => {
             <canvas ref="chartCanvasRef" class=""></canvas>
           </div>
           <div
-            class="col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
             v-if="groupedByAgeRangeAndGender"
           >
             <StackBarChart
@@ -305,7 +296,7 @@ watch(chartCanvasRef, (newValue) => {
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div> -->
         </div>
-        <div class="grid h-[350px] grid-cols-10 gap-3">
+        <div class="event-list-div grid h-[350px] grid-cols-10 gap-3">
           <div
             class="col-span-10 flex flex-col gap-2 rounded-[20px] bg-white px-8 py-6 pb-10 drop-shadow-md"
           >
@@ -342,23 +333,13 @@ watch(chartCanvasRef, (newValue) => {
                 <tr
                   v-else
                   v-for="event in eventsData"
-                  class="border-default-300 cursor-default border-b transition-colors"
+                  class="event-list border-default-300 cursor-default border-b transition-colors"
                 >
                   <EventList :event="event" :type="'dashboard'" />
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <!-- <div
-            class="col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
-            v-if="groupedByAgeRangeAndGender"
-          >
-            <StackBarChart
-              :groupedByAgeRangeAndGender="groupedByAgeRangeAndGender"
-              :colors="colors"
-            />
-          </div> -->
         </div>
       </div>
     </div>

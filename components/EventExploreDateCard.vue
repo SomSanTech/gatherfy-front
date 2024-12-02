@@ -7,22 +7,28 @@ const props = defineProps<{
 
 <template>
   <div
-    class="flex h-[200px] w-full justify-between gap-3 rounded-lg bg-light-grey p-4 drop-shadow-lg"
+    class="explore-card flex h-[150px] w-fit gap-3 rounded-lg bg-light-grey p-4 drop-shadow-lg lg:h-[200px] lg:w-full lg:justify-between"
   >
     <div class="flex flex-col justify-between">
       <div>
-        <p class="b3 text-zinc-400">
+        <p class="explore-card-time b4 text-zinc-400">
           {{ useFormatDateTime(props?.eventDetail?.start_date, 'time') }}
         </p>
-        <p class="b2 line-clamp-[2] w-[390px] font-semibold">
+        <p
+          class="explore-card-name b2 line-clamp-[2] w-[200px] pb-1 font-semibold lg:w-[390px]"
+        >
           {{ props.eventDetail?.name }}
         </p>
-        <p class="b3 text-zinc-400">By {{ props.eventDetail?.owner }}</p>
-        <p class="b3 line-clamp-1 w-[390px] text-zinc-400">
+        <p class="explore-card-owner b3 text-zinc-400">
+          By {{ props.eventDetail?.owner }}
+        </p>
+        <p
+          class="explore-card-location b3 line-clamp-1 w-[200px] text-zinc-400 lg:w-[390px]"
+        >
           At {{ props.eventDetail?.location }}
         </p>
       </div>
-      <div class="flex gap-2 pt-3">
+      <div class="flex gap-2">
         <div v-for="tag in eventDetail?.tags">
           <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
             <button
@@ -38,7 +44,7 @@ const props = defineProps<{
       <img
         :src="props?.eventDetail?.image"
         alt=""
-        class="h-full w-full rounded-md object-cover"
+        class="explore-card-img h-full w-full rounded-md object-cover"
       />
     </div>
   </div>

@@ -9,20 +9,29 @@ const handleSearch = () => {
       path: '/events',
       query: { k: encodeURIComponent(searchKw.value) },
     });
-    searchKw.value = '';
+  } else {
+    router.push({
+      path: '/events',
+    });
   }
 };
 </script>
 
 <template>
-  <div class="w-screen bg-white/20 py-6 backdrop-blur-sm">
-    <div class="mx-auto flex max-w-6xl items-center justify-between">
+  <div class="w-screen bg-white/20 py-4 backdrop-blur-sm lg:py-6">
+    <div
+      class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
+    >
       <NuxtLink to="/">
-        <button class="oooh-baby-regular text-4xl">Gatherfy</button>
+        <button class="go-home-btn oooh-baby-regular text-xl lg:text-4xl">
+          Gatherfy
+        </button>
       </NuxtLink>
 
       <div class="flex gap-5">
-        <div class="flex rounded-2xl border border-grey px-4 py-2">
+        <div
+          class="b3 flex rounded-2xl border border-grey px-2 lg:px-4 lg:py-2"
+        >
           <input
             type="text"
             name=""
@@ -32,7 +41,7 @@ const handleSearch = () => {
             class="bg-white/0 focus:outline-none"
             @keyup.enter="handleSearch"
           />
-          <button @click="handleSearch()">
+          <button @click="handleSearch()" class="search-btn">
             <SearchIcon class="h-3 w-3 text-black" />
           </button>
         </div>

@@ -24,7 +24,6 @@ const fetchData = async () => {
     `v1/events/owner/${adminData.value?.userId}`
   );
   eventsData.value = fetchedData || [];
-  console.log(eventsData.value);
 };
 
 onMounted(() => {
@@ -33,7 +32,6 @@ onMounted(() => {
     localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
-    console.log(adminData.value?.userId);
     fetchData();
   } finally {
     isLoading.value = false;

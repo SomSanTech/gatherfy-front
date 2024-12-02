@@ -36,7 +36,6 @@ onMounted(() => {
     } else {
       user.value = parseJSONSafe(storedAdmin) || {};
     }
-    console.log('user:', user.value);
   }
 });
 </script>

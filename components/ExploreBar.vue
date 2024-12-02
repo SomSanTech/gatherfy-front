@@ -55,20 +55,20 @@ const sortByData = [
 
 <template>
   <div
-    class="flex items-center justify-between rounded-xl border border-black-1 p-2 pr-4"
+    class="flex items-center justify-between rounded-xl border border-black-1 p-1 lg:p-2 lg:pr-4"
   >
     <div
       :class="`flex gap-2 ${isShowSort ? 'pointer-events-none opacity-0' : ''}`"
     >
       <button
         @click="selectTime('today')"
-        :class="`b3 rounded-md px-4 py-2 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        :class="`btn b3 rounded-md px-2 py-2 lg:px-4 ${selectedEventTime === 'today' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
       >
         Today event
       </button>
       <button
         @click="selectTime('upcome')"
-        :class="`b3 rounded-md px-4 py-2 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+        :class="`btn b3 rounded-md px-2 py-2 lg:px-4 ${selectedEventTime === 'upcome' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
       >
         Upcoming event
       </button>
@@ -76,36 +76,35 @@ const sortByData = [
     <div v-if="!isShowSort">
       <NuxtLink to="/events">
         <button
-          :class="`b3 flex items-center gap-1 rounded-md px-4 py-2 duration-500 hover:translate-x-2`"
+          :class="`btn b3 flex items-center gap-1 rounded-md px-2 py-2 duration-500 hover:translate-x-2 lg:px-4`"
         >
-          See all event<Arrow class="b4 rotate-180" />
+          See all events<Arrow class="b4 rotate-180" />
         </button>
       </NuxtLink>
     </div>
     <div class="b2 flex gap-4" v-show="isShowSort">
       <button
         @click="$emit('handleShowFilter')"
-        class="flex items-center gap-1"
+        class="btn flex items-center gap-1"
       >
         {{ showFilter ? 'Hide' : 'Show' }} filter <Filter class="text-black" />
       </button>
       <div class="relative">
         <button
           @click="isShowSortBy = !isShowSortBy"
-          class="flex items-center gap-1"
+          class="btn flex items-center gap-1"
         >
           Sort By<Arrow
             :class="`${isShowSortBy ? 'rotate-90' : '-rotate-90'} text-sm duration-200`"
           />
         </button>
         <div
-          v-if="isShowSortBy"
-          class="absolute -right-4 top-12 z-20 flex w-[150px] flex-col items-start gap-1 rounded-xl bg-[#fdfdfd] p-3 text-start shadow-xl"
+          :class="`sort-div ${isShowSortBy ? 'h-[125px] opacity-100 lg:h-[190px]' : 'pointer-events-none h-0 opacity-0'} absolute -right-4 top-8 z-20 flex w-[110px] flex-col items-start gap-1 rounded-xl bg-[#fdfdfd] p-1 text-start shadow-xl duration-700 ease-in-out lg:top-12 lg:w-[150px] lg:p-3`"
         >
           <button
             v-for="sortOption in sortByData"
             @click="selectSortOption(sortOption)"
-            :class="`w-full rounded-md px-4 py-1 text-start font-semibold ${selectedSortBy === sortOption.name ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+            :class="`btn w-full rounded-md px-2 py-1 text-start font-semibold lg:px-4 ${selectedSortBy === sortOption.name ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
           >
             {{ sortOption.name }}
           </button>

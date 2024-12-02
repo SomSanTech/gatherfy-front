@@ -20,7 +20,7 @@ const someCalculation = Math.round(totalViews / totalEntries);
 
 <template>
   <div
-    :class="`${format === 'row' ? 'grid grid-cols-4' : 'flex flex-grow'} h-full w-full gap-3`"
+    :class="`overall ${format === 'row' ? 'grid grid-cols-4' : 'flex flex-grow'} h-full w-full gap-3`"
   >
     <div
       v-if="format === 'row'"
