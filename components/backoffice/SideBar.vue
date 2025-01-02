@@ -3,8 +3,8 @@ import { onMounted, ref } from 'vue';
 import Calendar from '../icons/Calendar.vue';
 import Dashboard from '../icons/Dashboard.vue';
 import User from '../icons/User.vue';
-import UserList from '../icons/UserList.vue';
-import UserScreen from '../icons/UserScreen.vue';
+import Feedback from '../icons/Feedback.vue';
+import EventRegis from '../icons/EventRegis.vue';
 
 onMounted(() => {});
 </script>
@@ -14,20 +14,21 @@ onMounted(() => {});
       <NuxtLink to="/backoffice">Gatherfy</NuxtLink>
     </div>
     <div class="flex flex-col gap-3">
+      <div class="b3">Main menu</div>
       <NuxtLink to="/backoffice/dashboard">
         <div
           class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
         >
-          <Dashboard class="t2" />
-          <p class="font-semibold">Dashboard</p>
+          <Dashboard class="t3" />
+          <p class="b2 font-medium">Dashboard</p>
         </div>
       </NuxtLink>
       <NuxtLink to="/backoffice/events">
         <div
           class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
         >
-          <Calendar class="t2" />
-          <p class="font-semibold">Events</p>
+          <Calendar class="t3" />
+          <p class="b2 font-medium">Events</p>
         </div>
       </NuxtLink>
       <div class="hs-accordion" id="registration-accordion">
@@ -37,8 +38,8 @@ onMounted(() => {});
           aria-expanded="true"
           aria-controls="registration-accordion"
         >
-          <User class="t2" />
-          <p class="font-semibold">Registration</p>
+          <User class="t3" />
+          <p class="b2 font-medium">Registration</p>
 
           <svg
             class="ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500 hs-accordion-active:block"
@@ -79,23 +80,44 @@ onMounted(() => {});
           <div class="ps-2 pt-2">
             <NuxtLink to="/backoffice/registrations/event">
               <div
-                class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
               >
-                <UserScreen class="t2" />
-                <p class="font-semibold">Event Registration</p>
+                <EventRegis class="t3" />
+                <p class="b2 font-medium">Event Registration</p>
               </div>
             </NuxtLink>
             <NuxtLink to="/backoffice/registrations">
               <div
-                class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
               >
-                <UserList class="t2" />
-                <p class="font-semibold">All Registration</p>
+                <User class="t3" />
+                <p class="b2 font-medium">All Registration</p>
               </div>
             </NuxtLink>
           </div>
         </div>
       </div>
+      <NuxtLink to="/backoffice/feedback">
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <Feedback class="t3" />
+          <p class="b2 font-medium">Feedback</p>
+        </div>
+      </NuxtLink>
+      <div class="b3">General</div>
+      <NuxtLink
+        :to="{
+          name: `backoffice-feedback-notification`,
+        }"
+      >
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <Feedback class="t3" />
+          <p class="b2 font-medium">Feedback</p>
+        </div>
+      </NuxtLink>
     </div>
   </div>
 </template>

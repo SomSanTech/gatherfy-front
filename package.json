@@ -25,6 +25,7 @@
     "leaflet": "^1.9.4",
     "minio": "^8.0.1",
     "nuxt": "^3.13.0",
+    "nuxt-rating": "^0.1.5",
     "preline": "^2.5.1",
     "v-calendar": "^3.1.2",
     "vue": "latest",

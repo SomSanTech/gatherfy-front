@@ -6,39 +6,8 @@ definePageMeta({
   layout: 'backoffice',
 });
 
-const error = useError();
-const event = ref();
 const route = useRoute();
 const param = route.params.id;
-const isLoading = ref(true);
-const props = defineProps<{
-  event?: Event;
-}>();
-const fetchData = async () => {
-  const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
-
-  if (fetchedData.error) {
-    error.value = fetchData;
-  } else {
-    event.value = fetchedData || [];
-    console.log(event.value);
-  }
-};
-
-onMounted(() => {
-  try {
-    isLoading.value = true;
-    fetchData();
-  } finally {
-    isLoading.value = false;
-  }
-});
-
-watchEffect(() => {
-  if (param) {
-    fetchData();
-  }
-});
 </script>
 
 <template>
@@ -56,18 +25,15 @@ watchEffect(() => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Event Detail</h1>
-          <NuxtLink
-            :to="{
-              name: `backoffice-feedback-id`,
-              params: { id: param },
-            }"
-            class="flex justify-end"
-          >
+          <!-- <NuxtLink :to="{
+            name: `backoffice-feedback-id`,
+            params: { id: param },
+          }" class="flex justify-end">
             <BtnComp text="Manage Feedback" color="blue" />
-          </NuxtLink>
+          </NuxtLink> -->
         </div>
 
-        <EventDetail :event="event" />
+        <EventDetail />
       </div>
     </div>
   </div>

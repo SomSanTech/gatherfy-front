@@ -100,6 +100,7 @@ watchEffect(() => {
 });
 </script>
 
+<
 <template>
   <div v-if="isLoading" class="my-16 flex items-center justify-center">
     <span class="loader"></span>
@@ -220,3 +221,4 @@ watchEffect(() => {
     </div>
   </div>
 </template>
+>

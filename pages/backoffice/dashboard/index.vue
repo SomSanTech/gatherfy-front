@@ -247,7 +247,7 @@ watch(chartCanvasRef, (newValue) => {
 </script>
 
 <template>
-  <div class="w-full bg-ghost-white">
+  <div class="mb-44 w-full bg-ghost-white">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"

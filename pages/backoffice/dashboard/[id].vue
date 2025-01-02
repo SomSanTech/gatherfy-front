@@ -401,12 +401,13 @@ onMounted(async () => {
 
                 <p class="b2">Average feedback score</p>
               </div>
-              <button
+              <NuxtLink
+                :to="{ name: `backoffice-feedback-id`, params: { id: param } }"
                 class="b4 flex items-center justify-end gap-1 self-end pt-2 text-dark-grey/60"
               >
                 more feedback details
                 <Arrow class="rotate-180" />
-              </button>
+              </NuxtLink>
             </div>
           </div>
         </div>
