@@ -2,22 +2,12 @@
 import FeedbackList from '~/components/backoffice/FeedbackList.vue';
 import type { User } from '~/models/user';
 import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
+import type { DefaultQuestion, ExistingQuestion } from '~/models/question';
 
 definePageMeta({
   layout: 'backoffice',
 });
 
-interface ExistingQuestion {
-  questionId: string;
-  eventId: string;
-  questionText: string;
-  questionType: string;
-}
-interface DefaultQuestion {
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-}
 interface Event {
   eventId: number;
   eventName: string;

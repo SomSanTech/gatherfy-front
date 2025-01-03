@@ -8,7 +8,11 @@ const props = defineProps<{
     | DefaultQuestion[]
     | ExistingQuestion[];
   previewFeedback: boolean;
+  answerField: Answer[] | Feedback[];
+  feedbackField: Feedback[];
+  questionCount: number;
   closePreview: Function;
+  submitFeedback: Function;
 }>();
 
 interface FeedbackQuestion {
@@ -37,6 +41,25 @@ interface NewQuestion {
   questionTypeName: string;
   isDropdownOpen: boolean;
 }
+interface Answer {
+  feedbackId: number;
+  questionId: number;
+  eventId: number;
+  answerText: string | undefined;
+}
+interface Feedback {
+  eventId: number;
+  userId: number | undefined;
+  feedbackRating: number;
+  feedbackComment: string;
+}
+function ratingAnswer(index: number, rating: number) {
+  if (index < props.questionCount) {
+    props.answerField[index].answerText = rating;
+  } else {
+    props.answerField[index + 1].feedbackRating = rating;
+  }
+}
 </script>
 
 <template>
@@ -58,12 +81,27 @@ interface NewQuestion {
       <p class="b1">Please share your feedback regarding the event</p>
       <div v-for="(question, index) in questions" :key="index" class="my-10">
         <p class="b3 text-cool-gray">Question {{ index + 1 }}</p>
-        <p class="b1 mt-3">{{ question.questionText }}</p>
-        <div v-if="question.questionType === 'text'">
+        <p class="b1 mt-3">
+          {{ question.questionText }} {{ answerField[index] }}
+          {{ question.questionId }}
+        </p>
+        <div v-if="question.questionType === 'text' && index < questionCount">
           <textarea
             rows="3"
             required
             placeholder="Leave your answer"
+            v-model="props.answerField[index].answerText"
+            class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          ></textarea>
+        </div>
+        <div
+          v-else-if="question.questionType === 'text' && index >= questionCount"
+        >
+          <textarea
+            rows="3"
+            required
+            placeholder="Leave your answer"
+            v-model="props.answerField[index].feedbackComment"
             class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
           ></textarea>
         </div>
@@ -76,11 +114,18 @@ interface NewQuestion {
             rating-size="50"
             :rating-step="1"
             :rating-spacing="15"
+            @rating-selected="ratingAnswer(index, $event)"
           />
         </div>
       </div>
       <div class="pb-16">
-        <BtnComp text="Send" color="red" class="float-right" />
+        <button
+          type="button"
+          class="float-right text-black"
+          @click="submitFeedback()"
+        >
+          Send
+        </button>
       </div>
     </div>
   </div>

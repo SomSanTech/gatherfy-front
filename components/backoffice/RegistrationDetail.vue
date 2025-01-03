@@ -75,7 +75,7 @@ const fetchRegistration = async () => {
     'PUT',
     selectedStatus.value
   );
-  if (fetchedData === 200) {
+  if (fetchedData.status === 200) {
     isChangeStatusComplete.value = true;
   } else {
     isChangeStatusComplete.value = false;

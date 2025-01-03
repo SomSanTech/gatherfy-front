@@ -7,13 +7,21 @@ import UserProfile from '~/components/icons/UserProfile.vue';
 import Organisation from '~/components/icons/Organisation.vue';
 
 import type { User } from '~/models/user';
+import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
+import type { DefaultQuestion, ExistingQuestion } from '~/models/question';
 const route = useRoute();
 const error = useError();
 const param = route.params.id;
 const isOpenPopup = ref(false);
+const previewFeedback = ref(false);
 const event = ref();
 const userData = ref<User | null>(null);
+const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
+// const answers = ref<Answer[]>([])
+const answers = ref<(Answer | Feedback)[]>([]);
+const feedback = ref<Feedback[]>([]);
 const registrationBody = ref({});
+const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const isLoading = ref(true);
 const mockUserLogin = {
   userId: 5,
@@ -25,14 +33,34 @@ const mockUserLogin = {
   phone: '6677889900',
   role: 'Attendee',
 };
+interface Answer {
+  feedbackId: number;
+  questionId: number;
+  eventId: number;
+  answerText: string;
+}
+interface Feedback {
+  eventId: number;
+  userId: number | undefined;
+  feedbackRating: number;
+  feedbackComment: string;
+}
 
+const defaultQuestion = [
+  {
+    questionText: 'How satisfied are you after joining the event ?',
+    questionType: 'rating',
+    questionTypeName: 'Rating (1-5)',
+  },
+  { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
+];
 const regis = async () => {
   const regsitered = await useFetchRegistration(
     `v1/registrations`,
     'POST',
     registrationBody.value
   );
-  if (regsitered === 200) {
+  if (regsitered.status === 200) {
     alert('Thank you for registration');
   } else {
     alert('Already Registered for the Event');
@@ -49,6 +77,72 @@ const fetchData = async () => {
   }
 };
 
+const onPreviewFeedback = async (param: number) => {
+  const fetchedQuestionData = await useFetchData(
+    `v1/questions/event/${event.value.eventId}`
+  );
+  if (fetchedQuestionData.error) {
+    finalQuestion.value = [...defaultQuestion];
+    previewFeedback.value = true;
+    feedbackQuestion.value = [];
+  } else {
+    feedbackQuestion.value = fetchedQuestionData || [];
+    finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
+    previewFeedback.value = true;
+  }
+  document.body.style.overflow = 'hidden';
+  console.log(feedbackQuestion.value);
+  for (const item of feedbackQuestion.value) {
+    addAnswerField(item.questionId);
+  }
+  for (const item of defaultQuestion) {
+    addFeedbackField();
+  }
+  console.log(answers.value);
+};
+
+function closePreview() {
+  previewFeedback.value = false;
+  document.body.style.overflow = '';
+}
+function addAnswerField(questionId: number) {
+  answers.value.push({
+    feedbackId: 0,
+    questionId: questionId,
+    eventId: event.value.eventId,
+    answerText: '',
+  });
+}
+function addFeedbackField() {
+  answers.value.push({
+    eventId: event.value.eventId,
+    userId: userData.value?.userId,
+    feedbackRating: 0,
+    feedbackComment: '',
+  });
+}
+async function submitFeedback() {
+  const feedbackResponse = await useFetchRegistration(
+    `v1/feedbacks`,
+    'POST',
+    answers.value[answers.value.length - 1]
+  );
+  console.log(feedbackResponse);
+  if (feedbackResponse) {
+    const feedbackId = feedbackResponse.feedbackId; // Assuming `feedbackId` is in the response
+    for (let i = 0; i < feedbackQuestion.value.length; i++) {
+      answers.value[i].feedbackId = await feedbackId;
+      const fetchedData = await useFetchRegistration(
+        `v1/answers`,
+        'POST',
+        answers.value[i]
+      );
+    }
+  } else {
+    // isChangeStatusComplete.value = false;
+  }
+  previewFeedback.value = false;
+}
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -147,6 +241,7 @@ watchEffect(() => {
               </div>
               <div class="flex gap-2">
                 <BtnComp @click="isOpenPopup = true" text="Registor event" />
+                <BtnComp @click="onPreviewFeedback" text="Leave a review" />
               </div>
             </div>
           </div>
@@ -245,5 +340,15 @@ watchEffect(() => {
         />
       </div>
     </div>
+    <FeedbackForm
+      v-if="previewFeedback"
+      :questions="finalQuestion"
+      :preview-feedback="previewFeedback"
+      :close-preview="closePreview"
+      :answer-field="answers"
+      :feedback-field="feedback"
+      :submit-feedback="submitFeedback"
+      :question-count="feedbackQuestion.length"
+    />
   </div>
 </template>

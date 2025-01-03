@@ -17,7 +17,7 @@ export const useFetchRegistration = async (
     if (!response.ok) {
       throw new Error(`Error fetching`);
     }
-    return await response.status;
+    return await response.json();
   } catch (error) {
     console.error(error);
     return { error: 'Failed to fetch data' };
