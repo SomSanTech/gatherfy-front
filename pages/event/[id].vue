@@ -5,10 +5,15 @@ import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import UserProfile from '~/components/icons/UserProfile.vue';
 import Organisation from '~/components/icons/Organisation.vue';
-
-import type { User } from '~/models/user';
 import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
-import type { DefaultQuestion, ExistingQuestion } from '~/models/question';
+import type { User } from '~/models/user';
+import type {
+  AnswerBody,
+  DefaultQuestion,
+  ExistingQuestion,
+  FeedbackBody,
+} from '~/models/feedback';
+
 const route = useRoute();
 const error = useError();
 const param = route.params.id;
@@ -17,9 +22,8 @@ const previewFeedback = ref(false);
 const event = ref();
 const userData = ref<User | null>(null);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
-// const answers = ref<Answer[]>([])
-const answers = ref<(Answer | Feedback)[]>([]);
-const feedback = ref<Feedback[]>([]);
+const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
+const feedback = ref<FeedbackBody[]>([]);
 const registrationBody = ref({});
 const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const isLoading = ref(true);
@@ -33,20 +37,8 @@ const mockUserLogin = {
   phone: '6677889900',
   role: 'Attendee',
 };
-interface Answer {
-  feedbackId: number;
-  questionId: number;
-  eventId: number;
-  answerText: string;
-}
-interface Feedback {
-  eventId: number;
-  userId: number | undefined;
-  feedbackRating: number;
-  feedbackComment: string;
-}
 
-const defaultQuestion = [
+const defaultQuestion: DefaultQuestion[] = [
   {
     questionText: 'How satisfied are you after joining the event ?',
     questionType: 'rating',
@@ -77,16 +69,16 @@ const fetchData = async () => {
   }
 };
 
-const onPreviewFeedback = async (param: number) => {
+const onReviewFeedback = async () => {
   const fetchedQuestionData = await useFetchData(
     `v1/questions/event/${event.value.eventId}`
   );
-  if (fetchedQuestionData.error) {
+  if (fetchedQuestionData.length === 0) {
     finalQuestion.value = [...defaultQuestion];
-    previewFeedback.value = true;
     feedbackQuestion.value = [];
+    previewFeedback.value = true;
   } else {
-    feedbackQuestion.value = fetchedQuestionData || [];
+    feedbackQuestion.value = fetchedQuestionData;
     finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
     previewFeedback.value = true;
   }
@@ -101,10 +93,6 @@ const onPreviewFeedback = async (param: number) => {
   console.log(answers.value);
 };
 
-function closePreview() {
-  previewFeedback.value = false;
-  document.body.style.overflow = '';
-}
 function addAnswerField(questionId: number) {
   answers.value.push({
     feedbackId: 0,
@@ -121,6 +109,11 @@ function addFeedbackField() {
     feedbackComment: '',
   });
 }
+
+function closePreview() {
+  previewFeedback.value = false;
+  document.body.style.overflow = '';
+}
 async function submitFeedback() {
   const feedbackResponse = await useFetchRegistration(
     `v1/feedbacks`,
@@ -131,12 +124,8 @@ async function submitFeedback() {
   if (feedbackResponse) {
     const feedbackId = feedbackResponse.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
-      answers.value[i].feedbackId = await feedbackId;
-      const fetchedData = await useFetchRegistration(
-        `v1/answers`,
-        'POST',
-        answers.value[i]
-      );
+      (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
+      await useFetchRegistration(`v1/answers`, 'POST', answers.value[i]);
     }
   } else {
     // isChangeStatusComplete.value = false;
@@ -241,7 +230,7 @@ watchEffect(() => {
               </div>
               <div class="flex gap-2">
                 <BtnComp @click="isOpenPopup = true" text="Registor event" />
-                <BtnComp @click="onPreviewFeedback" text="Leave a review" />
+                <BtnComp @click="onReviewFeedback" text="Leave a review" />
               </div>
             </div>
           </div>
@@ -346,9 +335,8 @@ watchEffect(() => {
       :preview-feedback="previewFeedback"
       :close-preview="closePreview"
       :answer-field="answers"
-      :feedback-field="feedback"
       :submit-feedback="submitFeedback"
-      :question-count="feedbackQuestion.length"
+      :existing-question-count="feedbackQuestion.length"
     />
   </div>
 </template>

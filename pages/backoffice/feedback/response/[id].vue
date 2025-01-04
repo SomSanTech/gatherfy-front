@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
-import BtnComp from '~/components/BtnComp.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import Calendar from '~/components/icons/Calendar.vue';
 import Clock from '~/components/icons/Clock.vue';
-import Feedback from '~/components/icons/Feedback.vue';
 import Location from '~/components/icons/Location.vue';
 import StarRound from '~/components/icons/StarRound.vue';
-import type { Event } from '~/models/event';
+import type { Answer, ExistingQuestion, Feedback } from '~/models/feedback';
 import type { User } from '~/models/user';
 
 definePageMeta({
@@ -17,98 +15,67 @@ const route = useRoute();
 const param = route.params.id;
 const eventData = ref();
 const feedbackData = ref<Feedback[]>([]);
-const questionData = ref<Question[]>([]);
+const questionData = ref<ExistingQuestion[]>([]);
 const filterFeedbackData = ref<Feedback[]>([]);
+const answerData = ref<GroupedAnswers>({});
 const isLoading = ref(true);
 const activeStar = ref();
-const activeEventId = ref();
 const rating = ref([5, 4, 3, 2, 1]);
 const adminData = ref<User | null>(null);
-const previewFeedback = ref(false);
-const closePreview = ref(false);
-const feedbackResponse = ref();
 const averageRating = ref();
+const nuxtRating = ref();
 const conicGradientStyle = ref();
-const groupedByAnswerText = ref();
-interface Feedback {
-  // count: number,
-  // feedback: {
-  feedbackId: number;
-  eventId: number;
-  userId: number;
-  feedbackRating: number;
-  feedbackComment: string;
-  createdAt: Date;
-  // }
+const groupedByAnswerText = ref<Record<string, number>>({});
+
+export interface GroupedAnswers {
+  [key: string]: Answer[];
 }
 
-interface Question {
-  questionId: number;
-  eventId: number;
-  questionText: string;
-  questionType: string;
-}
-
-const colors = {
+const colors: Record<string, string> = {
   5: '#989898',
   4: '#D71515',
   3: '#cccccc',
-  2: '#989898',
-  1: '#D71515',
+  2: '#16C098',
+  1: '#0085DB',
 };
 
-const answers = [
-  'Great event, very informative!',
-  'Loved the interactive sessions.',
-  'Well-organized but could improve time management.',
-  'Networking opportunities were excellent.',
-  'More detailed explanations would be helpful.',
-  'Fantastic speakers, very engaging.',
-  'The schedule felt a bit rushed.',
-  'Venue was convenient and comfortable.',
-  'Would love more hands-on activities.',
-  'Great opportunity to connect with peers.',
-  'Some sessions ran over time.',
-  'Enjoyed the diverse topics covered.',
-  'Better food options would be nice.',
-  'The Q&A sessions were insightful.',
-  'Would appreciate more breaks in between sessions.',
-  'Loved the energy of the hosts!',
-  'The event met my expectations overall.',
-  'Workshops were very practical and useful.',
-  'Appreciated the clear communication before the event.',
-  'Looking forward to the next one!',
-];
-
-const fetchData = async () => {
+async function fetchData() {
   const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
   const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
   const fetchedFeedbackData = await useFetchData(`v1/feedbacks/event/${param}`);
-  const fetchedAnswerData = await useFetchData(`v2/feedbacks/event/${param}`);
   eventData.value = fetchedData || [];
   questionData.value = fetchedQuestionData || [];
   feedbackData.value = fetchedFeedbackData || [];
   filterFeedbackData.value = fetchedFeedbackData || [];
 
-  // wait for fetchedAnswerData
-  groupedByAnswerText.value = Object.fromEntries(
-    d3.rollup(
-      feedbackData.value,
-      (v) => v.length,
-      (d) => d.feedbackRating // answer rate in the question
-    )
-  );
-};
-
+  for (const question of questionData.value) {
+    await getAnswerByQuestion(question.questionId);
+  }
+}
 function getAverage() {
   const total = feedbackData.value.reduce(
     (sum, curr) => sum + curr.feedbackRating,
     0
   );
   const avg = total / feedbackData.value.length;
-  averageRating.value = Math.round(avg * 10) / 10;
+  nuxtRating.value = Math.round(avg * 10) / 10;
+  averageRating.value =
+    total === 0 ? 0 : (Math.round(avg * 10) / 10).toFixed(1);
 }
-const filterRating = (star: number) => {
+function getRatingAnswer(questionKey: number) {
+  groupedByAnswerText.value = Object.fromEntries(
+    d3.rollup(
+      answerData.value[questionKey],
+      (v) => v.length,
+      (d) => d.answerText // answer rate in the question
+    )
+  );
+  // Update the specific key in the conicGradientStyle ref object
+  conicGradientStyle.value = {
+    [questionKey]: `conic-gradient(${generateConicGradient(groupedByAnswerText.value, colors)})`,
+  };
+}
+function filterRating(star: number) {
   if (activeStar.value === star) {
     activeStar.value = null;
     filterFeedbackData.value = feedbackData.value;
@@ -118,7 +85,30 @@ const filterRating = (star: number) => {
       (item) => item.feedbackRating === activeStar.value
     );
   }
-};
+}
+async function getAnswerByQuestion(questionId: number) {
+  const fetchedAnswerData = await useFetchData(
+    `v1/answers/question/${questionId}`
+  );
+  // Initialize an object to store grouped answers
+  const groupedAnswers: { [key: string]: Answer[] } = {};
+  if (Array.isArray(fetchedAnswerData)) {
+    fetchedAnswerData.forEach((answer) => {
+      // Create a custom key based on the questionId
+      const questionKey = `${answer.questionId}`;
+
+      // Initialize the array if it doesn't exist
+      if (!groupedAnswers[questionKey]) {
+        groupedAnswers[questionKey] = [];
+      }
+      // Add the answer to the corresponding array
+      groupedAnswers[questionKey].push(answer);
+    });
+  } else {
+    console.error('Fetched data is not an array');
+  }
+  answerData.value = { ...answerData.value, ...groupedAnswers };
+}
 
 onMounted(async () => {
   try {
@@ -127,7 +117,6 @@ onMounted(async () => {
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
     await fetchData();
     await getAverage();
-    conicGradientStyle.value = `conic-gradient(${generateConicGradient(groupedByAnswerText.value, colors)})`;
   } finally {
     isLoading.value = false;
   }
@@ -199,28 +188,20 @@ onMounted(async () => {
         </div>
       </div>
       <div
+        v-if="averageRating"
         class="grid w-full grid-cols-6 gap-5 rounded-3xl bg-white p-10 drop-shadow-lg"
       >
         <div class="col-span-2 place-items-center content-center">
           <p class="t3 mb-5">Average Rating</p>
-          <p class="t1">{{ averageRating }} <span class="b1">out of 5</span></p>
-          <p class="b2">{{ feedbackData.length }} ratings</p>
-          <NuxtRating :rating-value="averageRating" rating-size="20" />
+          <p class="t1">{{ averageRating }}</p>
+          <p class="b1">out of 5</p>
+          <NuxtRating :rating-value="nuxtRating" rating-size="20" />
+          <p class="b2 mt-2 opacity-70">
+            Based on {{ feedbackData.length }} ratings
+          </p>
         </div>
-        <!-- <div class="col-span-1">
-          <div class="flex">
-            <NuxtRating :rating-value="5" />
-            <div class="bg-lavender-gray  h-3">
-              <div class="bg-burgundy w-10 h-3"></div>
-            </div>
-          </div>
-          <NuxtRating :rating-value="4" />
-          <NuxtRating :rating-value="3" />
-          <NuxtRating :rating-value="2" />
-          <NuxtRating :rating-value="1" />
-        </div> -->
-        <div class="col-span-4 h-96 overflow-auto">
-          <div class="flex gap-3">
+        <div class="col-span-4">
+          <div class="mb-3 flex gap-3">
             <div v-for="star in rating" :key="star">
               <div
                 class="b1 flex w-fit cursor-pointer items-center gap-1 rounded-full border px-3 py-1 duration-200"
@@ -232,55 +213,76 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div v-if="filterFeedbackData.length == 0">
-            <p class="t3 mt-10">There's no review with that rating</p>
-          </div>
-          <div v-else v-for="item in filterFeedbackData">
-            <div class="my-2 flex gap-5 rounded-xl border p-5 pb-6">
-              <!-- <div class="flex items-start mt-4">
-              <img src="/components/images/kornnaphat.png" class="w-12 h-12 object-cover rounded-full" />
-            </div> -->
-              <div class="flex flex-col gap-y-2">
-                <p class="b2 font-medium">
-                  Kornnaphat Sethratanapong<span class="mx-5">·</span>
-                  <span class="font-normal text-gray-600">{{
-                    useFormatDateTime(item.createdAt, 'time')
-                  }}</span>
-                </p>
-                <NuxtRating
-                  :read-only="true"
-                  :rating-value="item.feedbackRating"
-                  :rating-size="20"
-                />
-                <p class="b3">{{ item.feedbackComment }}</p>
+          <div class="h-96 overflow-auto">
+            <div v-if="filterFeedbackData.length == 0">
+              <p class="t3 mt-10">There's no review with that rating</p>
+            </div>
+            <div v-else v-for="item in filterFeedbackData">
+              <div class="my-2 flex gap-5 rounded-xl border p-5 pb-6">
+                <div class="mt-4 flex items-start">
+                  <img
+                    src="/components/images/kornnaphat.png"
+                    class="h-12 w-12 rounded-full object-cover"
+                  />
+                </div>
+                <div class="flex flex-col gap-y-2">
+                  <p class="b2 font-medium">
+                    {{ item.username }}<span class="mx-5">·</span>
+                    <span class="font-normal text-gray-600">{{
+                      useFormatDateTime(item.createdAt, 'date')
+                    }}</span>
+                  </p>
+                  <NuxtRating
+                    :read-only="true"
+                    :rating-value="item.feedbackRating"
+                    :rating-size="20"
+                  />
+                  <p class="b3">{{ item.feedbackComment }}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div
+        v-else
+        class="flex h-96 flex-col justify-center rounded-3xl bg-white p-10 text-center drop-shadow-lg"
+      >
+        <img
+          src="/components/images/catch-feedback.png"
+          class="h-64 object-contain"
+        />
+        <p class="b1 mb-3 font-normal">Awaiting feedback</p>
+        <p class="b2">Once guests respond, you will see their feedback here.</p>
+      </div>
+      <div
         v-for="(question, index) in questionData"
         class="w-full rounded-3xl bg-white p-10 drop-shadow-lg"
       >
         <p class="b1 mb-3">{{ index + 1 }}. {{ question.questionText }}</p>
-        <p class="b2 mb-2">{{ answers.length }} responses</p>
+        <p class="b2 mb-2">
+          {{ answerData[question.questionId].length }} responses
+        </p>
         <div class="h-72 overflow-auto">
           <div
             v-if="question.questionType === 'text'"
-            v-for="answer in answers"
+            v-for="answer in answerData[question.questionId]"
           >
             <div class="my-2 rounded-xl border px-4 py-2">
-              <p class="b2">{{ answer }}</p>
+              <p class="b2">{{ answer.answerText }}</p>
             </div>
           </div>
           <div v-else-if="question.questionType === 'rating'" class="flex">
+            {{ getRatingAnswer(question.questionId) }}
             <div class="w-80 pt-5">
               <div
                 class="relative flex h-full w-full items-center justify-center"
               >
                 <div
                   class="aspect-square w-3/4 rounded-full drop-shadow-lg"
-                  :style="{ background: conicGradientStyle }"
+                  :style="{
+                    background: conicGradientStyle[question.questionId],
+                  }"
                 ></div>
                 <div
                   class="absolute left-1/2 top-1/2 aspect-square w-2/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"

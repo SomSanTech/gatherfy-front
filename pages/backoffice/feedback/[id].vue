@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
-import FeedbackSurvey from '~/components/backoffice/FeedbackForm.vue';
 import QuestionItem from '~/components/backoffice/QuestionItem.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import BubbleQuestion from '~/components/icons/BubbleQuestion.vue';
-import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
 import type { Event } from '~/models/event';
+import type {
+  AddQuestion,
+  AnswerBody,
+  DefaultQuestion,
+  EditQuestion,
+  FeedbackBody,
+} from '~/models/feedback';
 
 definePageMeta({
   layout: 'backoffice',
@@ -33,30 +38,12 @@ interface CheckedInOption {
   name: string;
   urlSend: string;
 }
-interface FeedbackQuestion {
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
-interface ExistingQuestion {
-  questionId: string;
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
-interface DefaultQuestion {
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-}
-const existQuestion = ref<ExistingQuestion[]>([]);
-const compareExistQuestion = ref<ExistingQuestion[]>([]);
-const questions = ref<FeedbackQuestion[]>([]);
-const finalQuestion = ref<(FeedbackQuestion | DefaultQuestion)[]>([]);
+
+const existQuestions = ref<EditQuestion[]>([]);
+const compareExistQuestion = ref<EditQuestion[]>([]);
+const newQuestions = ref<AddQuestion[]>([]);
+const finalQuestion = ref<(AddQuestion | DefaultQuestion)[]>([]);
+const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
 
 const selectedEventTimeStyle = {
   active: 'text-light-grey font-semibold bg-burgundy',
@@ -76,16 +63,6 @@ const statusStyle = {
     text: 'Sorry, nothing changed',
   },
 };
-const statusData = [
-  {
-    name: 'Text',
-    urlSend: 'text',
-  },
-  {
-    name: 'Rating (1-5)',
-    urlSend: 'rating',
-  },
-];
 
 const defaultQuestion = [
   {
@@ -104,7 +81,7 @@ async function fetchData() {
     error.value = fetchedEventData ? fetchedEventData : fetchedQuestionData;
   } else {
     event.value = fetchedEventData || [];
-    existQuestion.value = fetchedQuestionData || [];
+    existQuestions.value = fetchedQuestionData || [];
     // Create a deep copy of fetchedQuestionData for compareExistQuestion
     compareExistQuestion.value = fetchedQuestionData.map((item: any) => ({
       ...item,
@@ -122,7 +99,7 @@ const createQuestion = async () => {
   });
 };
 
-async function editQuestion(difference: ExistingQuestion[]) {
+async function editQuestion(difference: EditQuestion[]) {
   const formattedQuestions = getEditFormattedQuestions(difference);
   let createResult = true;
   difference.forEach(async (question, index) => {
@@ -144,10 +121,10 @@ const deleteQuestion = async (questionId: number) => {
 };
 
 function selectStatus(index: number, statusOption: CheckedInOption) {
-  questions.value[index].questionType = statusOption.urlSend;
-  questions.value[index].questionTypeName = statusOption.name;
-  questions.value[index].isDropdownOpen =
-    !questions.value[index].isDropdownOpen;
+  newQuestions.value[index].questionType = statusOption.urlSend;
+  newQuestions.value[index].questionTypeName = statusOption.name;
+  newQuestions.value[index].isDropdownOpen =
+    !newQuestions.value[index].isDropdownOpen;
 }
 
 function getDifference<T>(array1: T[], array2: T[], ...keys: Array<keyof T>) {
@@ -161,25 +138,25 @@ async function toSave() {
   try {
     isLoading.value = true;
     let difference = getDifference(
-      existQuestion.value,
+      existQuestions.value,
       compareExistQuestion.value,
       'questionText',
       'questionType'
     );
     console.log(difference);
-    if (questions.value.length >= 1 && difference.length !== 0) {
+    if (newQuestions.value.length >= 1 && difference.length !== 0) {
       await createQuestion();
       await editQuestion(difference);
-    } else if (questions.value.length >= 1 && difference.length === 0) {
+    } else if (newQuestions.value.length >= 1 && difference.length === 0) {
       await createQuestion();
-    } else if (questions.value.length === 0 && difference.length !== 0) {
+    } else if (newQuestions.value.length === 0 && difference.length !== 0) {
       await editQuestion(difference);
     }
   } catch {
     processResult = false;
   } finally {
     saveCompleted.value = true;
-    questions.value.splice(0);
+    newQuestions.value.splice(0);
     await fetchData();
     setTimeout(() => {
       saveCompleted.value = false;
@@ -192,7 +169,7 @@ function addField() {
   const param = Array.isArray(route.params.id)
     ? route.params.id[0]
     : route.params.id;
-  questions.value.push({
+  newQuestions.value.push({
     eventId: param,
     questionText: '',
     questionType: '',
@@ -203,13 +180,15 @@ function addField() {
 
 function getFormattedQuestions(type: string) {
   if (type === 'create') {
-    return questions.value.map(({ eventId, questionText, questionType }) => ({
-      eventId,
-      questionText,
-      questionType,
-    }));
+    return newQuestions.value.map(
+      ({ eventId, questionText, questionType }) => ({
+        eventId,
+        questionText,
+        questionType,
+      })
+    );
   } else if (type === 'edit') {
-    return existQuestion.value.map(
+    return existQuestions.value.map(
       ({ eventId, questionText, questionType }) => ({
         eventId,
         questionText,
@@ -220,7 +199,7 @@ function getFormattedQuestions(type: string) {
   return [];
 }
 
-function getEditFormattedQuestions(data: ExistingQuestion[]) {
+function getEditFormattedQuestions(data: EditQuestion[]) {
   return data.map(({ eventId, questionText, questionType }) => ({
     eventId,
     questionText,
@@ -229,7 +208,7 @@ function getEditFormattedQuestions(data: ExistingQuestion[]) {
 }
 
 // Function to remove a field by index
-function removeField(indexName: string, index: number, questionId: number) {
+function removeField(indexName: string, questionId: number) {
   const array = indexName.split('-');
   if (indexName.includes('existing')) {
     indexDeleteQuestion.value = array[1];
@@ -248,7 +227,7 @@ async function confirmRemoveField(indexName: string, confirm: boolean) {
   if (array[0] === 'existing' && confirm) {
     deleteCompleted.value = true;
     deleteQuestion(questionIdConfirmDelete.value);
-    existQuestion.value.splice(indexDeleteQuestion.value, 1);
+    existQuestions.value.splice(indexDeleteQuestion.value, 1);
     indexDeleteQuestion.value = null;
     questionIdConfirmDelete.value = null;
     setTimeout(() => {
@@ -257,7 +236,7 @@ async function confirmRemoveField(indexName: string, confirm: boolean) {
     indexConfirmDelete.value = null;
   } else if (array[0] === 'custom' && confirm) {
     deleteCompleted.value = true;
-    questions.value.splice(indexDeleteQuestion.value, 1);
+    newQuestions.value.splice(indexDeleteQuestion.value, 1);
     indexDeleteQuestion.value = null;
     indexConfirmDelete.value = null;
     setTimeout(() => {
@@ -269,13 +248,34 @@ async function confirmRemoveField(indexName: string, confirm: boolean) {
 }
 function combineQuestion() {
   finalQuestion.value = [
-    ...existQuestion.value,
-    ...questions.value,
+    ...existQuestions.value,
+    ...newQuestions.value,
     ...defaultQuestion,
   ];
   previewFeedback.value = true;
   document.body.style.overflow = 'hidden';
-  console.log(finalQuestion.value);
+  for (const item of [...existQuestions.value, ...newQuestions.value]) {
+    addAnswerField();
+  }
+  for (const item of defaultQuestion) {
+    addFeedbackField();
+  }
+}
+function addAnswerField() {
+  answers.value.push({
+    feedbackId: 0,
+    questionId: 0,
+    eventId: 0,
+    answerText: '',
+  });
+}
+function addFeedbackField() {
+  answers.value.push({
+    eventId: 0,
+    userId: 0,
+    feedbackRating: 0,
+    feedbackComment: '',
+  });
 }
 function closePreview() {
   previewFeedback.value = false;
@@ -415,9 +415,8 @@ watchEffect(() => {
           <div class="">
             <!-- Existing Questions -->
             <div
-              v-for="(question, index) in existQuestion"
+              v-for="(question, index) in existQuestions"
               :key="`existing-${index}`"
-              class="grid grid-cols-4 gap-x-5 gap-y-3"
             >
               <QuestionItem
                 class="duration-200"
@@ -434,9 +433,8 @@ watchEffect(() => {
               />
             </div>
             <div
-              v-for="(question, index) in questions"
+              v-for="(question, index) in newQuestions"
               :key="`custom-${index}`"
-              class="grid grid-cols-4 gap-x-5 gap-y-3"
             >
               <QuestionItem
                 class="fade-leave-active"
@@ -444,7 +442,7 @@ watchEffect(() => {
                 :question="question"
                 :index="index"
                 :index-name="`custom-${index}`"
-                :startIndex="existQuestion.length"
+                :startIndex="existQuestions.length"
                 :indexConfirmDelete="indexConfirmDelete"
                 :selectedEventTimeStyle="selectedEventTimeStyle"
                 :removeField="removeField"
@@ -472,6 +470,8 @@ watchEffect(() => {
     :questions="finalQuestion"
     :preview-feedback="previewFeedback"
     :close-preview="closePreview"
+    :existing-question-count="existQuestions.length + newQuestions.length"
+    :answer-field="answers"
   />
 
   <div

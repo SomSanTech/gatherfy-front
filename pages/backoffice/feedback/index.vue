@@ -2,7 +2,12 @@
 import FeedbackList from '~/components/backoffice/FeedbackList.vue';
 import type { User } from '~/models/user';
 import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
-import type { DefaultQuestion, ExistingQuestion } from '~/models/question';
+import type {
+  AnswerBody,
+  DefaultQuestion,
+  ExistingQuestion,
+  FeedbackBody,
+} from '~/models/feedback';
 
 definePageMeta({
   layout: 'backoffice',
@@ -38,6 +43,7 @@ const defaultQuestion = [
 const eventsData = ref<Event[]>([]);
 const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
+const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
 const adminData = ref<User | null>(null);
 const isLoading = ref(true);
 const feedbacksCount = ref();
@@ -87,9 +93,30 @@ const onPreviewFeedback = async (param: number) => {
     finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
     previewFeedback.value = true;
   }
+  for (const item of feedbackQuestion.value) {
+    addAnswerField();
+  }
+  for (const item of defaultQuestion) {
+    addFeedbackField();
+  }
   document.body.style.overflow = 'hidden';
 };
-
+function addAnswerField() {
+  answers.value.push({
+    feedbackId: 0,
+    questionId: 0,
+    eventId: 0,
+    answerText: '',
+  });
+}
+function addFeedbackField() {
+  answers.value.push({
+    eventId: 0,
+    userId: 0,
+    feedbackRating: 0,
+    feedbackComment: '',
+  });
+}
 function closePreview() {
   previewFeedback.value = false;
   document.body.style.overflow = '';
@@ -133,11 +160,6 @@ onMounted(async () => {
                 Edit avalaiable until
               </td>
               <td
-                class="h-14 w-24 px-4 text-base font-semibold text-lavender-gray"
-              >
-                Status
-              </td>
-              <td
                 class="h-14 w-24 px-4 text-center text-base font-semibold text-lavender-gray"
               >
                 Responses
@@ -175,6 +197,8 @@ onMounted(async () => {
     :questions="finalQuestion"
     :preview-feedback="previewFeedback"
     :close-preview="closePreview"
+    :existing-question-count="feedbackQuestion.length"
+    :answer-field="answers"
   />
 </template>
 

@@ -27,7 +27,6 @@ const emit = defineEmits(['previewFeedback']);
     {{ useFormatDateTime(event?.eventStartDate, 'date') }},
     {{ useFormatDateTime(event?.eventStartDate, 'time') }}
   </td>
-  <td class="b2 p-4 align-middle">Waiting</td>
   <td class="b2 p-4 text-center align-middle">
     {{ responses }}
   </td>

@@ -1,63 +1,38 @@
 <script setup lang="ts">
+import type {
+  AddQuestion,
+  AnswerBody,
+  DefaultQuestion,
+  EditQuestion,
+  ExistingQuestion,
+  FeedbackBody,
+} from '~/models/feedback';
 import Cancle from '../icons/Cancle.vue';
 
-const props = defineProps<{
-  questions?:
-    | FeedbackQuestion[]
-    | NewQuestion[]
-    | DefaultQuestion[]
-    | ExistingQuestion[];
-  previewFeedback: boolean;
-  answerField: Answer[] | Feedback[];
-  feedbackField: Feedback[];
-  questionCount: number;
-  closePreview: Function;
-  submitFeedback: Function;
-}>();
+const props = withDefaults(
+  defineProps<{
+    questions?: (
+      | EditQuestion
+      | AddQuestion
+      | DefaultQuestion
+      | ExistingQuestion
+    )[];
+    previewFeedback: boolean;
+    answerField: (AnswerBody | FeedbackBody)[];
+    existingQuestionCount: number;
+    closePreview: Function;
+    submitFeedback?: Function;
+  }>(),
+  {
+    submitFeedback: () => console.log('Sunmit Feedback'),
+  }
+);
 
-interface FeedbackQuestion {
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
-
-interface ExistingQuestion {
-  questionId: string;
-  eventId: string;
-  questionText: string;
-  questionType: string;
-}
-interface DefaultQuestion {
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-}
-interface NewQuestion {
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
-interface Answer {
-  feedbackId: number;
-  questionId: number;
-  eventId: number;
-  answerText: string | undefined;
-}
-interface Feedback {
-  eventId: number;
-  userId: number | undefined;
-  feedbackRating: number;
-  feedbackComment: string;
-}
 function ratingAnswer(index: number, rating: number) {
-  if (index < props.questionCount) {
-    props.answerField[index].answerText = rating;
+  if (index < props.existingQuestionCount) {
+    (props.answerField[index] as AnswerBody).answerText = rating;
   } else {
-    props.answerField[index + 1].feedbackRating = rating;
+    (props.answerField[index + 1] as FeedbackBody).feedbackRating = rating;
   }
 }
 </script>
@@ -77,31 +52,36 @@ function ratingAnswer(index: number, rating: number) {
       >
         <Cancle />
       </div>
-      <p class="t2">Event Feedback</p>
+      <p class="t2 mb-5">Event Feedback</p>
       <p class="b1">Please share your feedback regarding the event</p>
       <div v-for="(question, index) in questions" :key="index" class="my-10">
         <p class="b3 text-cool-gray">Question {{ index + 1 }}</p>
         <p class="b1 mt-3">
-          {{ question.questionText }} {{ answerField[index] }}
-          {{ question.questionId }}
+          {{ question.questionText }}
         </p>
-        <div v-if="question.questionType === 'text' && index < questionCount">
-          <textarea
-            rows="3"
-            required
-            placeholder="Leave your answer"
-            v-model="props.answerField[index].answerText"
-            class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
-          ></textarea>
-        </div>
         <div
-          v-else-if="question.questionType === 'text' && index >= questionCount"
+          v-if="
+            question.questionType === 'text' && index < existingQuestionCount
+          "
         >
           <textarea
             rows="3"
             required
             placeholder="Leave your answer"
-            v-model="props.answerField[index].feedbackComment"
+            v-model="(props.answerField[index] as AnswerBody).answerText"
+            class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          ></textarea>
+        </div>
+        <div
+          v-else-if="
+            question.questionType === 'text' && index >= existingQuestionCount
+          "
+        >
+          <textarea
+            rows="3"
+            required
+            placeholder="Leave your answer"
+            v-model="(props.answerField[index] as FeedbackBody).feedbackComment"
             class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
           ></textarea>
         </div>
@@ -114,17 +94,18 @@ function ratingAnswer(index: number, rating: number) {
             rating-size="50"
             :rating-step="1"
             :rating-spacing="15"
+            :rating-value="0"
             @rating-selected="ratingAnswer(index, $event)"
           />
         </div>
       </div>
-      <div class="pb-16">
+      <div class="pb-20">
         <button
           type="button"
-          class="float-right text-black"
+          class="float-right rounded-md bg-burgundy px-6 py-2 font-semibold text-light-grey duration-200 hover:bg-[#A61010]"
           @click="submitFeedback()"
         >
-          Send
+          Submit
         </button>
       </div>
     </div>
