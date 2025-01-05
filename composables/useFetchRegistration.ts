@@ -1,6 +1,6 @@
 import { useRuntimeConfig } from '#app';
 
-export const useFetchRegistration = async (
+export const useFetchCreateUpdate = async (
   url: string,
   method: string,
   body: object

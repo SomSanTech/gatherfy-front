@@ -70,7 +70,7 @@ const fetchData = async () => {
 };
 
 const fetchRegistration = async () => {
-  const fetchedData = await useFetchRegistration(
+  const fetchedData = await useFetchCreateUpdate(
     `v1/registrations/${param}`,
     'PUT',
     selectedStatus.value

@@ -48,7 +48,7 @@ const props = defineProps<{
 // };
 
 const fetchEvent = async () => {
-  //   const fetchedData = await useFetchRegistration(
+  //   const fetchedData = await useFetchCreateUpdate(
   //     `v1/events/backoffice/${param}`,
   //     'PUT',
   //     eventBody.value

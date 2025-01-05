@@ -47,7 +47,7 @@ const defaultQuestion: DefaultQuestion[] = [
   { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
 ];
 const regis = async () => {
-  const regsitered = await useFetchRegistration(
+  const regsitered = await useFetchCreateUpdate(
     `v1/registrations`,
     'POST',
     registrationBody.value
@@ -115,7 +115,7 @@ function closePreview() {
   document.body.style.overflow = '';
 }
 async function submitFeedback() {
-  const feedbackResponse = await useFetchRegistration(
+  const feedbackResponse = await useFetchCreateUpdate(
     `v1/feedbacks`,
     'POST',
     answers.value[answers.value.length - 1]
@@ -125,7 +125,7 @@ async function submitFeedback() {
     const feedbackId = feedbackResponse.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
       (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
-      await useFetchRegistration(`v1/answers`, 'POST', answers.value[i]);
+      await useFetchCreateUpdate(`v1/answers`, 'POST', answers.value[i]);
     }
   } else {
     // isChangeStatusComplete.value = false;

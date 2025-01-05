@@ -91,7 +91,7 @@ async function fetchData() {
 const createQuestion = async () => {
   const formattedQuestions = getFormattedQuestions('create');
   formattedQuestions.forEach(async (question) => {
-    const fetchedData = await useFetchRegistration(
+    const fetchedData = await useFetchCreateUpdate(
       `v1/questions`,
       'POST',
       question
@@ -103,7 +103,7 @@ async function editQuestion(difference: EditQuestion[]) {
   const formattedQuestions = getEditFormattedQuestions(difference);
   let createResult = true;
   difference.forEach(async (question, index) => {
-    const fetchedData = await useFetchRegistration(
+    const fetchedData = await useFetchCreateUpdate(
       `v1/questions/${question.questionId}`,
       'PUT',
       formattedQuestions[index]
