@@ -32,7 +32,7 @@ const emit = defineEmits(['previewFeedback']);
   </td>
   <td>
     <div class="flex justify-center gap-5 text-xl text-gray-600">
-      <div class="flex items-center justify-center gap-2 p-4">
+      <div v-if="canEdit" class="flex items-center justify-center gap-2 p-4">
         <NuxtLink
           class="go-to-feedback"
           :to="{
@@ -42,9 +42,9 @@ const emit = defineEmits(['previewFeedback']);
           <PenEdit class="t3" />
         </NuxtLink>
       </div>
-      <!-- <div v-else class="flex items-center justify-center gap-2 p-4">
-        <PenEdit class="t3 text-cool-gray" />
-      </div> -->
+      <div v-else class="flex items-center justify-center gap-2 p-4">
+        <PenEdit class="t3 cursor-not-allowed text-cool-gray" />
+      </div>
       <div class="flex items-center justify-center gap-2 p-4">
         <NuxtLink
           class="go-to-response"

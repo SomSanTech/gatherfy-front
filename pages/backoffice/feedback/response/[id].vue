@@ -104,8 +104,6 @@ async function getAnswerByQuestion(questionId: number) {
       // Add the answer to the corresponding array
       groupedAnswers[questionKey].push(answer);
     });
-  } else {
-    console.error('Fetched data is not an array');
   }
   answerData.value = { ...answerData.value, ...groupedAnswers };
 }
@@ -260,57 +258,69 @@ onMounted(async () => {
         class="w-full rounded-3xl bg-white p-10 drop-shadow-lg"
       >
         <p class="b1 mb-3">{{ index + 1 }}. {{ question.questionText }}</p>
-        <p class="b2 mb-2">
-          {{ answerData[question.questionId].length }} responses
-        </p>
-        <div class="h-72 overflow-auto">
-          <div
-            v-if="question.questionType === 'text'"
-            v-for="answer in answerData[question.questionId]"
-          >
-            <div class="my-2 rounded-xl border px-4 py-2">
-              <p class="b2">{{ answer.answerText }}</p>
-            </div>
-          </div>
-          <div v-else-if="question.questionType === 'rating'" class="flex">
-            {{ getRatingAnswer(question.questionId) }}
-            <div class="w-80 pt-5">
-              <div
-                class="relative flex h-full w-full items-center justify-center"
-              >
-                <div
-                  class="aspect-square w-3/4 rounded-full drop-shadow-lg"
-                  :style="{
-                    background: conicGradientStyle[question.questionId],
-                  }"
-                ></div>
-                <div
-                  class="absolute left-1/2 top-1/2 aspect-square w-2/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"
-                ></div>
+        <div v-if="answerData[question.questionId]">
+          <p class="b2 mb-2">
+            {{ answerData[question.questionId]?.length }} responses
+          </p>
+          <div class="h-72 overflow-auto">
+            <div
+              v-if="question.questionType === 'text'"
+              v-for="answer in answerData[question.questionId]"
+            >
+              <div class="my-2 rounded-xl border px-4 py-2">
+                <p class="b2">{{ answer.answerText }}</p>
               </div>
             </div>
-
-            <div class="flex items-center">
-              <ul class="" v-if="groupedByAnswerText">
-                <li
-                  v-for="(data, index) in Object.keys(
-                    groupedByAnswerText
-                  ).sort()"
-                  :key="index"
-                  class="b2 flex items-center gap-2"
+            <div v-else-if="question.questionType === 'rating'" class="flex">
+              {{ getRatingAnswer(question.questionId) }}
+              <div class="w-80 pt-5">
+                <div
+                  class="relative flex h-full w-full items-center justify-center"
                 >
-                  <span
-                    v-if="colors"
-                    :style="{ backgroundColor: colors[data] }"
-                    class="h-3 w-3 rounded-full drop-shadow-sm"
-                  ></span>
-                  {{ data }}
-                  <StarRound />
-                  [{{ groupedByAnswerText[data] }}]
-                </li>
-              </ul>
+                  <div
+                    class="aspect-square w-3/4 rounded-full drop-shadow-lg"
+                    :style="{
+                      background: conicGradientStyle[question.questionId],
+                    }"
+                  ></div>
+                  <div
+                    class="absolute left-1/2 top-1/2 aspect-square w-2/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="flex items-center">
+                <ul class="" v-if="groupedByAnswerText">
+                  <li
+                    v-for="(data, index) in Object.keys(
+                      groupedByAnswerText
+                    ).sort()"
+                    :key="index"
+                    class="b2 flex items-center gap-2"
+                  >
+                    <span
+                      v-if="colors"
+                      :style="{ backgroundColor: colors[data] }"
+                      class="h-3 w-3 rounded-full drop-shadow-sm"
+                    ></span>
+                    {{ data }}
+                    <StarRound />
+                    [{{ groupedByAnswerText[data] }}]
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
+        </div>
+        <div v-else class="flex flex-col justify-center text-center">
+          <img
+            src="/components/images/catch-feedback.png"
+            class="h-64 object-contain"
+          />
+          <p class="b1 mb-3 font-normal">Awaiting feedback</p>
+          <p class="b2">
+            Once guests respond, you will see their feedback here.
+          </p>
         </div>
       </div>
     </div>

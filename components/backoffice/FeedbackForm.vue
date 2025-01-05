@@ -24,7 +24,7 @@ const props = withDefaults(
     submitFeedback?: Function;
   }>(),
   {
-    submitFeedback: () => console.log('Sunmit Feedback'),
+    submitFeedback: () => {},
   }
 );
 
