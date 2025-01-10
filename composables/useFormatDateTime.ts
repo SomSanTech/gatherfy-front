@@ -1,6 +1,6 @@
 export const useFormatDateTime = (
   date: Date,
-  format: 'date' | 'time' | 'fullDate'
+  format: 'date' | 'ISOdate' | 'time' | 'fullDate'
 ) => {
   const dateTime = new Date(date);
 
@@ -18,6 +18,13 @@ export const useFormatDateTime = (
     return `${month} ${day} ${dayOfWeek}`;
   };
 
+  const formatIsoDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   if (format === 'time') {
     return new Intl.DateTimeFormat('en-GB', {
       hour: 'numeric',
@@ -27,6 +34,8 @@ export const useFormatDateTime = (
     }).format(dateTime);
   } else if (format === 'fullDate') {
     return formatFullDate(dateTime);
+  } else if (format === 'ISOdate') {
+    return formatIsoDate(dateTime);
   } else {
     return new Intl.DateTimeFormat('en-GB', {
       day: 'numeric',
