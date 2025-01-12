@@ -14,22 +14,22 @@ const route = useRoute();
 const param = route.params.id;
 const error = useError();
 const event = ref({
-  name: '',
-  description: '',
-  detail: '',
-  start_date: '',
-  end_date: '',
-  ticket_start_date: '',
-  ticket_end_date: '',
-  location: '',
-  map: '',
-  capacity: '',
-  status: '',
-  slug: '',
-  image: '',
-  owner: '',
-  tags: '',
+  event_name: '',
+  event_desc: '',
+  event_detail: '',
+  event_start_date: '',
+  event_end_date: '',
+  event_ticket_start_date: '',
+  event_ticket_end_date: '',
+  event_location: '',
+  event_google_map: '',
+  event_capacity: '',
+  event_slug: '',
+  event_image: '',
+  event_owner: 2,
+  tags: [],
 });
+
 const tags = ref<Tag[]>([]);
 const isChangeStatusComplete = ref();
 const filteredTag = ref();
@@ -41,6 +41,8 @@ const iframeSrc = ref();
 const selectedFile = ref('');
 const selectedTags = ref<Tag[]>([]);
 const previewImage = ref();
+const uploadFileName = ref();
+const fileToUpload = ref();
 const statusStyle = {
   success: {
     style: 'bg-[#16C098]/25 text-[#008767]',
@@ -64,16 +66,24 @@ const fetchData = async () => {
   }
 };
 const fetchEventEdit = async () => {
-  const fetchedData = await useFetchCreateUpdate(
-    `v1/event/${param}`,
-    'PUT',
-    event.value
+  const fetchedUpload = await useFetchUpload(
+    `v1/files/upload`,
+    fileToUpload.value
   );
-  if (fetchedData.status === 200) {
-    isChangeStatusComplete.value = true;
-  } else {
-    isChangeStatusComplete.value = false;
+  if (fetchedUpload) {
+    event.value.event_image = uploadFileName.value;
+    const fetchedData = await useFetchCreateUpdate(
+      `v1/event/${param}`,
+      'PUT',
+      event.value
+    );
+    if (fetchedData && fetchedUpload) {
+      isChangeStatusComplete.value = true;
+    } else {
+      isChangeStatusComplete.value = false;
+    }
   }
+
   console.log(event.value);
 };
 
@@ -107,7 +117,7 @@ function onDeleteSelectedTag(index: number) {
 function slugify(eventName: string) {
   eventName = eventName.replace(/^\s+|\s+$/g, ''); // trim leading/trailing white space
   eventName = eventName.toLowerCase(); // convert string to lowercase
-  event.value.slug = eventName
+  event.value.event_slug = eventName
     .replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
     .replace(/\s+/g, '-') // replace spaces with hyphens
     .replace(/-+/g, '-'); // remove consecutive hyphens
@@ -120,15 +130,17 @@ function renderIframe(content: string) {
 //       isIframeLoaded.value = true;
 //       console.log('Iframe has finished loading');
 //     }
-function handelFileUpload(event: Event) {
+function handelFileUpload(file: Event) {
   // return URL.createObjectURL(file)
-  const target = event.target as HTMLInputElement;
+  const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
     previewImage.value = URL.createObjectURL(file);
-    console.log(previewImage.value);
+    uploadFileName.value = file.name;
+    fileToUpload.value = file;
   }
 }
+
 // const minioClient = new Minio.Client({
 //   endPoint: 'http://cp24us1.sit.kmutt.ac.th',
 //   port: 9000,
@@ -201,8 +213,8 @@ onMounted(async () => {
                 <input
                   type="text"
                   class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.name"
-                  @input="slugify(event.name)"
+                  v-model="event.event_name"
+                  @input="slugify(event.event_name)"
                 />
               </div>
               <div class="col-span-3">
@@ -216,7 +228,7 @@ onMounted(async () => {
                 <input
                   type="text"
                   class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.slug"
+                  v-model="event.event_slug"
                 />
               </div>
               <div class="col-span-3">
@@ -297,7 +309,7 @@ onMounted(async () => {
                 <input
                   type="text"
                   class="event-detail-desc b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.description"
+                  v-model="event.event_desc"
                 />
               </div>
               <div class="col-span-3">
@@ -306,7 +318,7 @@ onMounted(async () => {
                   rows="8"
                   type="text"
                   class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.detail"
+                  v-model="event.event_detail"
                 />
               </div>
               <div class="">
@@ -374,7 +386,7 @@ onMounted(async () => {
                 <input
                   type="number"
                   class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.capacity"
+                  v-model="event.event_capacity"
                   placeholder="The maximum number of people"
                 />
               </div>
@@ -383,7 +395,7 @@ onMounted(async () => {
                 <input
                   type="number"
                   class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.capacity"
+                  v-model="event.event_google_map"
                   placeholder="Registration goal for reference, no impact on event."
                 />
               </div>
@@ -392,7 +404,7 @@ onMounted(async () => {
                 <input
                   type="text"
                   class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.location"
+                  v-model="event.event_location"
                 />
               </div>
               <div class="col-span-3">
@@ -401,9 +413,9 @@ onMounted(async () => {
                   rows="5"
                   type="text"
                   class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-                  v-model="event.map"
+                  v-model="event.event_google_map"
                   placeholder='&lt;iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.8730478848183!2d100.54497267612477!3d13.726134986663078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29f2476aee2a3%3A0x6e91389d33667ab8!2sOne%20Bangkok!5e0!3m2!1sen!2sth!4v1732998492170!5m2!1sen!2sth" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"&gt;&lt;/iframe&gt;'
-                  @input="renderIframe(event.map)"
+                  @input="renderIframe(event.event_google_map)"
                 />
                 <!-- <div v-html="event.map"></div> -->
                 <div v-if="iframeSrc">
