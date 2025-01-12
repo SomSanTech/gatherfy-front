@@ -27,6 +27,8 @@ export interface AddQuestion {
   questionType: string;
   questionTypeName: string;
   isDropdownOpen: boolean;
+  isInputChange: boolean;
+  isQuestionNew: boolean;
 }
 export interface EditQuestion {
   questionId: string;
@@ -35,6 +37,8 @@ export interface EditQuestion {
   questionType: string;
   questionTypeName: string;
   isDropdownOpen: boolean;
+  isInputChange: boolean;
+  isQuestionNew: boolean;
 }
 export interface Answer {
   answerId: number;

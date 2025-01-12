@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AddQuestion, EditQuestion } from '~/models/feedback';
 import Arrow from '../icons/Arrow.vue';
 import Trash from '../icons/Trash.vue';
 
@@ -9,7 +10,7 @@ const selectedEventTimeStyle = {
 };
 const prop = defineProps<{
   type: string;
-  question: ExistingQuestion | NewQuestion;
+  question: EditQuestion | AddQuestion;
   index: number;
   indexName: string;
   startIndex: number;
@@ -19,23 +20,6 @@ const prop = defineProps<{
   confirmRemoveField: Function;
   selectStatus: Function;
 }>();
-
-interface ExistingQuestion {
-  questionId: string;
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
-
-interface NewQuestion {
-  eventId: string;
-  questionText: string;
-  questionType: string;
-  questionTypeName: string;
-  isDropdownOpen: boolean;
-}
 
 const questionType = [
   {
@@ -60,16 +44,17 @@ const selectType = (typeOption: QuestionTypeOption) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-4 gap-x-5 gap-y-3">
+  <div
+    class="grid grid-cols-4 gap-x-5 gap-y-3"
+    :class="question.isQuestionNew ? 'italic' : ''"
+  >
     <div class="relative col-span-1 mt-10 flex gap-5">
       <p class="b1 font-medium">
         Question {{ type === 'existing' ? index + 1 : index + startIndex + 1 }}
       </p>
       <Trash
         class="b1 mt-1 cursor-pointer"
-        @click="
-          removeField(indexName, (question as ExistingQuestion).questionId)
-        "
+        @click="removeField(indexName, (question as EditQuestion).questionId)"
       />
       <div
         v-if="indexConfirmDelete == indexName"
@@ -105,7 +90,9 @@ const selectType = (typeOption: QuestionTypeOption) => {
         required
         placeholder="Type your question"
         v-model="question.questionText"
-        class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+        class="b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
+        :class="question.isInputChange ? 'italic' : ''"
+        @input="question.isInputChange = true"
       />
     </div>
     <div class="col-span-2 col-start-2">
@@ -114,7 +101,8 @@ const selectType = (typeOption: QuestionTypeOption) => {
         <div class="relative">
           <button
             @click="question.isDropdownOpen = !question.isDropdownOpen"
-            class="regis-detail-status b2 border-1 my-4 flex w-full items-center justify-between gap-1 rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner"
+            :class="question.isInputChange ? 'italic' : ''"
+            class="regis-detail-status b2 border-1 my-4 flex w-full items-center justify-between gap-1 rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner"
           >
             {{
               // question.questionTypeName
@@ -155,7 +143,7 @@ const selectType = (typeOption: QuestionTypeOption) => {
           required
           placeholder="Leave your answer"
           disabled
-          class="b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          class="b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
         />
       </div>
       <div v-else-if="question.questionType === 'rating'" class="mx-3 my-4">

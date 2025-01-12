@@ -175,6 +175,8 @@ function addField() {
     questionType: '',
     questionTypeName: '',
     isDropdownOpen: false,
+    isInputChange: true,
+    isQuestionNew: true,
   });
 }
 
