@@ -33,5 +33,5 @@ export interface EditEvent {
   event_slug: string;
   event_image: string;
   event_owner: number;
-  tags: any;
+  tags: number[];
 }
