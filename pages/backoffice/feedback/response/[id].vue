@@ -32,11 +32,11 @@ export interface GroupedAnswers {
 }
 
 const colors: Record<string, string> = {
-  5: '#989898',
-  4: '#D71515',
-  3: '#cccccc',
-  2: '#16C098',
-  1: '#0085DB',
+  5: '#a0c15a',
+  4: '#add633',
+  3: '#ffd934',
+  2: '#ffb234',
+  1: '#ff8c5a',
 };
 
 async function fetchData() {
@@ -158,7 +158,7 @@ onMounted(async () => {
               :to="{ name: 'event-id', params: { id: eventData?.slug } }"
             >
               <button
-                class="dash-event-name flex items-center justify-start gap-1 text-3xl font-semibold duration-300 hover:underline"
+                class="dash-event-name t3 flex items-center justify-start gap-1 text-3xl font-semibold duration-300 hover:underline"
               >
                 {{ eventData?.name }}
                 <Arrow class="t3 rotate-180" />

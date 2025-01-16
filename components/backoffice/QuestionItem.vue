@@ -39,23 +39,27 @@ const selectType = (typeOption: QuestionTypeOption) => {
   prop.question.questionType = typeOption.urlSend;
   prop.question.questionTypeName = typeOption.name;
   prop.question.isDropdownOpen = !prop.question.isDropdownOpen;
-  console.log(typeOption);
+  prop.question.isInputChange = true;
 };
 </script>
 
 <template>
-  <div
-    class="grid grid-cols-4 gap-x-5 gap-y-3"
-    :class="question.isQuestionNew ? 'italic' : ''"
-  >
+  <div class="grid grid-cols-4 gap-x-5 gap-y-3">
     <div class="relative col-span-1 mt-10 flex gap-5">
       <p class="b1 font-medium">
         Question {{ type === 'existing' ? index + 1 : index + startIndex + 1 }}
+        <br />
+        <span
+          v-if="question.isQuestionNew || question.isInputChange"
+          class="b3 font-normal italic text-lavender-gray"
+          >edited</span
+        >
       </p>
       <Trash
         class="b1 mt-1 cursor-pointer"
         @click="removeField(indexName, (question as EditQuestion).questionId)"
       />
+
       <div
         v-if="indexConfirmDelete == indexName"
         class="absolute top-8 z-50 flex translate-x-1/3 items-center justify-center bg-opacity-50"
@@ -69,13 +73,13 @@ const selectType = (typeOption: QuestionTypeOption) => {
             </h3>
             <button
               @click="confirmRemoveField(indexName, true)"
-              class="b3 mr-2 inline-flex items-center rounded-lg bg-red-600 px-3 py-2.5 text-center font-medium text-white hover:bg-red-800 focus:ring-4 focus:ring-red-300"
+              class="b3 mr-2 inline-flex items-center rounded-lg bg-red-600 px-3 py-2.5 text-center font-medium text-white hover:bg-red-800"
             >
               Yes, I'm sure
             </button>
             <button
               @click="confirmRemoveField(indexName, false)"
-              class="b3 inline-flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-center font-medium text-gray-900 hover:bg-gray-100 focus:ring-4 focus:ring-cyan-200"
+              class="b3 inline-flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-center font-medium text-gray-900 hover:bg-gray-100"
             >
               No, cancel
             </button>
@@ -91,7 +95,6 @@ const selectType = (typeOption: QuestionTypeOption) => {
         placeholder="Type your question"
         v-model="question.questionText"
         class="b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
-        :class="question.isInputChange ? 'italic' : ''"
         @input="question.isInputChange = true"
       />
     </div>
@@ -101,7 +104,6 @@ const selectType = (typeOption: QuestionTypeOption) => {
         <div class="relative">
           <button
             @click="question.isDropdownOpen = !question.isDropdownOpen"
-            :class="question.isInputChange ? 'italic' : ''"
             class="regis-detail-status b2 border-1 my-4 flex w-full items-center justify-between gap-1 rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner"
           >
             {{
@@ -150,8 +152,8 @@ const selectType = (typeOption: QuestionTypeOption) => {
         <NuxtRating :read-only="true" :rating-value="3" rating-size="30" />
       </div>
     </div>
-    <hr class="col-span-4 text-black/25" />
   </div>
+  <hr class="col-span-4 my-5 text-black/25" />
 </template>
 
 <style scoped></style>
