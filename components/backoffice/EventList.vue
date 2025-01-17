@@ -16,6 +16,7 @@ interface Event {
   eventLocation: string;
   eventStartDate: Date;
 }
+const emit = defineEmits(['handleDeleteEvent']);
 </script>
 
 <template>
@@ -42,7 +43,10 @@ interface Event {
       >
         <PenEdit />
       </NuxtLink>
-      <Trash />
+      <Trash
+        class="cursor-pointer"
+        @click="$emit('handleDeleteEvent', event)"
+      />
     </div>
     <div
       v-else-if="type === 'registration'"

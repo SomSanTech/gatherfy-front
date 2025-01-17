@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { Tag } from '~/models/tag';
 import Arrow from '../icons/Arrow.vue';
+import Cancle from '../icons/Cancle.vue';
 import CheckCircle from '../icons/CheckCircle.vue';
-import type { Event } from '~/models/event';
+import type { EditEvent } from '~/models/event';
 const error = useError();
 const route = useRoute();
 const param = route.params.id;
@@ -33,9 +35,14 @@ const statusStyle = {
 
 // ENUM('Awaiting Check-in', 'Checked in', 'Unattended')
 const props = defineProps<{
-  event?: Event;
+  event?: EditEvent;
+  tags?: Tag[];
+  fetchEdit: Function;
 }>();
-
+const filteredTag = ref();
+const inputTag = ref('');
+const isDropdownVisible = ref(false);
+// const editEventDto = ref<EditEvent>({})
 // const fetchData = async () => {
 //     const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
 
@@ -47,18 +54,32 @@ const props = defineProps<{
 //     }
 // };
 
-const fetchEvent = async () => {
-  //   const fetchedData = await useFetchCreateUpdate(
-  //     `v1/events/backoffice/${param}`,
-  //     'PUT',
-  //     eventBody.value
-  //   );
-  //   if (fetchedData === 200) {
-  //     isChangeStatusComplete.value = true;
-  //   } else {
-  //     isChangeStatusComplete.value = false;
-  //   }
-};
+// function separateDate(date: Date, format: 'date' | 'time'){
+//   const parsedDate = new Date(date);
+//   const dateTime = parsedDate.toISOString().split("T");
+//   console.log(parsedDate)
+//   if(format === 'date'){
+//     return dateTime[0]
+//   }
+//   else{
+//     const time = dateTime[1]
+//     return time.substring(0, 5); // "HH:mm"
+//   }
+// }
+function filterTag(value: string) {
+  const tagLeft = props.tags?.filter(
+    (item) => !props.event?.tags.includes(item.tag_title)
+  );
+  const filter = tagLeft?.filter((item) =>
+    item.tag_title.toLowerCase().startsWith(value.toLowerCase())
+  );
+  filteredTag.value = filter;
+}
+
+function selectTag(tag: {}) {
+  console.log(tag);
+  isDropdownVisible.value = false;
+}
 
 onMounted(() => {
   try {
@@ -79,10 +100,10 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div v-if="isLoading" class="my-16 flex items-center justify-center">
+  <!-- <div v-if="isLoading" class="my-16 flex items-center justify-center">
     <span class="loader"></span>
-  </div>
-  <div v-else>
+  </div> -->
+  <div>
     <div class="mt-10 grid grid-cols-3 gap-x-16 gap-y-5">
       <div
         v-if="isChangeStatusComplete != null"
@@ -102,15 +123,81 @@ watchEffect(() => {
         <input
           type="text"
           class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
-          :value="props.event?.name"
+          v-model="event.name"
         />
+      </div>
+      <div class="col-span-3">
+        <p class="b1">Slug</p>
+        <input
+          type="text"
+          class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          v-model="event.slug"
+        />
+      </div>
+      <div class="col-span-3">
+        <p class="b1">Tags</p>
+        <!-- <div class="flex items-center gap-2 my-4 rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner">
+          <div v-for="tag of props.event?.tags"
+            class="flex items-center gap-2 b2 border rounded-lg px-2 py-1 w-fit bg-white cursor-pointer duration-100">
+            {{ tag }}
+            <Cancle />
+          </div>
+          <div id="add-tag"
+            class="relative b2 font-medium text-lavender-gray px-2 py-1 hover:bg-[#e3e5e9] rounded-lg cursor-pointer duration-150 hover:li">
+            + Add tag
+            <div id="tag-dropdown" class="absolute bg-white border rounded-lg left-0 mt-2">
+              <div v-for="tag of tags"
+                class="flex items-center justify-between gap-2 b2 px-4 py-1 cursor-pointer duration-100 text-black border-t">
+                <label :for="tag.tag_title">{{ tag.tag_title }}</label><input type="checkbox" :id="tag.tag_title" :name="tag.tag_title" :value="tag.tag_title" />
+              </div>
+            </div>
+          </div>
+        </div> -->
+        <div
+          class="tag-input my-4 flex items-center gap-2 rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner"
+        >
+          <div
+            v-for="tag of props.event?.tags"
+            class="b2 flex w-fit cursor-pointer items-center gap-2 rounded-lg border bg-white px-2 py-1 duration-100"
+          >
+            {{ tag }}
+            <Cancle />
+          </div>
+          <div>
+            <input
+              type="text"
+              id="add-tag"
+              class="b2 item relative bg-[#F8FBFF] px-2 py-1 focus:outline-none"
+              @input="filterTag(inputTag)"
+              @focus="isDropdownVisible = true"
+              v-model="inputTag"
+              placeholder="+ Add tag"
+            />
+            <div
+              v-if="isDropdownVisible"
+              class="absolute mt-2 rounded-lg border bg-white"
+            >
+              <div
+                v-for="tag of filteredTag"
+                class="b2 z-50 flex cursor-pointer items-center justify-between gap-2 border-t px-5 py-2 text-black duration-100 hover:bg-[#d0d2d4]"
+              >
+                <button
+                  @click="selectTag(tag)"
+                  @blur="isDropdownVisible = false"
+                >
+                  {{ tag.tag_title }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-span-3">
         <p class="b1">Event Description</p>
         <input
           type="text"
           class="event-detail-desc b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
-          :value="props.event?.description"
+          v-model="event.description"
         />
       </div>
       <div class="col-span-3">
@@ -119,12 +206,87 @@ watchEffect(() => {
           rows="8"
           type="text"
           class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
-          :value="props.event?.detail"
+          v-model="event.detail"
         />
+      </div>
+      <!-- <div class="">
+        <p class="b1">Ticket Start Date</p>
+        <div class="flex gap-3 my-4">
+          <input type="date" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required :value="useFormatDateTime(props.event?.ticket_start_date, 'ISOdate')">
+          <input type="time" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required :value="props.event?.ticket_start_date ? useFormatDateTime(props.event.ticket_start_date, 'time') : ''">
+        </div>
+      </div>
+      <div class="">
+        <p class="b1">Ticket End Date</p>
+        <div class="flex gap-3 my-4">
+          <input type="date" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required :value="useFormatDateTime(props.event?.ticket_end_date, 'ISOdate')">
+          <input type="time" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required :value="props.event?.ticket_end_date ? useFormatDateTime(props.event.ticket_end_date, 'time') : ''">
+        </div>
+      </div> -->
+      <!-- <div class="col-start-1">
+        <p class="b1">Event Start Date</p>
+        <div class="flex gap-3 my-4">
+          <input type="date" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required
+            :value="useFormatDateTime(props.event?.start_date, 'ISOdate')">
+          <input type="time" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required
+            :value="props.event?.start_date ? useFormatDateTime(props.event.start_date, 'time') : ''">
+        </div>
+      </div>
+      <div class="">
+        <p class="b1">Event End Date</p>
+        <div class="flex gap-3 my-4">
+          <input type="date" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required
+            :value="useFormatDateTime(props.event?.end_date, 'ISOdate')">
+          <input type="time" class="b2 border px-4 py-2 bg-[#F8FBFF] shadow-inner rounded-lg" required
+            :value="props.event?.start_date ? useFormatDateTime(props.event.end_date, 'time') : ''">
+        </div>
+      </div> -->
+      <div class="col-span-1 col-start-1">
+        <p class="b1">Capacity</p>
+        <input
+          type="number"
+          class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          v-model="event.capacity"
+        />
+      </div>
+      <div class="col-span-1">
+        <p class="b1">Goal</p>
+        <input
+          type="number"
+          class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          v-model="event.capacity"
+        />
+      </div>
+      <div class="col-span-3">
+        <p class="b1">Location</p>
+        <input
+          type="text"
+          class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          v-model="event.location"
+        />
+      </div>
+      <div class="col-span-3">
+        <p class="b1">Map</p>
+        <textarea
+          rows="6"
+          type="text"
+          class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-[#F8FBFF] px-4 py-2 shadow-inner focus:outline-none"
+          v-model="event.map"
+        />
+        <div v-html="props.event?.map"></div>
       </div>
     </div>
     <div class="flex justify-end gap-5">
-      <BtnComp text="Save" @click="fetchEvent" color="green" />
+      <BtnComp text="Save" @click="fetchEdit()" color="green" />
     </div>
   </div>
 </template>
+<style>
+#add-tag:focus #tag-dropdown {
+  display: block;
+}
+
+#tag-dropdown {
+  display: none;
+}
+</style>
