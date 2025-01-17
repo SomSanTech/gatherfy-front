@@ -125,18 +125,20 @@ function getFormattedTags(tags: Tag[]) {
 }
 const fetchEventEdit = async () => {
   try {
-    const formattedTags = await getFormattedTags(selectedTags.value);
-    event.value.tags = await formattedTags;
-    const editEventDto = toEditEventDTO(event.value);
     if (validateForm()) {
+      const formattedTags = await getFormattedTags(selectedTags.value);
+      event.value.tags = await formattedTags;
+      const editEventDto = toEditEventDTO(event.value);
+      const currentFileName = editEventDto.event_image.replace(
+        'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
+        ''
+      );
       if (uploadFileName.value) {
+        await useFetchDelete(`v1/files/delete/${currentFileName}`);
         editEventDto.event_image = uploadFileName.value;
         await useFetchUpload(`v1/files/upload`, fileToUpload.value);
       } else {
-        editEventDto.event_image = editEventDto.event_image.replace(
-          'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
-          ''
-        );
+        editEventDto.event_image = currentFileName;
       }
       concatDateTime();
       const fetchedData = await useFetchCreateUpdate(
@@ -211,22 +213,22 @@ function handelFileUpload(file: Event) {
   }
 }
 function concatDateTime() {
-  dateInput.value.ticket_start_date = event.value.ticket_start_date.concat(
+  event.value.ticket_start_date = dateInput.value.ticket_start_date.concat(
     'T',
-    event.value.ticket_start_time
+    dateInput.value.ticket_start_time
   );
-  dateInput.value.ticket_start_time = event.value.ticket_end_date.concat(
+  // event.value.ticket_start_time = dateInput.value.ticket_end_date.concat(
+  //   'T',
+  //   dateInput.value.ticket_end_time
+  // );
+  event.value.start_date = dateInput.value.start_date.concat(
     'T',
-    event.value.ticket_end_time
+    dateInput.value.start_time
   );
-  dateInput.value.start_date = event.value.start_date.concat(
-    'T',
-    event.value.start_time
-  );
-  dateInput.value.start_time = event.value.end_date.concat(
-    'T',
-    event.value.end_time
-  );
+  // dateInput.value.start_time = dateInput.value.end_date.concat(
+  //   'T',
+  //   dateInput.value.end_time
+  // );
 }
 function getGenerateSlug() {
   if (!autoGenerateSlug.value) {
