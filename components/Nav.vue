@@ -15,6 +15,10 @@ const handleSearch = () => {
     });
   }
 };
+const loginPopup = useLoginPopup();
+function openLoginPopup() {
+  loginPopup.value = true;
+}
 </script>
 
 <template>
@@ -45,7 +49,7 @@ const handleSearch = () => {
             <SearchIcon class="h-3 w-3 text-black" />
           </button>
         </div>
-        <BtnComp text="Sign in" color="red" />
+        <BtnComp text="Sign in" color="red" @click="openLoginPopup" />
       </div>
     </div>
   </div>
