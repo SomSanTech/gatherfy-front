@@ -135,6 +135,11 @@ onMounted(async () => {
     }, 5000);
   }
 });
+
+const accessToken = useCookie('accessToken');
+const refreshToken = useCookie('refreshToken');
+
+console.log(accessToken.value);
 const filteredTimeData = ref();
 const filterTimeEventData = (time: string) => {
   let filter;

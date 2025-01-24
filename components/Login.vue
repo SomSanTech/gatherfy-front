@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useRuntimeConfig } from '#app';
 const loginPopup = useLoginPopup();
-
+const isUserSignIn = useIsUserSignIn();
 const isSignup = ref(false);
+
 function closePopup() {
   loginPopup.value = false;
 }
@@ -12,6 +14,101 @@ const changeToSignUp = () => {
 const selectedGender = ref('female');
 const birthday = ref();
 const genderList = ['Male', 'Female', 'Other', 'Prefer not to say'];
+
+const username = ref('');
+const password = ref('');
+
+const useFetch = async (url: string, method: string, body: object) => {
+  const config = useRuntimeConfig();
+  try {
+    const response = await fetch(`${config.public.baseUrl}/api/v1/${url}`, {
+      method: `${method}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to fetch data' };
+  }
+};
+const userProfile = useUserProfile();
+// const useFetchWithAuth = async (
+//   url: string,
+//   method: string,
+//   token: any,
+//   body?: object
+// ) => {
+//   // const token = 'your-access-token'; // เปลี่ยนเป็น token ของคุณ
+//   const config = useRuntimeConfig();
+//   try {
+//     const response = await fetch(`${config.public.baseUrl}/api/v1/${url}`, {
+//       method: method, // เช่น 'GET', 'POST', 'PUT', 'DELETE'
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: `Bearer ${token}`, // ใส่ Bearer token ใน header
+//       },
+//       body: body ? JSON.stringify(body) : undefined, // ใส่ body เฉพาะเมื่อมีค่า
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`);
+//     }
+
+//     return await response.json();
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//     return { error: 'Failed to fetch data' };
+//   }
+// };
+
+const handleSignin = async () => {
+  if (username.value.length !== 0 && password.value.length !== 0) {
+    const dataSend = {
+      username: username.value,
+      password: password.value,
+    };
+
+    console.log('Sending Data:', dataSend);
+
+    const fetchedData = await useFetch(`login`, 'POST', dataSend);
+    console.log('Fetched Data:', fetchedData);
+
+    if (fetchedData.accessToken && fetchedData.refreshToken) {
+      const accessCookie = useCookie('accessToken', {
+        httpOnly: false, // Debugging Phase
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+      accessCookie.value = fetchedData.accessToken;
+
+      const refreshCookie = useCookie('refreshToken', {
+        httpOnly: false, // Debugging Phase
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      refreshCookie.value = fetchedData.refreshToken;
+      const userProfileData = await useFetchWithAuth(
+        'profile',
+        'GET',
+        accessCookie.value
+      );
+      userProfile.value = userProfileData;
+      console.log(userProfile.value);
+
+      console.log('Access Token:', accessCookie.value);
+    } else {
+      console.error('Tokens not received from server');
+    }
+
+    loginPopup.value = false;
+  }
+};
 </script>
 
 <template>
@@ -81,16 +178,20 @@ const genderList = ['Male', 'Female', 'Other', 'Prefer not to say'];
           <input
             type="text"
             placeholder="Username"
+            v-model="username"
             class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
           />
+          {{ username }}
         </div>
         <div>
           <p v-if="!isSignup" class="b2 font pb-1 font-semibold">Password</p>
           <input
             type="password"
+            v-model="password"
             placeholder="Enter your password"
             class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
           />
+          {{ password }}
         </div>
 
         <div class="flex gap-2" v-if="isSignup">
@@ -146,7 +247,10 @@ const genderList = ['Male', 'Female', 'Other', 'Prefer not to say'];
         </div>
         <p class="b2 underline">Forgot password?</p>
       </div>
-      <button class="b1 w-full rounded-lg bg-dark-grey py-2 text-white">
+      <button
+        @click="handleSignin"
+        class="b1 w-full rounded-lg bg-dark-grey py-2 text-white"
+      >
         {{ isSignup ? 'Sign Up' : 'Sign in now' }}
       </button>
 

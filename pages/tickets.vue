@@ -1,7 +1,16 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const tickets = ref();
+const accessToken = useCookie('accessToken');
+const refreshToken = useCookie('refreshToken');
+onMounted(async () => {
+  const response = await useFetchWithAuth('tickets', 'GET', accessToken.value);
+  tickets.value = response;
+  console.log(tickets.value);
+});
+</script>
 
 <template>
-  <div class="mx-auto mt-32 flex w-screen max-w-6xl gap-9">
+  <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9">
     <div class="bg- w-[280px] rounded-xl border border-black/70"></div>
     <div class="w-full">
       <p class="t3">My Ticket</p>
@@ -26,34 +35,57 @@
         </div>
       </div>
       <div>
-        <div class="mt-4 flex shadow-xl">
-          <div class="aspect-square w-[300px] rounded-[5px]">
-            <img
-              src="../components/images/2025-SMTown.jpg"
-              class="aspect-square w-[500px] object-cover"
-              alt=""
-            />
-          </div>
-          <div class="rounded-[5px] bg-white p-4 px-5">
-            <h1 class="t2">Startup Pitch Night</h1>
-            <p class="b3">Technology</p>
-            <div class="mt-4">
-              <p class="b2 font-semibold">25.12.2025</p>
-              <p class="b2">Sunday 7PM - 11PM</p>
-            </div>
-
-            <div class="mt-[105px]">
-              <p class="b3 font-semibold">Co-Working Space</p>
-              <p class="b3">Chiang Mai, Thailand</p>
-            </div>
-          </div>
+        <div
+          v-for="ticket in tickets"
+          class="relative mt-4 overflow-hidden rounded-lg"
+          :style="{
+            backgroundImage: `url(${ticket?.image})`,
+            borderRadius: '12px',
+          }"
+        >
           <div
-            class="w- b3 flex items-center justify-center border-l-[1px] border-dashed px-12 text-center"
+            class="relative z-10 flex h-full rounded-xl bg-white bg-opacity-50 p-2 backdrop-blur-xl"
           >
-            <p class="mx-auto">
-              Click to view <br />
-              QR Code
-            </p>
+            <div class="aspect-square w-[290px] shrink-0 rounded-[5px]">
+              <img
+                :src="ticket.image"
+                class="aspect-square rounded-[6px] object-cover"
+                alt=""
+              />
+            </div>
+            <div
+              class="flex w-full flex-col justify-between rounded-[5px] p-3 px-5"
+            >
+              <div class="pb-5">
+                <h1 class="t2">{{ ticket.name }}</h1>
+                <div class="flex items-center gap-2">
+                  <p v-for="tag in ticket.tags" class="b3">{{ tag }}</p>
+                </div>
+                <div class="mt-4">
+                  <p class="b2 font-semibold">25.12.2025</p>
+                  <p class="b2">Sunday 7PM - 11PM</p>
+                </div>
+              </div>
+
+              <div class="">
+                <p class="b3 font-semibold">Co-Working Space</p>
+                <p class="b3">Chiang Mai, Thailand</p>
+              </div>
+            </div>
+            <div
+              class="b3 relative flex w-1/3 items-center justify-center border-l-[1px] border-dashed border-black/80 px-12 text-center"
+            >
+              <div
+                class="absolute -top-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
+              ></div>
+              <div
+                class="absolute -bottom-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
+              ></div>
+              <p class="mx-auto">
+                Click to view <br />
+                QR Code
+              </p>
+            </div>
           </div>
         </div>
       </div>

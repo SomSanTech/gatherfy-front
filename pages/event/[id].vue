@@ -132,8 +132,20 @@ async function submitFeedback() {
   }
   previewFeedback.value = false;
 }
+
+const isUserSignIn = useIsUserSignIn();
+
 onMounted(async () => {
   try {
+    console.log(isUserSignIn.value);
+    const accessToken = useCookie('accessToken').value;
+    const refreshToken = useCookie('refreshToken').value;
+
+    if (accessToken && refreshToken) {
+      console.log('User is logged in');
+    } else {
+      console.log('User is not logged in');
+    }
     isLoading.value = true;
     localStorage.setItem('user', JSON.stringify(mockUserLogin));
     const storedUser = localStorage.getItem('user');
