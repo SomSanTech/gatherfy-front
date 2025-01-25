@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Edit from '~/components/icons/Edit.vue';
-import { BrowserQRCodeReader } from '@zxing/browser';
-import QrcodeVue from 'qrcode.vue';
+// import { BrowserQRCodeReader } from '@zxing/browser';
+// import QrcodeVue from 'qrcode.vue';
 
-const video = ref<HTMLVideoElement | null>(null);
-const scannedValue = ref<string | null>(null);
+// const video = ref<HTMLVideoElement | null>(null);
+// const scannedValue = ref<string | null>(null);
 
 // onMounted(() => {
 //   const codeReader = new BrowserQRCodeReader();
@@ -16,67 +16,140 @@ const scannedValue = ref<string | null>(null);
 const userProfile = useUserProfile();
 console.log(userProfile.value);
 
-const userProfileEdited = ref({
-  firstname: userProfile.value.users_firstname,
-  lastname: userProfile.value.users_lastname,
-  username: userProfile.value.username,
-  password: userProfile.value.password,
-  gender: userProfile.value.users_gender,
-  email: userProfile.value.users_email,
-  phone: userProfile.value.users_phone,
-  image: userProfile.value.users_image,
-  birthday: userProfile.value.users_birthday,
-});
+// const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
 
-const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
+// const apiResponse = ref<string | null>(null);
+// let qrCodeReader: BrowserQRCodeReader;
+// ตัวแปรสำหรับ Gender
+const selectedGender = ref<string | null>(null);
 
-const apiResponse = ref<string | null>(null);
-let qrCodeReader: BrowserQRCodeReader;
+// onMounted(async () => {
+//   qrCodeReader = new BrowserQRCodeReader();
+//   qrCodeReader.decodeFromVideoDevice(
+//     null,
+//     video.value,
+//     async (result, error) => {
+//       if (result) {
+//         scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
+//         if (scannedValue.value) {
+//           apiResponse.value = scannedValue.value;
+//           console.log(scannedValue.value);
 
-onMounted(() => {
-  qrCodeReader = new BrowserQRCodeReader();
-  qrCodeReader.decodeFromVideoDevice(
-    null,
-    video.value,
-    async (result, error) => {
-      if (result) {
-        scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
-        if (scannedValue.value) {
-          try {
-            // เรียก API ที่แสกนมา
-            const response = await fetch(scannedValue.value, {
-              method: 'GET',
-            });
-            const data = await response.json();
-            apiResponse.value = JSON.stringify(data, null, 2); // แสดงผล API Response
-          } catch (err) {
-            console.error('API call failed:', err);
-            apiResponse.value = 'API call failed!';
-          }
-        }
-      }
-      if (error) console.error(error);
-    }
-  );
-});
+//           try {
+//             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
+//             const response = await useFetchWithAuth(
+//               `check-in`,
+//               'PUT',
+//               scannedValue.value
+//             );
+//             // const response = await fetch(
+//             //   'http://localhost:4040/api/v1/check-in',
+//             //   {
+//             //     method: 'PUT',
+//             //     headers: {
+//             //       Authorization: `Bearer ${scannedValue.value}`, // แนบ token ใน header
+//             //     },
+//             //   }
+//             // );
+//             const data = await response.json();
+//             // apiResponse.value = JSON.stringify(data, null, 2); // แสดงผลลัพธ์
+//             apiResponse.value = response;
+//           } catch (err) {
+//             console.error('API call failed:', err);
+//             apiResponse.value = 'API call failed!';
+//           }
+//         } else {
+//           console.log('test');
+//         }
+//       }
+//       if (error) console.error(error);
+//     }
+//   );
+// });
 // ตัวแปรสำหรับวัน, เดือน, และปี
 const selectedDay = ref<string | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
+const userProfileEdited = ref({
+  firstname: '',
+  lastname: '',
+  username: '',
+  password: '',
+  gender: '',
+  email: '',
+  phone: '',
+  image: '',
+  birthday: '',
+});
+// const userProfileEdited = ref({
+//   firstname: userProfile.value.users_firstname,
+//   lastname: userProfile.value.users_lastname,
+//   username: userProfile.value.username,
+//   password: userProfile.value.password,
+//   gender: userProfile.value.users_gender,
+//   email: userProfile.value.users_email,
+//   phone: userProfile.value.users_phone,
+//   image: userProfile.value.users_image,
+//   birthday: userProfile,
+// });
+watch(
+  userProfile,
+  (newProfile) => {
+    if (newProfile) {
+      userProfileEdited.value = {
+        firstname: newProfile.users_firstname,
+        lastname: newProfile.users_lastname,
+        username: newProfile.username,
+        password: newProfile.password,
+        gender: newProfile.users_gender,
+        email: newProfile.users_email,
+        phone: newProfile.users_phone,
+        image: newProfile.users_image,
+        birthday: newProfile.users_birthday,
+      };
+
+      const [year, month, day] = newProfile.users_birthday
+        .split('T')[0]
+        .split('-');
+
+      selectedDay.value = day;
+      selectedMonth.value = parseInt(month);
+      selectedYear.value = year;
+      selectedGender.value = newProfile.users_gender;
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
-  const [year, month, day] = userProfileEdited.value.birthday
-    .split('T')[0]
-    .split('-');
+  if (userProfile.value) {
+    userProfileEdited.value = {
+      firstname: userProfile.value.users_firstname,
+      lastname: userProfile.value.users_lastname,
+      username: userProfile.value.username,
+      password: userProfile.value.password,
+      gender: userProfile.value.users_gender,
+      email: userProfile.value.users_email,
+      phone: userProfile.value.users_phone,
+      image: userProfile.value.users_image,
+      birthday: userProfile,
+    };
 
-  // ตั้งค่าลงใน selectedDay, selectedMonth, และ selectedYear
-  selectedDay.value = day;
-  selectedMonth.value = parseInt(month);
-  selectedYear.value = year;
+    const [year, month, day] = userProfile.value.users_birthday
+      .split('T')[0]
+      .split('-');
 
-  console.log(selectedDay.value);
-  console.log(selectedMonth.value);
-  console.log(selectedYear.value);
+    // ตั้งค่าลงใน selectedDay, selectedMonth, และ selectedYear
+    selectedDay.value = day;
+    selectedMonth.value = parseInt(month);
+    selectedYear.value = year;
+
+    console.log(selectedDay.value);
+    console.log(selectedMonth.value);
+    console.log(selectedYear.value);
+
+    selectedGender.value = userProfile.value.users_gender;
+  }
 });
 // สร้างช่วงของวัน (1-31), เดือน, และปี (2000-2025)
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -98,8 +171,6 @@ const years = Array.from(
   { length: 50 },
   (_, i) => new Date().getFullYear() - i
 );
-// ตัวแปรสำหรับ Gender
-const selectedGender = ref<string | null>(null);
 
 // รายการตัวเลือก Gender
 const genders = ['Male', 'Female', 'Non-Binary', 'Prefer not to say'];
@@ -115,9 +186,23 @@ const formattedBirthday = computed(() => {
   }
   return 'Please select a valid date';
 });
-onBeforeUnmount(() => {
-  qrCodeReader.reset(); // ปิดกล้องเมื่อออกจากหน้า
-});
+const accessToken = useCookie('accessToken');
+const refreshToken = useCookie('refreshToken');
+const editProfile = async () => {
+  console.log('---------------------------------');
+
+  console.log(userProfileEdited.value);
+
+  const response = await useFetchWithAuth(
+    `profile`,
+    'PUT',
+    accessToken.value,
+    userProfileEdited.value
+  );
+};
+// onBeforeUnmount(() => {
+//   qrCodeReader.reset(); // ปิดกล้องเมื่อออกจากหน้า
+// });
 </script>
 
 <template>
@@ -125,20 +210,17 @@ onBeforeUnmount(() => {
     <div class="bg- w-[280px] rounded-xl border border-black/70"></div>
     <div class="w-full">
       <p class="t3">My Profile</p>
-      <div>
+      <!-- <div>
         <video ref="video" width="300" height="300"></video>
         <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p>
         <p v-if="apiResponse" class="mt-4 text-blue-600">
           API Response: {{ apiResponse }}
         </p>
-      </div>
-      <div>
-        <qrcode-vue :value="qrValue" size="200" />
-      </div>
+      </div> -->
       <div class="flex gap-20 rounded-xl border border-black/70 p-8 px-20">
         <div class="relative h-fit shrink-0">
           <img
-            :src="userProfile.users_image"
+            :src="userProfile?.users_image"
             alt=""
             class="relative h-40 w-40 rounded-full"
           />
@@ -154,7 +236,7 @@ onBeforeUnmount(() => {
             <input
               type="text"
               placeholder="Firstname"
-              v-model="userProfileEdited.users_firstname"
+              v-model="userProfileEdited.firstname"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
             />
           </div>
@@ -163,7 +245,7 @@ onBeforeUnmount(() => {
             <input
               type="text"
               placeholder="Lastname"
-              v-model="userProfileEdited.users_lastname"
+              v-model="userProfileEdited.lastname"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
             />
           </div>
@@ -181,7 +263,7 @@ onBeforeUnmount(() => {
             <input
               type="text"
               placeholder="Phone"
-              v-model="userProfileEdited.users_phone"
+              v-model="userProfileEdited.phone"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
             />
           </div>
@@ -247,6 +329,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
         </div>
+        <button class="" @click="editProfile">save</button>
       </div>
     </div>
   </div>

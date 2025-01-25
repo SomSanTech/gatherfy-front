@@ -1,11 +1,34 @@
 <script setup lang="ts">
+import QrcodeVue from 'qrcode.vue';
+
 const tickets = ref();
 const accessToken = useCookie('accessToken');
 const refreshToken = useCookie('refreshToken');
+const getTokenForQR = async (eventId: string) => {
+  const token = await useFetchWithAuth(
+    `check-in/${eventId}`,
+    'POST',
+    accessToken.value
+  );
+  return token?.qrToken;
+};
+const qrValues = ref<{ [key: string]: string }>({});
+const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
+const isShowQRcode = ref({ event: 0, isShow: false });
+const generateQRCode = async (eventId: string) => {
+  const tokenResponse = await getTokenForQR(eventId);
+  console.log(tokenResponse);
+
+  if (tokenResponse) {
+    const token = tokenResponse?.qrToken; // สมมติว่าคุณได้ token กลับมาจาก API
+    qrValues.value[eventId] = `${tokenResponse}`;
+  }
+};
 onMounted(async () => {
   const response = await useFetchWithAuth('tickets', 'GET', accessToken.value);
   tickets.value = response;
   console.log(tickets.value);
+  console.log('test', accessToken.value);
 });
 </script>
 
@@ -73,7 +96,7 @@ onMounted(async () => {
               </div>
             </div>
             <div
-              class="b3 relative flex w-1/3 items-center justify-center border-l-[1px] border-dashed border-black/80 px-12 text-center"
+              class="b3 relative flex w-1/3 items-center justify-center border-l-[1px] border-dashed border-black/80 pl-2 text-center"
             >
               <div
                 class="absolute -top-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
@@ -81,10 +104,20 @@ onMounted(async () => {
               <div
                 class="absolute -bottom-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
               ></div>
-              <p class="mx-auto">
+              <button
+                v-if="!qrValues[ticket.eventId]"
+                @click="generateQRCode(ticket.eventId)"
+                class="mx-auto"
+              >
                 Click to view <br />
                 QR Code
-              </p>
+              </button>
+              <div
+                v-if="qrValues[ticket.eventId]"
+                class="rounded-lg bg-white p-2"
+              >
+                <qrcode-vue :value="qrValues[ticket.eventId]" size="100" />
+              </div>
             </div>
           </div>
         </div>

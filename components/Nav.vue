@@ -96,6 +96,7 @@ const deleteCookie = () => {
             <SearchIcon class="h-3 w-3 text-black" />
           </button>
         </div>
+        {{ userProfile?.users_image }}
         <BtnComp
           v-if="!isUserSignIn"
           text="Sign in"
