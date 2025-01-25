@@ -6,13 +6,6 @@ import Edit from '~/components/icons/Edit.vue';
 // const video = ref<HTMLVideoElement | null>(null);
 // const scannedValue = ref<string | null>(null);
 
-// onMounted(() => {
-//   const codeReader = new BrowserQRCodeReader();
-//   codeReader.decodeFromVideoDevice(null, video.value, (result, error) => {
-//     if (result) scannedValue.value = result.getText();
-//     if (error) console.error(error);
-//   });
-// });
 const userProfile = useUserProfile();
 console.log(userProfile.value);
 
@@ -74,9 +67,9 @@ const userProfileEdited = ref({
   firstname: '',
   lastname: '',
   username: '',
-  password: '',
+  password: 'Orm6+5=11',
   gender: '',
-  email: '',
+  email: 'orm.kornnaphat@gmail.com',
   phone: '',
   image: '',
   birthday: '',
@@ -96,6 +89,8 @@ watch(
   userProfile,
   (newProfile) => {
     if (newProfile) {
+      console.log('userProfile ', userProfile.value);
+
       userProfileEdited.value = {
         firstname: newProfile.users_firstname,
         lastname: newProfile.users_lastname,
@@ -122,17 +117,17 @@ watch(
 );
 
 onMounted(() => {
+  console.log('userProfile ', userProfile.value);
   if (userProfile.value) {
     userProfileEdited.value = {
       firstname: userProfile.value.users_firstname,
       lastname: userProfile.value.users_lastname,
       username: userProfile.value.username,
-      password: userProfile.value.password,
       gender: userProfile.value.users_gender,
       email: userProfile.value.users_email,
       phone: userProfile.value.users_phone,
       image: userProfile.value.users_image,
-      birthday: userProfile,
+      birthday: '',
     };
 
     const [year, month, day] = userProfile.value.users_birthday
@@ -191,14 +186,14 @@ const refreshToken = useCookie('refreshToken');
 const editProfile = async () => {
   console.log('---------------------------------');
 
-  console.log(userProfileEdited.value);
+  console.log('userProfileEdited: ', userProfileEdited.value);
 
-  const response = await useFetchWithAuth(
-    `profile`,
-    'PUT',
-    accessToken.value,
-    userProfileEdited.value
-  );
+  // const response = await useFetchWithAuth(
+  //   `profile`,
+  //   'PUT',
+  //   accessToken.value,
+  //   userProfileEdited.value
+  // );
 };
 // onBeforeUnmount(() => {
 //   qrCodeReader.reset(); // ปิดกล้องเมื่อออกจากหน้า
@@ -255,6 +250,24 @@ const editProfile = async () => {
               type="text"
               placeholder="Username"
               v-model="userProfileEdited.username"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Email</p>
+            <input
+              type="text"
+              placeholder="Email"
+              v-model="userProfileEdited.email"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Password</p>
+            <input
+              type="text"
+              placeholder="Password"
+              v-model="userProfileEdited.password"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
             />
           </div>

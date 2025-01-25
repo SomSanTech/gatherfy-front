@@ -105,6 +105,14 @@ onMounted(() => {});
           <p class="b2 font-medium">Feedback</p>
         </div>
       </NuxtLink>
+      <NuxtLink to="/backoffice/qrscan">
+        <div
+          class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+        >
+          <Feedback class="t3" />
+          <p class="b2 font-medium">Scan QR Code</p>
+        </div>
+      </NuxtLink>
       <div class="b3">General</div>
       <NuxtLink
         :to="{

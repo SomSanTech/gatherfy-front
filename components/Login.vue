@@ -67,47 +67,78 @@ const userProfile = useUserProfile();
 //   }
 // };
 
+const signupData = ref({
+  firstname: '',
+  lastname: '',
+  username: '',
+  gender: '',
+  email: '',
+  phone: '',
+  image: null,
+  role: '',
+  birthday: '',
+  password: '',
+});
 const handleSignin = async () => {
-  if (username.value.length !== 0 && password.value.length !== 0) {
-    const dataSend = {
-      username: username.value,
-      password: password.value,
-    };
+  if (!isSignup.value) {
+    if (username.value.length !== 0 && password.value.length !== 0) {
+      const dataSend = {
+        username: username.value,
+        password: password.value,
+      };
 
-    console.log('Sending Data:', dataSend);
+      console.log('Sending Data:', dataSend);
 
-    const fetchedData = await useFetch(`login`, 'POST', dataSend);
-    console.log('Fetched Data:', fetchedData);
+      const fetchedData = await useFetch(`login`, 'POST', dataSend);
+      console.log('Fetched Data:', fetchedData);
 
-    if (fetchedData.accessToken && fetchedData.refreshToken) {
-      const accessCookie = useCookie('accessToken', {
-        httpOnly: false, // Debugging Phase
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60,
-      });
-      accessCookie.value = fetchedData.accessToken;
+      if (fetchedData.accessToken && fetchedData.refreshToken) {
+        const accessCookie = useCookie('accessToken', {
+          httpOnly: false, // Debugging Phase
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60,
+        });
+        accessCookie.value = fetchedData.accessToken;
 
-      const refreshCookie = useCookie('refreshToken', {
-        httpOnly: false, // Debugging Phase
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 7,
-      });
-      refreshCookie.value = fetchedData.refreshToken;
-      const userProfileData = await useFetchWithAuth(
-        'profile',
-        'GET',
-        accessCookie.value
-      );
-      userProfile.value = userProfileData;
-      console.log(userProfile.value);
+        const refreshCookie = useCookie('refreshToken', {
+          httpOnly: false, // Debugging Phase
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60 * 24 * 7,
+        });
+        refreshCookie.value = fetchedData.refreshToken;
+        const userProfileData = await useFetchWithAuth(
+          'profile',
+          'GET',
+          accessCookie.value
+        );
+        userProfile.value = userProfileData;
+        console.log(userProfile.value);
 
-      console.log('Access Token:', accessCookie.value);
-    } else {
-      console.error('Tokens not received from server');
+        console.log('Access Token:', accessCookie.value);
+      } else {
+        console.error('Tokens not received from server');
+      }
+
+      loginPopup.value = false;
     }
-
-    loginPopup.value = false;
   }
+  //   else if(isSignup.value){
+  //     console.log('hello');
+  //     Organization
+  //     Attendee
+  //     {
+  //   "firstname": "string",
+  //   "lastname": "string",
+  //   "username": "string",
+  //   "gender": "string",
+  //   "email": "string",
+  //   "phone": "string",
+  //   "image": "string",
+  //   "role": "string",
+  //   "birthday": "2025-01-25T11:11:32.134Z",
+  //   "password": "string"
+  // }
+  //   }
 };
 </script>
 
@@ -171,6 +202,12 @@ const handleSignin = async () => {
           v-if="isSignup"
           type="text"
           placeholder="Email"
+          class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+        />
+        <input
+          v-if="isSignup"
+          type="text"
+          placeholder="Phone"
           class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
         />
         <div>
