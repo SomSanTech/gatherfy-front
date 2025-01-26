@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { UserProfile } from '~/models/userProfile';
 import SearchIcon from './icons/Search.vue';
 
 const router = useRouter();
@@ -23,19 +24,17 @@ function openLoginPopup() {
 }
 
 watch(
-  () => isUserSignIn.value, // ฟังก์ชันที่คืนค่าที่ต้องการติดตาม
+  () => isUserSignIn.value,
   (newVal, oldVal) => {
-    // ฟังก์ชัน callback เมื่อค่าเปลี่ยนแปลง
     if (newVal) {
       console.log('User is now signed in');
-      // คุณสามารถเรียกฟังก์ชันอื่น หรือทำ action อื่นๆ ที่ต้องการได้ที่นี่
     } else {
       console.log('User is signed out');
-      openLoginPopup(); // เปิด popup ล็อกอินเมื่อ signed out
+      openLoginPopup();
     }
   }
 );
-const userProfile = useUserProfile();
+const userProfile: Ref<UserProfile | null> = useUserProfile();
 const isOpenProfilePopup = ref(false);
 
 const handleOpenProfilePopup = () => {
@@ -53,17 +52,16 @@ onMounted(async () => {
   userProfile.value = userProfileData;
 });
 
-const deleteCookie = () => {
+const signOut = () => {
   const accessToken = useCookie('accessToken');
   const refreshToken = useCookie('refreshToken');
-
-  // ลบคุกกี้โดยการตั้งค่าเป็น null
+  const role = useCookie('roleCookie');
   accessToken.value = null;
   refreshToken.value = null;
+  role.value = null;
   router.push('/').then(() => {
     window.location.reload();
   });
-  console.log('Cookies deleted');
 };
 </script>
 
@@ -72,7 +70,6 @@ const deleteCookie = () => {
     <div
       class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
     >
-      <!-- {{ userProfile }} -->
       <NuxtLink to="/">
         <button class="go-home-btn oooh-baby-regular text-xl lg:text-4xl">
           Gatherfy
@@ -133,7 +130,7 @@ const deleteCookie = () => {
               </button>
             </NuxtLink>
             <button
-              @click="deleteCookie"
+              @click="signOut"
               class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
             >
               Sign out

@@ -13,7 +13,6 @@ console.log(userProfile.value);
 
 // const apiResponse = ref<string | null>(null);
 // let qrCodeReader: BrowserQRCodeReader;
-// ตัวแปรสำหรับ Gender
 const selectedGender = ref<string | null>(null);
 
 // onMounted(async () => {
@@ -59,7 +58,6 @@ const selectedGender = ref<string | null>(null);
 //     }
 //   );
 // });
-// ตัวแปรสำหรับวัน, เดือน, และปี
 const selectedDay = ref<string | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
@@ -134,7 +132,6 @@ onMounted(() => {
       .split('T')[0]
       .split('-');
 
-    // ตั้งค่าลงใน selectedDay, selectedMonth, และ selectedYear
     selectedDay.value = day;
     selectedMonth.value = parseInt(month);
     selectedYear.value = year;
@@ -146,7 +143,6 @@ onMounted(() => {
     selectedGender.value = userProfile.value.users_gender;
   }
 });
-// สร้างช่วงของวัน (1-31), เดือน, และปี (2000-2025)
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   'January',
@@ -167,10 +163,8 @@ const years = Array.from(
   (_, i) => new Date().getFullYear() - i
 );
 
-// รายการตัวเลือก Gender
 const genders = ['Male', 'Female', 'Non-Binary', 'Prefer not to say'];
 
-// คำนวณผลลัพธ์เป็นรูปแบบ "YYYY-MM-DDT00:00:00"
 const formattedBirthday = computed(() => {
   if (selectedDay.value && selectedMonth.value && selectedYear.value) {
     const day = String(selectedDay.value).padStart(2, '0'); // เติมเลข 0 ข้างหน้า เช่น 01

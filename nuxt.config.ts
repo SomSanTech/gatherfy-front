@@ -11,7 +11,16 @@ export default defineNuxtConfig({
     },
   },
   components: {
-    dirs: ['~/components', '~/components/backoffice'],
+    dirs: [
+      { path: '~/components', pathPrefix: false, extensions: ['vue'] },
+      { path: '~/components', pathPrefix: false },
+      {
+        path: '~/components/backoffice',
+        pathPrefix: false,
+        extensions: ['vue'],
+      },
+      { path: '~/components/icons', pathPrefix: false },
+    ],
   },
   typescript: {
     strict: true,

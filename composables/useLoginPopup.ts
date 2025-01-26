@@ -2,6 +2,7 @@ import { useRuntimeConfig } from '#app';
 
 export const useLoginPopup = () => useState('loginPopup', () => false);
 export const useUserProfile = () => useState('userProfile', () => null);
+export const useRole = () => useState('useRole', () => null);
 
 export const useIsUserSignIn = () => {
   const isUserSignIn = useState('isUserSignIn', () => false); // เก็บสถานะผู้ใช้
