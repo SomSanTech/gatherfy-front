@@ -25,7 +25,7 @@ onMounted(async () => {
           try {
             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
             const response = await useFetchWithAuth(
-              `check-in`,
+              `v1/check-in`,
               'PUT',
               scannedValue.value
             );

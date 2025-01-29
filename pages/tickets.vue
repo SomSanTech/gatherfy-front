@@ -6,26 +6,26 @@ const accessToken = useCookie('accessToken');
 const refreshToken = useCookie('refreshToken');
 const getTokenForQR = async (eventId: string) => {
   const token = await useFetchWithAuth(
-    `check-in/${eventId}`,
+    `v1/check-in/${eventId}`,
     'POST',
     accessToken.value
   );
   return token?.qrToken;
 };
 const qrValues = ref<{ [key: string]: string }>({});
-const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
-const isShowQRcode = ref({ event: 0, isShow: false });
 const generateQRCode = async (eventId: string) => {
   const tokenResponse = await getTokenForQR(eventId);
-  console.log(tokenResponse);
 
   if (tokenResponse) {
-    const token = tokenResponse?.qrToken; // สมมติว่าคุณได้ token กลับมาจาก API
     qrValues.value[eventId] = `${tokenResponse}`;
   }
 };
 onMounted(async () => {
-  const response = await useFetchWithAuth('tickets', 'GET', accessToken.value);
+  const response = await useFetchWithAuth(
+    'v1/tickets',
+    'GET',
+    accessToken.value
+  );
   tickets.value = response;
   console.log(tickets.value);
   console.log('test', accessToken.value);

@@ -7,7 +7,7 @@ export const useFetchWithAuth = async (
   // const token = 'your-access-token'; // เปลี่ยนเป็น token ของคุณ
   const config = useRuntimeConfig();
   try {
-    const response = await fetch(`${config.public.baseUrl}/api/v1/${url}`, {
+    const response = await fetch(`${config.public.baseUrl}/api/${url}`, {
       method: method, // เช่น 'GET', 'POST', 'PUT', 'DELETE'
       headers: {
         'Content-Type': 'application/json',

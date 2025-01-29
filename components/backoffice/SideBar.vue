@@ -19,7 +19,7 @@ const signOut = () => {
 
 onMounted(async () => {
   const userProfileData = await useFetchWithAuth(
-    'profile',
+    'v1/profile',
     'GET',
     accessToken.value
   );

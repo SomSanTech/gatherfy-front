@@ -146,8 +146,10 @@ const initializeChart = () => {
 };
 
 const fetchAllRegisData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/registrations/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations`,
+    'GET',
+    accessToken.value
   );
   registrationsData.value = fetchedData || [];
 
@@ -188,9 +190,14 @@ const fetchAllRegisData = async () => {
     ])
   );
 };
+
+const accessToken = useCookie('accessToken');
+
 const fetchAllEventData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
   );
   eventsData.value = fetchedData || [];
   // eventsData.value =  [];
@@ -223,9 +230,12 @@ const fetchAllViewData = async () => {
     });
   }
 };
-
+const profileData = useCookie('profileData');
 onMounted(async () => {
   try {
+    console.log(profileData.value);
+    console.log('actk', accessToken.value);
+
     isLoading.value = true;
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
@@ -265,10 +275,11 @@ watch(chartCanvasRef, (newValue) => {
     <div v-else class="ml-80 flex h-full">
       <div class="mx-20 mt-32 flex w-full flex-col gap-3">
         <SumaryOfView
+          v-if="profileData"
           :sumOfViews="sumOfViews?.totalViews"
           :viewsEntries="sumOfViews?.totalEntries"
           :allRegistration="registrationsData?.length"
-          :adminData
+          :profileData
           format="row"
         />
 

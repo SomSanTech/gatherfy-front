@@ -235,7 +235,7 @@ const handleSignin = async () => {
         });
         refreshCookie.value = fetchedData.refreshToken;
         const userProfileData = await useFetchWithAuth(
-          'profile',
+          'v1/profile',
           'GET',
           accessCookie.value
         );
@@ -244,11 +244,27 @@ const handleSignin = async () => {
         role.value = decodeToken(accessCookie.value)?.role;
         console.log(role);
         const roleCookie = useCookie('roleCookie', {
-          httpOnly: false, // Debugging Phase
+          httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
-          maxAge: 60 * 60 * 24 * 7,
+          maxAge: 60 * 60,
         });
+
         roleCookie.value = decodeToken(accessCookie.value)?.role;
+
+        const profileData = useCookie('profileData', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60,
+        });
+        if (fetchedData.accessToken) {
+          const userProfileData = await useFetchWithAuth(
+            'v1/profile',
+            'GET',
+            fetchedData.accessToken
+          );
+          profileData.value = userProfileData;
+        }
+
         if (roleCookie.value === 'Attendee') {
           router.push('/');
         } else {
@@ -473,6 +489,7 @@ watch(
           <p v-if="!isSignup" class="b2 font pb-1 font-semibold">Password</p>
           <div class="relative">
             <input
+              @keypress.enter="handleSignin"
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
               placeholder="Enter your password"
@@ -589,7 +606,6 @@ watch(
           >
             {{ fieldErrorMessages['testPass'] }}
           </p>
-          {{ confirmPassword }}
         </div>
         <div class="flex gap-2" v-if="isSignup">
           <div class="w-full">

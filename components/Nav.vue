@@ -4,6 +4,15 @@ import SearchIcon from './icons/Search.vue';
 
 const router = useRouter();
 const searchKw = ref('');
+const loginPopup = useLoginPopup();
+const isUserSignIn = useIsUserSignIn();
+const userProfile: Ref<UserProfile | null> = useUserProfile();
+const isOpenProfilePopup = ref(false);
+
+function openLoginPopup() {
+  loginPopup.value = true;
+}
+
 const handleSearch = () => {
   if (searchKw.value.length > 0) {
     router.push({
@@ -16,41 +25,10 @@ const handleSearch = () => {
     });
   }
 };
-const loginPopup = useLoginPopup();
-const isUserSignIn = useIsUserSignIn();
-
-function openLoginPopup() {
-  loginPopup.value = true;
-}
-
-watch(
-  () => isUserSignIn.value,
-  (newVal, oldVal) => {
-    if (newVal) {
-      console.log('User is now signed in');
-    } else {
-      console.log('User is signed out');
-      openLoginPopup();
-    }
-  }
-);
-const userProfile: Ref<UserProfile | null> = useUserProfile();
-const isOpenProfilePopup = ref(false);
 
 const handleOpenProfilePopup = () => {
   isOpenProfilePopup.value = !isOpenProfilePopup.value;
 };
-onMounted(async () => {
-  const accessToken = useCookie('accessToken');
-  console.log();
-
-  const userProfileData = await useFetchWithAuth(
-    'profile',
-    'GET',
-    accessToken.value
-  );
-  userProfile.value = userProfileData;
-});
 
 const signOut = () => {
   const accessToken = useCookie('accessToken');
@@ -63,6 +41,30 @@ const signOut = () => {
     window.location.reload();
   });
 };
+
+watch(
+  () => isUserSignIn.value,
+  (newVal) => {
+    if (newVal) {
+      console.log('User is now signed in');
+    } else {
+      console.log('User is signed out');
+      openLoginPopup();
+    }
+  }
+);
+
+onMounted(async () => {
+  const accessToken = useCookie('accessToken');
+  if (accessToken.value) {
+    const userProfileData = await useFetchWithAuth(
+      'v1/profile',
+      'GET',
+      accessToken.value
+    );
+    userProfile.value = userProfileData;
+  }
+});
 </script>
 
 <template>
