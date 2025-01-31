@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/models/userProfile';
 
-const userProfile: Ref<UserProfile | null> = useUserProfile();
-const accessToken = useCookie('accessToken');
+// const userProfile: Ref<UserProfile | null> = useUserProfile();
+// const accessToken = useCookie('accessToken');
 const router = useRouter();
 
 const signOut = () => {
@@ -16,16 +16,16 @@ const signOut = () => {
     window.location.reload();
   });
 };
-
-onMounted(async () => {
-  const userProfileData = await useFetchWithAuth(
-    'v1/profile',
-    'GET',
-    accessToken.value
-  );
-  userProfile.value = userProfileData;
-  console.log('userProfile.value', userProfile.value);
-});
+const profileData = useCookie<UserProfile>('profileData');
+// onMounted(async () => {
+//   const userProfileData = await useFetchWithAuth(
+//     'v1/profile',
+//     'GET',
+//     accessToken.value
+//   );
+//   userProfile.value = userProfileData;
+//   console.log('userProfile.value', userProfile.value);
+// });
 </script>
 <template>
   <div
@@ -154,12 +154,12 @@ onMounted(async () => {
     <div class="flex w-full items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <img
-          v-if="userProfile"
-          :src="userProfile?.users_image"
+          v-if="profileData"
+          :src="profileData?.users_image"
           alt=""
           class="h-8 w-8 rounded-full"
         />
-        <p class="b2">{{ userProfile?.username }}</p>
+        <p class="b2">{{ profileData?.username }}</p>
       </div>
       <button @click="signOut">
         <SignOut class="text-xl" />

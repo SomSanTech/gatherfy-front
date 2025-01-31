@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import EventDetail from '~/components/backoffice/EventDetail.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
 import type { EditEvent } from '~/models/event';
 import type { Tag } from '~/models/tag';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
@@ -26,7 +26,7 @@ const event = ref<EditEvent>({
   event_registration_goal: 0,
   event_slug: '',
   event_image: '',
-  event_owner: 2,
+  event_owner: 0,
   tags: [],
 });
 const dateInput = ref({
@@ -75,20 +75,25 @@ async function fetchData() {
     tags.value = fetchedTags || [];
   }
 }
+
+const accessToken = useCookie('accessToken');
 async function fetchEventCreate() {
   const formattedTags = getFormattedTags(selectedTags.value);
   event.value.tags = formattedTags;
   if (validateForm()) {
     const fetchedUpload = await useFetchUpload(
-      `v1/files/upload`,
-      fileToUpload.value
+      `v2/files/upload`,
+      fileToUpload.value,
+      'thumbnails',
+      accessToken.value
     );
     if (fetchedUpload) {
       event.value.event_image = uploadFileName.value;
       concatDateTime();
-      const fetchedData = await useFetchCreateUpdate(
-        `v1/events`,
+      const fetchedData = await useFetchWithAuth(
+        `v2/backoffice/events`,
         'POST',
+        accessToken.value,
         event.value
       );
       if (fetchedData && fetchedUpload) {
@@ -153,6 +158,7 @@ function renderIframe(content: string) {
   const srcMatch = content.match(/src="([^"]+)"/);
   iframeSrc.value = srcMatch ? srcMatch[1] : '';
 }
+
 function handelFileUpload(file: Event) {
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
@@ -190,10 +196,17 @@ function getAutoGenerateSlug() {
   }
   event.value.event_slug = autoGenerateSlug.value;
 }
+
+const profileData = useCookie<UserProfile>('profileData');
+
 onMounted(async () => {
   try {
     isLoading.value = true;
     await fetchData();
+    console.log(profileData.value);
+    if (profileData.value) {
+      event.value.event_owner = profileData.value.users_id;
+    }
   } finally {
     isLoading.value = false;
   }

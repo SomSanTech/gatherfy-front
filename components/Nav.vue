@@ -8,7 +8,6 @@ const router = useRouter();
 const searchKw = ref('');
 const loginPopup = useLoginPopup();
 const isUserSignIn = useIsUserSignIn();
-const userProfile: Ref<UserProfile | null> = useUserProfile();
 const isOpenProfilePopup = ref(false);
 
 function openLoginPopup() {
@@ -44,29 +43,18 @@ const signOut = () => {
   });
 };
 
-watch(
-  () => isUserSignIn.value,
-  (newVal) => {
-    if (newVal) {
-      console.log('User is now signed in');
-    } else {
-      console.log('User is signed out');
-      openLoginPopup();
-    }
-  }
-);
-
-onMounted(async () => {
-  const accessToken = useCookie('accessToken');
-  if (accessToken.value) {
-    const userProfileData = await useFetchWithAuth(
-      'v1/profile',
-      'GET',
-      accessToken.value
-    );
-    userProfile.value = userProfileData;
-  }
-});
+// watch(
+//   () => isUserSignIn.value,
+//   (newVal) => {
+//     if (newVal) {
+//       console.log('User is now signed in');
+//     } else {
+//       console.log('User is signed out');
+//       openLoginPopup();
+//     }
+//   }
+// );
+const profileData = useCookie<UserProfile>('profileData');
 </script>
 
 <template>
@@ -98,7 +86,7 @@ onMounted(async () => {
           </button>
         </div>
         <BtnComp
-          v-if="!isUserSignIn"
+          v-if="!profileData"
           text="Sign in"
           color="red"
           @click="openLoginPopup"
@@ -109,8 +97,8 @@ onMounted(async () => {
             class="h-8 w-8 rounded-full bg-zinc-300"
           >
             <img
-              v-if="userProfile"
-              :src="userProfile?.users_image"
+              v-if="profileData"
+              :src="profileData?.users_image"
               alt=""
               class="h-8 w-8 rounded-full"
             />

@@ -8,6 +8,7 @@ import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
@@ -230,7 +231,7 @@ const fetchAllViewData = async () => {
     });
   }
 };
-const profileData = useCookie('profileData');
+const profileData = useCookie<UserProfile>('profileData');
 onMounted(async () => {
   try {
     console.log(profileData.value);
