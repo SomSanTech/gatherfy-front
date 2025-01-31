@@ -46,11 +46,16 @@ const defaultQuestion: DefaultQuestion[] = [
   },
   { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
 ];
+const token = useCookie('accessToken');
+
 const regis = async () => {
-  const regsitered = await useFetchCreateUpdate(
-    `v1/registrations`,
+  const regsitered = await useFetchWithAuth(
+    `v2/registrations`,
     'POST',
-    registrationBody.value
+    token.value,
+    {
+      eventId: event.value.eventId,
+    }
   );
   if (regsitered.status === 200) {
     alert('Thank you for registration');

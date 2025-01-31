@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/models/userProfile';
+import { vOnClickOutside } from '@vueuse/components';
+
 import SearchIcon from './icons/Search.vue';
 
 const router = useRouter();
@@ -115,6 +117,7 @@ onMounted(async () => {
           </div>
           <div
             v-if="isOpenProfilePopup"
+            v-on-click-outside="handleOpenProfilePopup"
             class="absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-lg bg-white p-3 text-start shadow-xl"
           >
             <NuxtLink to="/profile">

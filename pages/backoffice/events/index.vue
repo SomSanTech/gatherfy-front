@@ -2,22 +2,15 @@
 import EventList from '~/components/backoffice/EventList.vue';
 import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
 });
-const mockAdminLogin = {
-  userId: 2,
-  firstname: 'Jane',
-  lastname: 'Smith',
-  username: 'Janesmith',
-  gender: 'Female',
-  email: 'janesmith@example.com',
-  phone: '0987654321',
-  role: 'Organization',
-};
+const profileData = useCookie('profileData');
+
 const eventsData = ref<Event[]>([]);
-const adminData = ref<User | null>(null);
+const adminData = ref<UserProfile>();
 const isLoading = ref(true);
 const deleteAlert = ref(false);
 const deleteAlertMessage = ref('');
@@ -25,7 +18,7 @@ const deletePopup = ref(false);
 const eventDataDelete = ref();
 const fetchData = async () => {
   const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+    `v1/events/owner/${adminData.value?.users_id}`
   );
   eventsData.value = fetchedData || [];
 };
@@ -59,9 +52,10 @@ async function deleteEvent() {
 onMounted(() => {
   try {
     isLoading.value = true;
-    localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
-    const storedUser = localStorage.getItem('admin');
-    adminData.value = storedUser ? JSON.parse(storedUser) : {};
+    if (profileData.value) {
+      adminData.value = profileData.value;
+    }
+
     fetchData();
   } finally {
     isLoading.value = false;

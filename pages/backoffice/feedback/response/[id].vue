@@ -42,7 +42,11 @@ const colors: Record<string, string> = {
 async function fetchData() {
   const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
   const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
-  const fetchedFeedbackData = await useFetchData(`v1/feedbacks/event/${param}`);
+  const fetchedFeedbackData = await useFetchWithAuth(
+    `v1/feedbacks/event/${param}`,
+    'GET',
+    token.value
+  );
   eventData.value = fetchedData || [];
   questionData.value = fetchedQuestionData || [];
   feedbackData.value = fetchedFeedbackData || [];
@@ -86,9 +90,14 @@ function filterRating(star: number) {
     );
   }
 }
+
+const token = useCookie('accessToken');
+
 async function getAnswerByQuestion(questionId: number) {
-  const fetchedAnswerData = await useFetchData(
-    `v1/answers/question/${questionId}`
+  const fetchedAnswerData = await useFetchWithAuth(
+    `v2/answers/question/${questionId}`,
+    'GET',
+    token.value
   );
   // Initialize an object to store grouped answers
   const groupedAnswers: { [key: string]: Answer[] } = {};

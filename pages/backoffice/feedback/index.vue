@@ -8,6 +8,7 @@ import type {
   ExistingQuestion,
   FeedbackBody,
 } from '~/models/feedback';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
@@ -19,17 +20,7 @@ interface Event {
   eventLocation: string;
   eventStartDate: Date;
 }
-
-const mockAdminLogin = {
-  userId: 2,
-  firstname: 'Jane',
-  lastname: 'Smith',
-  username: 'Janesmith',
-  gender: 'Female',
-  email: 'janesmith@example.com',
-  phone: '0987654321',
-  role: 'Organization',
-};
+const profileData = useCookie('profileData');
 
 const defaultQuestion = [
   {
@@ -44,14 +35,15 @@ const eventsData = ref<Event[]>([]);
 const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
 const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
-const adminData = ref<User | null>(null);
+const adminData = ref<UserProfile>();
 const isLoading = ref(true);
 const feedbacksCount = ref();
 const previewFeedback = ref(false);
+const token = useCookie('accessToken');
 
 const fetchData = async () => {
   const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+    `v1/events/owner/${adminData.value?.users_id}`
   );
   eventsData.value = fetchedData || [];
   // Initialize an empty array for feedback counts
@@ -61,8 +53,10 @@ const fetchData = async () => {
     for (const item of fetchedData) {
       try {
         // Fetching feedback data for each event
-        const fetchedFeedbackData = await useFetchData(
-          `v2/feedbacks/event/${item.eventId}`
+        const fetchedFeedbackData = await useFetchWithAuth(
+          `v2/feedbacks/event/${item.eventId}`,
+          'GET',
+          token.value
         );
         if (fetchedFeedbackData.count === undefined) {
           feedbacksCount.value.push(0);
@@ -125,9 +119,7 @@ function closePreview() {
 onMounted(async () => {
   try {
     isLoading.value = true;
-    localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
-    const storedUser = localStorage.getItem('admin');
-    adminData.value = storedUser ? JSON.parse(storedUser) : {};
+    adminData.value = profileData.value;
     await fetchData();
   } finally {
     isLoading.value = false;
