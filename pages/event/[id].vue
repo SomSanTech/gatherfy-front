@@ -57,6 +57,9 @@ const regis = async () => {
       eventId: event.value.eventId,
     }
   );
+
+  console.log(regsitered);
+
   if (regsitered.status === 200) {
     alert('Thank you for registration');
   } else {
@@ -73,6 +76,8 @@ const fetchData = async () => {
     event.value = fetchedData || [];
   }
 };
+
+const userProfile = useCookie('profileData');
 
 const onReviewFeedback = async () => {
   const fetchedQuestionData = await useFetchData(
@@ -119,6 +124,7 @@ function closePreview() {
   previewFeedback.value = false;
   document.body.style.overflow = '';
 }
+
 async function submitFeedback() {
   const feedbackResponse = await useFetchCreateUpdate(
     `v1/feedbacks`,
@@ -326,8 +332,10 @@ watchEffect(() => {
             <div class="mt-2 flex items-center gap-2">
               <UserProfile class="b1" />
               <p class="regis-user b2">
-                <span class="mr-3 font-semibold">{{ userData?.username }}</span
-                >{{ userData?.email }}
+                <span class="mr-3 font-semibold">{{
+                  userProfile?.username
+                }}</span
+                >{{ userProfile?.users_email }}
               </p>
             </div>
             <button

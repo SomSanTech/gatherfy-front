@@ -34,9 +34,11 @@ const handleOpenProfilePopup = () => {
 const signOut = () => {
   const accessToken = useCookie('accessToken');
   const refreshToken = useCookie('refreshToken');
+  const profileData = useCookie('profileData');
   const role = useCookie('roleCookie');
   accessToken.value = null;
   refreshToken.value = null;
+  profileData.value = null;
   role.value = null;
   router.push('/').then(() => {
     window.location.reload();
