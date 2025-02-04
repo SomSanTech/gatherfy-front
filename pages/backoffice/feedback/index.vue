@@ -58,10 +58,10 @@ const fetchData = async () => {
           'GET',
           token.value
         );
-        if (fetchedFeedbackData.count === undefined) {
+        if (fetchedFeedbackData.data.count === undefined) {
           feedbacksCount.value.push(0);
         } else {
-          feedbacksCount.value.push(fetchedFeedbackData.count);
+          feedbacksCount.value.push(fetchedFeedbackData.data.count);
         }
       } catch (error) {
         return;

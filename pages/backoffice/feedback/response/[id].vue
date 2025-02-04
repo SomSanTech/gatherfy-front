@@ -49,8 +49,8 @@ async function fetchData() {
   );
   eventData.value = fetchedData || [];
   questionData.value = fetchedQuestionData || [];
-  feedbackData.value = fetchedFeedbackData || [];
-  filterFeedbackData.value = fetchedFeedbackData || [];
+  feedbackData.value = fetchedFeedbackData.data || [];
+  filterFeedbackData.value = fetchedFeedbackData.data || [];
 
   for (const question of questionData.value) {
     await getAnswerByQuestion(question.questionId);
@@ -101,8 +101,8 @@ async function getAnswerByQuestion(questionId: number) {
   );
   // Initialize an object to store grouped answers
   const groupedAnswers: { [key: string]: Answer[] } = {};
-  if (Array.isArray(fetchedAnswerData)) {
-    fetchedAnswerData.forEach((answer) => {
+  if (Array.isArray(fetchedAnswerData.data)) {
+    fetchedAnswerData.data.forEach((answer) => {
       // Create a custom key based on the questionId
       const questionKey = `${answer.questionId}`;
 

@@ -10,7 +10,7 @@ const getTokenForQR = async (eventId: string) => {
     'POST',
     accessToken.value
   );
-  return token?.qrToken;
+  return token.data?.qrToken;
 };
 const qrValues = ref<{ [key: string]: string }>({});
 const generateQRCode = async (eventId: string) => {
@@ -26,7 +26,7 @@ onMounted(async () => {
     'GET',
     accessToken.value
   );
-  tickets.value = response;
+  tickets.value = response.data;
   console.log(tickets.value);
   console.log('test', accessToken.value);
 });

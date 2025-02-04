@@ -9,15 +9,14 @@ export const useFetchUpload = async (
   const config = useRuntimeConfig();
   try {
     const formData = new FormData();
-    formData.append('file', file);
     formData.append('bucket', bucket);
+    formData.append('file', file);
     console.log('formData', formData);
     let response;
     if (token) {
       response = await fetch(`${config.public.baseUrl}/api/${url}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: formData,

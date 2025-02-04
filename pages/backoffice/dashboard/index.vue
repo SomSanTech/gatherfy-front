@@ -152,7 +152,7 @@ const fetchAllRegisData = async () => {
     'GET',
     accessToken.value
   );
-  registrationsData.value = fetchedData || [];
+  registrationsData.value = fetchedData.data || [];
 
   groupedByGender.value = Object.fromEntries(
     d3.rollup(
@@ -200,7 +200,7 @@ const fetchAllEventData = async () => {
     'GET',
     accessToken.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
   // eventsData.value =  [];
 };
 const fetchAllViewData = async () => {

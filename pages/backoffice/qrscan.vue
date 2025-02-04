@@ -38,9 +38,8 @@ onMounted(async () => {
             //     },
             //   }
             // );
-            const data = await response.json();
             // apiResponse.value = JSON.stringify(data, null, 2); // แสดงผลลัพธ์
-            apiResponse.value = response;
+            apiResponse.value = response.data;
           } catch (err) {
             console.error('API call failed:', err);
             apiResponse.value = 'API call failed!';

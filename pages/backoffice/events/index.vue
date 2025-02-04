@@ -16,11 +16,16 @@ const deleteAlert = ref(false);
 const deleteAlertMessage = ref('');
 const deletePopup = ref(false);
 const eventDataDelete = ref();
+const accessToken = useCookie('accessToken');
+const refreshToken = useCookie('refreshToken');
+
 const fetchData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.users_id}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
 };
 function handleDeleteEvent(event: Event) {
   eventDataDelete.value = event;
@@ -32,10 +37,12 @@ function closeDeletePopup() {
   document.body.style.overflow = '';
 }
 async function deleteEvent() {
-  const fetchedDeleteData = await useFetchDelete(
-    `v1/events/${eventDataDelete.value.eventId}`
+  const fetchedDeleteData = await useFetchWithAuth(
+    `v2/backoffice/events/${eventDataDelete.value.eventId}`,
+    'DELETE',
+    accessToken.value
   );
-  if (fetchedDeleteData === 200) {
+  if (fetchedDeleteData.status === 200) {
     closeDeletePopup();
     deleteAlertMessage.value = 'Event is removed';
     eventsData.value = eventsData.value.filter(

@@ -73,13 +73,19 @@ const dateInput = ref({
   ticket_end_date: '',
   ticket_end_time: '',
 });
+const accessToken = useCookie('accessToken');
+const refreshToken = useCookie('refreshToken');
 async function fetchData() {
-  const fetchedData = await useFetchData(`v2/events/backoffice/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events/${param}`,
+    'GET',
+    accessToken.value
+  );
   const fetchedTags = await useFetchData(`v1/tags`);
   if (fetchedData.error || fetchedTags.error) {
     error.value = fetchedData ? fetchedData : fetchedTags;
   } else {
-    event.value = (await fetchedData) || [];
+    event.value = (await fetchedData.data) || [];
     tags.value = (await fetchedTags) || [];
     selectedTags.value = event.value.tags;
     compareExistTags.value = selectedTags.value.map((item: any) => ({
@@ -247,7 +253,7 @@ function validateForm() {
 onMounted(async () => {
   try {
     isLoading.value = true;
-    await fetchData();
+    // await fetchData();
     await currentDateTime();
     await renderIframe(event.value.map);
   } finally {

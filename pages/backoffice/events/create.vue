@@ -53,6 +53,23 @@ const fileToUpload = ref();
 const autoGenerateSlug = ref('');
 const validateTagsInput = ref('');
 const validateFileInput = ref('');
+
+const validateInput = ref({
+  name: '',
+  slug: '',
+  tag: '',
+  image: '',
+  desc: '',
+  detail: '',
+  ticketStart: '',
+  ticketEnd: '',
+  startDate: '',
+  endDate: '',
+  capacity: '',
+  goal: '',
+  location: '',
+  map: '',
+});
 const statusStyle = {
   success: {
     style: 'bg-[#16C098]/25 text-[#008767]',
@@ -77,38 +94,90 @@ async function fetchData() {
 }
 
 const accessToken = useCookie('accessToken');
+
+// async function fetchEventCreate() {
+//   const formattedTags = getFormattedTags(selectedTags.value);
+//   event.value.tags = formattedTags;
+//   if (validateForm()) {
+//     const fetchedUpload = await useFetchUpload(
+//       `v1/files/upload`,
+//       fileToUpload.value,
+//       'thumbnails',
+//       accessToken.value
+//     );
+//     if (fetchedUpload) {
+//       event.value.event_image = uploadFileName.value;
+//       concatDateTime();
+//       const fetchedData = await useFetchWithAuth(
+//         `v2/backoffice/events`,
+//         'POST',
+//         accessToken.value,
+//         event.value
+//       );
+//       if (fetchedData.data && fetchedUpload) {
+//         router.push('/backoffice/events');
+//       } else {
+//         isChangeStatusComplete.value = false;
+//       }
+//     }
+//   } else {
+//     window.scrollTo(0, 0);
+//   }
+// }
 async function fetchEventCreate() {
   const formattedTags = getFormattedTags(selectedTags.value);
   event.value.tags = formattedTags;
+  concatDateTime();
+  console.log('rb', event.value);
+
   if (validateForm()) {
-    const fetchedUpload = await useFetchUpload(
-      `v2/files/upload`,
-      fileToUpload.value,
-      'thumbnails',
-      accessToken.value
+    event.value.event_image = uploadFileName.value;
+    const fetchedData = await useFetchWithAuth(
+      `v2/backoffice/events`,
+      'POST',
+      accessToken.value,
+      event.value
     );
-    if (fetchedUpload) {
-      event.value.event_image = uploadFileName.value;
-      concatDateTime();
-      const fetchedData = await useFetchWithAuth(
-        `v2/backoffice/events`,
-        'POST',
-        accessToken.value,
-        event.value
+    let fetchedUpload;
+    if (fetchData.status === 200) {
+      console.log('dai ja');
+      fetchedUpload = await useFetchUpload(
+        `v1/files/upload`,
+        fileToUpload.value,
+        'thumbnails',
+        accessToken.value
       );
-      if (fetchedData && fetchedUpload) {
-        router.push('/backoffice/events');
-      } else {
-        isChangeStatusComplete.value = false;
-      }
+    }
+    if (fetchedData.data && fetchedUpload) {
+      router.push('/backoffice/events');
+    } else {
+      isChangeStatusComplete.value = false;
     }
   } else {
     window.scrollTo(0, 0);
   }
 }
+
 function validateForm() {
+  if (event.value.event_name.length > 255) {
+    validateInput.value.name = '*Please keep event name within 255 characters.';
+    return false;
+  }
+  if (event.value.event_slug.length > 100) {
+    validateInput.value.slug = '*Please keep event slug within 100 characters.';
+    return false;
+  }
+  if (
+    new Date(event.value.event_start_date).getTime() >
+    new Date(event.value.event_end_date).getTime()
+  ) {
+    validateInput.value.startDate =
+      '*Please keep event slug within 100 characters.';
+    return false;
+  }
   if (selectedTags.value.length === 0) {
     validateTagsInput.value = '*Select at least 1 tag';
+    validateInput.tag.value = '*Select at least 1 tag';
     return false;
   } else if (!fileToUpload.value) {
     validateFileInput.value = '*Select image';
@@ -117,9 +186,11 @@ function validateForm() {
     return true;
   }
 }
+
 function getFormattedTags(tags: Tag[]) {
   return tags.map(({ tag_id }) => tag_id);
 }
+
 function filterTag(value: string) {
   const tagLeft = tags.value.filter(
     (item) =>
@@ -133,6 +204,7 @@ function filterTag(value: string) {
   filteredTag.value = filter;
   console.log(filteredTag.value);
 }
+
 function onSelectTag(tag: Tag) {
   isDropdownVisible.value = false;
   selectedTags.value.push(tag);
@@ -142,6 +214,7 @@ function onSelectTag(tag: Tag) {
     validateTagsInput.value = '';
   }
 }
+
 function onDeleteSelectedTag(index: number) {
   selectedTags.value.splice(index, 1);
   filterTag('');
@@ -250,7 +323,23 @@ onMounted(async () => {
                   </p>
                 </div>
                 <div class="col-span-3">
-                  <p class="b1">Event Name</p>
+                  <div class="flex items-center justify-between">
+                    <p class="b1">
+                      Event Name
+                      <span class="b3 italic text-burgundy">{{
+                        validateInput.name
+                      }}</span>
+                    </p>
+                    <p class="b3">
+                      <span
+                        :class="
+                          event.event_name.length > 255 ? 'text-burgundy' : ''
+                        "
+                      >
+                        {{ event.event_name.length }} </span
+                      ><span> / 255</span>
+                    </p>
+                  </div>
                   <input
                     type="text"
                     class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -261,19 +350,31 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="col-span-3">
-                  <p class="b1 flex items-baseline gap-2">
-                    Slug
-                    <span class="b3 italic"
-                      >*You can use
-                      <span
-                        @click="getAutoGenerateSlug"
-                        class="cursor-pointer text-burgundy underline"
-                        >default slug</span
+                  <div class="flex items-center justify-between">
+                    <p class="b1 flex items-baseline gap-2">
+                      Slug
+                      <span class="b3 italic"
+                        >*You can use
+                        <span
+                          @click="getAutoGenerateSlug"
+                          class="cursor-pointer text-burgundy underline"
+                          >default slug</span
+                        >
+                        or customize your slug but slugs should be
+                        'easy-to-read'</span
                       >
-                      or customize your slug but slugs should be
-                      'easy-to-read'</span
-                    >
-                  </p>
+                    </p>
+                    <p class="b3">
+                      <span
+                        :class="
+                          event.event_slug.length > 255 ? 'text-burgundy' : ''
+                        "
+                      >
+                        {{ event.event_slug.length }} </span
+                      ><span> / 100</span>
+                    </p>
+                  </div>
+
                   <input
                     type="text"
                     class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -458,6 +559,12 @@ onMounted(async () => {
                     />
                   </div>
                 </div>
+                {{ event }}
+                <span class="b3 italic text-burgundy">{{
+                  validateInput.startDate
+                }}</span>
+                -----
+                {{ dateInput }}
                 <div class="col-span-1 col-start-1">
                   <p class="b1">Capacity</p>
                   <input

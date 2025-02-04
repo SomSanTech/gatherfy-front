@@ -239,7 +239,7 @@ const handleSignin = async () => {
           'GET',
           accessCookie.value
         );
-        userProfile.value = userProfileData;
+        userProfile.value = userProfileData.data;
         console.log(userProfile.value);
         role.value = decodeToken(accessCookie.value)?.role;
         console.log(role);
@@ -262,7 +262,7 @@ const handleSignin = async () => {
             'GET',
             fetchedData.accessToken
           );
-          profileData.value = userProfileData;
+          profileData.value = userProfileData.data;
         }
 
         if (roleCookie.value === 'Attendee') {
