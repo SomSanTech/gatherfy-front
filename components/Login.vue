@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useRuntimeConfig } from '#app';
 import { vOnClickOutside } from '@vueuse/components';
+import {
+  GoogleSignInButton,
+  type CredentialResponse,
+} from 'vue3-google-signin';
 
 const loginPopup = useLoginPopup();
 const isSignup = ref(false);
@@ -359,6 +363,18 @@ watch(
   },
   { immediate: true }
 );
+
+// handle success event
+const handleLoginSuccess = (response: CredentialResponse) => {
+  const { credential } = response;
+  console.log('Access Token', credential);
+  console.log(response);
+};
+
+// handle an error event
+const handleLoginError = () => {
+  console.error('Login failed');
+};
 </script>
 
 <template>
@@ -382,7 +398,10 @@ watch(
         <p class="t3 text-center">Create an account!</p>
         <p class="b1 text-gray-600">Sign up and join with us.</p>
       </div>
-
+      <GoogleSignInButton
+        @success="handleLoginSuccess"
+        @error="handleLoginError"
+      ></GoogleSignInButton>
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
