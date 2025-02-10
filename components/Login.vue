@@ -401,8 +401,7 @@ const handleLoginError = () => {
       <GoogleSignInButton
         @success="handleLoginSuccess"
         @error="handleLoginError"
-      ></GoogleSignInButton
-      >aaaaaaaaa
+      ></GoogleSignInButton>
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"

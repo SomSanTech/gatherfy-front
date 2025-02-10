@@ -31,6 +31,8 @@ const fetchData = async () => {
   bannerEventData.value = eventData.value
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
     .slice(0, 5);
+
+  console.log('bannerEventData ', bannerEventData.value);
 };
 
 const handleReccomEvent = (type: string) => {
@@ -114,7 +116,9 @@ const selectedEventTime = ref('today');
 const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
+
 const isLoading = ref(false);
+
 onMounted(async () => {
   isLoading.value = true;
   try {
@@ -128,7 +132,7 @@ onMounted(async () => {
     const intervalId = setInterval(() => {
       if (!isFirstClickSampleEvent.value) {
         sampleEventIndex.value =
-          (sampleEventIndex.value + 1) % eventData?.value?.length;
+          (sampleEventIndex.value + 1) % bannerEventData?.value?.length;
       } else {
         clearInterval(intervalId);
       }

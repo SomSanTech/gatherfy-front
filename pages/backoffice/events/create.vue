@@ -55,21 +55,47 @@ const validateTagsInput = ref('');
 const validateFileInput = ref('');
 
 const validateInput = ref({
-  name: '',
-  slug: '',
-  tag: '',
-  image: '',
-  desc: '',
-  detail: '',
-  ticketStart: '',
-  ticketEnd: '',
-  startDate: '',
-  endDate: '',
-  capacity: '',
-  goal: '',
-  location: '',
-  map: '',
+  name: true,
+  nameLength: true,
+  slug: true,
+  slugLength: true,
+  tag: true,
+  image: true,
+  desc: true,
+  detail: true,
+  ticketStart: true,
+  ticketEnd: true,
+  ticketValid: true,
+  startDate: true,
+  endDate: true,
+  dateValid: true,
+  capacity: true,
+  goal: true,
+  location: true,
+  map: true,
 });
+
+const validateInputErrText = ref({
+  name: '*Please enter the event name.',
+  nameLength: '*Please keep event name within 255 characters.',
+  slug: '*Please enter the event slug.',
+  slugLength: '*Please keep event slug within 100 characters.',
+  tag: '*Please provide at least one tag.',
+  image: '*Please upload a valid image.',
+  desc: '*Please provide a short event description.',
+  detail: '*Please provide detailed event information.',
+  ticketStart: '*Please specify the ticket sales start date.',
+  ticketEnd: '*Please specify the ticket sales end date.',
+  ticketValid: '*Ticket sales must end after they start.',
+  startDate: '*Please enter the event start date.',
+  endDate: '*Please enter the event end date.',
+  dateValid: '*The event must end after it starts.',
+  capacity: '*Please specify the event capacity.',
+  goal: '*Please describe the event’s goal.',
+  location: '*Please provide the event location.',
+  map: '*Please enter a valid map link or coordinates.',
+});
+
 const statusStyle = {
   success: {
     style: 'bg-[#16C098]/25 text-[#008767]',
@@ -129,8 +155,10 @@ async function fetchEventCreate() {
   event.value.tags = formattedTags;
   concatDateTime();
   console.log('rb', event.value);
+  // validateForm();
+  console.log(validateInput.value);
 
-  if (validateForm()) {
+  if (!validateForm()) {
     event.value.event_image = uploadFileName.value;
     const fetchedData = await useFetchWithAuth(
       `v2/backoffice/events`,
@@ -154,37 +182,75 @@ async function fetchEventCreate() {
       isChangeStatusComplete.value = false;
     }
   } else {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
 function validateForm() {
-  if (event.value.event_name.length > 255) {
-    validateInput.value.name = '*Please keep event name within 255 characters.';
-    return false;
-  }
-  if (event.value.event_slug.length > 100) {
-    validateInput.value.slug = '*Please keep event slug within 100 characters.';
-    return false;
-  }
-  if (
-    new Date(event.value.event_start_date).getTime() >
-    new Date(event.value.event_end_date).getTime()
-  ) {
-    validateInput.value.startDate =
-      '*Please keep event slug within 100 characters.';
-    return false;
-  }
-  if (selectedTags.value.length === 0) {
-    validateTagsInput.value = '*Select at least 1 tag';
-    validateInput.tag.value = '*Select at least 1 tag';
-    return false;
-  } else if (!fileToUpload.value) {
-    validateFileInput.value = '*Select image';
-    return false;
-  } else {
-    return true;
-  }
+  console.log('event', event.value);
+
+  const checkField = {
+    name: event.value.event_name.trim(),
+    nameLength: event.value.event_name.trim().length <= 255,
+    slug: event.value.event_slug.trim(),
+    slugLength: event.value.event_slug.trim().length <= 100,
+    tag: selectedTags.value.length > 0,
+    image: fileToUpload.value,
+    desc: event.value.event_desc.trim(),
+    detail: event.value.event_detail.trim(),
+    ticketStart: event.value.event_ticket_start_date,
+    ticketEnd: event.value.event_ticket_end_date,
+    ticketValid:
+      new Date(event.value.event_ticket_end_date).getTime() >
+      new Date(event.value.event_ticket_start_date).getTime(),
+    startDate: event.value.event_start_date,
+    endDate: event.value.event_end_date,
+    dateValid:
+      new Date(event.value.event_end_date).getTime() >
+      new Date(event.value.event_start_date).getTime(),
+    capacity: event.value.event_capacity > 0,
+    goal: event.value.event_registration_goal > 0,
+    location: event.value.event_location.trim(),
+    map: true,
+  };
+
+  Object.entries(checkField).forEach(([key, value]) => {
+    const typedKey = key as keyof typeof checkField;
+    validateInput.value[typedKey] = Boolean(value);
+  });
+  const hasError = Object.values(validateInput.value).includes(false);
+
+  // if (hasError) {
+  //   triggerShake();
+  // }
+
+  return hasError;
+  // if (event.value.event_name.length > 255) {
+  //   validateInput.value.name = '*Please keep event name within 255 characters.';
+  //   return false;
+  // }
+  // if (event.value.event_slug.length > 100) {
+  //   validateInput.value.slug = '*Please keep event slug within 100 characters.';
+  //   return false;
+  // }
+  // if (
+  //   new Date(event.value.event_start_date).getTime() >
+  //   new Date(event.value.event_end_date).getTime()
+  // ) {
+  //   validateInput.value.startDate =
+  //     '*Please keep event slug within 100 characters.';
+  //   return false;
+  // }
+  // if (selectedTags.value.length === 0) {
+  //   validateTagsInput.value = '*Select at least 1 tag';
+  //   validateInput.tag.value = '*Select at least 1 tag';
+  //   return false;
+  // } else if (!fileToUpload.value) {
+  //   validateFileInput.value = '*Select image';
+  //   return false;
+  // } else {
+  //   return true;
+  // }
 }
 
 function getFormattedTags(tags: Tag[]) {
@@ -306,7 +372,7 @@ onMounted(async () => {
           <span class="loader"></span>
         </div>
         <div v-else>
-          <form @submit.prevent="fetchEventCreate">
+          <div>
             <div>
               <div class="mt-10 grid grid-cols-3 gap-x-16 gap-y-5">
                 <div
@@ -326,9 +392,18 @@ onMounted(async () => {
                   <div class="flex items-center justify-between">
                     <p class="b1">
                       Event Name
-                      <span class="b3 italic text-burgundy">{{
-                        validateInput.name
-                      }}</span>
+                      <span
+                        v-if="!validateInput.name || !validateInput.nameLength"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{
+                          !validateInput.name
+                            ? validateInputErrText.name
+                            : !validateInput.nameLength
+                              ? validateInputErrText.nameLength
+                              : ''
+                        }}</span
+                      >
                     </p>
                     <p class="b3">
                       <span
@@ -353,15 +428,17 @@ onMounted(async () => {
                   <div class="flex items-center justify-between">
                     <p class="b1 flex items-baseline gap-2">
                       Slug
-                      <span class="b3 italic"
-                        >*You can use
-                        <span
-                          @click="getAutoGenerateSlug"
-                          class="cursor-pointer text-burgundy underline"
-                          >default slug</span
-                        >
-                        or customize your slug but slugs should be
-                        'easy-to-read'</span
+                      <span
+                        v-if="!validateInput.slug || !validateInput.slugLength"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{
+                          !validateInput.slug
+                            ? validateInputErrText.slug
+                            : !validateInput.slugLength
+                              ? validateInputErrText.slugLength
+                              : ''
+                        }}</span
                       >
                     </p>
                     <p class="b3">
@@ -374,7 +451,16 @@ onMounted(async () => {
                       ><span> / 100</span>
                     </p>
                   </div>
-
+                  <span class="b3 italic"
+                    >*You can use
+                    <span
+                      @click="getAutoGenerateSlug"
+                      class="cursor-pointer text-burgundy underline"
+                      >default slug</span
+                    >
+                    or customize your slug but slugs should be
+                    'easy-to-read'</span
+                  >
                   <input
                     type="text"
                     class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -387,9 +473,12 @@ onMounted(async () => {
                 <div class="col-span-3">
                   <p class="b1">
                     Tags
-                    <span class="b3 italic text-burgundy">{{
-                      validateTagsInput
-                    }}</span>
+                    <span
+                      v-if="!validateInput.tag"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.tag }}</span
+                    >
                   </p>
                   <div
                     class="tag-input my-4 flex items-center gap-2 rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner"
@@ -437,9 +526,12 @@ onMounted(async () => {
                 <div class="col-span-3 col-start-1">
                   <p class="b1">
                     Event Thumbnail
-                    <span class="b3 italic text-burgundy">{{
-                      validateFileInput
-                    }}</span>
+                    <span
+                      v-if="!validateInput.image"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.image }}</span
+                    >
                   </p>
                   <div class="my-4 flex text-center">
                     <label
@@ -471,7 +563,15 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div class="col-span-3">
-                  <p class="b1">Event Description</p>
+                  <p class="b1">
+                    Event Description
+                    <span
+                      v-if="!validateInput.desc"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.desc }}</span
+                    >
+                  </p>
                   <input
                     type="text"
                     class="event-detail-desc b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -481,7 +581,15 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="col-span-3">
-                  <p class="b1">Event Detail</p>
+                  <p class="b1">
+                    Event Detail
+                    <span
+                      v-if="!validateInput.detail"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.detail }}</span
+                    >
+                  </p>
                   <textarea
                     rows="8"
                     type="text"
@@ -492,7 +600,15 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="">
-                  <p class="b1">Ticket Start Date</p>
+                  <p class="b1">
+                    Ticket Start Date
+                    <span
+                      v-if="!validateInput.ticketStart"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.ticketStart }}</span
+                    >
+                  </p>
                   <div class="my-4 flex gap-3">
                     <input
                       type="date"
@@ -509,7 +625,15 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div class="">
-                  <p class="b1">Ticket End Date</p>
+                  <p class="b1">
+                    Ticket End Date
+                    <span
+                      v-if="!validateInput.ticketEnd"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.ticketEnd }}</span
+                    >
+                  </p>
                   <div class="my-4 flex gap-3">
                     <input
                       type="date"
@@ -524,9 +648,23 @@ onMounted(async () => {
                       required
                     />
                   </div>
+                  <span
+                    v-if="!validateInput.ticketValid"
+                    class="b3 italic text-burgundy"
+                  >
+                    {{ validateInputErrText.ticketValid }}</span
+                  >
                 </div>
                 <div class="col-start-1">
-                  <p class="b1">Event Start Date</p>
+                  <p class="b1">
+                    Event Start Date
+                    <span
+                      v-if="!validateInput.startDate"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.startDate }}</span
+                    >
+                  </p>
                   <div class="my-4 flex gap-3">
                     <input
                       type="date"
@@ -543,7 +681,15 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div class="">
-                  <p class="b1">Event End Date</p>
+                  <p class="b1">
+                    Event End Date
+                    <span
+                      v-if="!validateInput.endDate"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.endDate }}</span
+                    >
+                  </p>
                   <div class="my-4 flex gap-3">
                     <input
                       type="date"
@@ -559,14 +705,23 @@ onMounted(async () => {
                     />
                   </div>
                 </div>
-                {{ event }}
-                <span class="b3 italic text-burgundy">{{
-                  validateInput.startDate
-                }}</span>
-                -----
-                {{ dateInput }}
+                <span
+                  v-if="!validateInput.dateValid"
+                  class="b3 italic text-burgundy"
+                >
+                  {{ validateInputErrText.dateValid }}</span
+                >
+
                 <div class="col-span-1 col-start-1">
-                  <p class="b1">Capacity</p>
+                  <p class="b1">
+                    Capacity
+                    <span
+                      v-if="!validateInput.capacity"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.capacity }}</span
+                    >
+                  </p>
                   <input
                     type="number"
                     class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -576,7 +731,15 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="col-span-1">
-                  <p class="b1">Goal</p>
+                  <p class="b1">
+                    Goal
+                    <span
+                      v-if="!validateInput.goal"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.goal }}</span
+                    >
+                  </p>
                   <input
                     type="number"
                     class="event-detail-event-name b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -586,7 +749,15 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="col-span-3">
-                  <p class="b1">Location</p>
+                  <p class="b1">
+                    Location
+                    <span
+                      v-if="!validateInput.location"
+                      class="b3 italic text-burgundy"
+                    >
+                      {{ validateInputErrText.location }}</span
+                    >
+                  </p>
                   <input
                     type="text"
                     class="event-detail-detail b2 border-1 my-4 w-full rounded-lg bg-lavender-gray/10 px-4 py-2 shadow-inner focus:outline-none"
@@ -619,7 +790,7 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
-              <div class="flex justify-end gap-5">
+              <div class="flex justify-end gap-5" @click="fetchEventCreate">
                 <input
                   type="submit"
                   value="Save"
@@ -627,7 +798,7 @@ onMounted(async () => {
                 />
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
