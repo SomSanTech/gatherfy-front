@@ -38,9 +38,12 @@ const colors: Record<string, string> = {
   2: '#ffb234',
   1: '#ff8c5a',
 };
+const token = useCookie('accessToken');
 
 async function fetchData() {
-  const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
+  const fetchedData = (
+    await useFetchWithAuth(`v1/backoffice/events/${param}`, 'GET', token.value)
+  ).data;
   const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
   const fetchedFeedbackData = await useFetchWithAuth(
     `v1/feedbacks/event/${param}`,
@@ -90,8 +93,6 @@ function filterRating(star: number) {
     );
   }
 }
-
-const token = useCookie('accessToken');
 
 async function getAnswerByQuestion(questionId: number) {
   const fetchedAnswerData = await useFetchWithAuth(

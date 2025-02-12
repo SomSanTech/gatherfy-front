@@ -176,7 +176,7 @@ const formattedBirthday = computed(() => {
   return 'Please select a valid date';
 });
 const accessToken = useCookie('accessToken');
-const refreshToken = useCookie('refreshToken');
+// const refreshToken = useCookie('refreshToken');
 const editProfile = async () => {
   console.log('---------------------------------');
 

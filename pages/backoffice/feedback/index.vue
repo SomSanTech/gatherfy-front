@@ -42,10 +42,12 @@ const previewFeedback = ref(false);
 const token = useCookie('accessToken');
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.users_id}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    token.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
   // Initialize an empty array for feedback counts
   feedbacksCount.value = [];
   if (fetchedData) {

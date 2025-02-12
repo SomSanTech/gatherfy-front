@@ -17,7 +17,7 @@ const deleteAlertMessage = ref('');
 const deletePopup = ref(false);
 const eventDataDelete = ref();
 const accessToken = useCookie('accessToken');
-const refreshToken = useCookie('refreshToken');
+// const refreshToken = useCookie('refreshToken');
 
 const fetchData = async () => {
   const fetchedData = await useFetchWithAuth(

@@ -3,7 +3,7 @@ import QrcodeVue from 'qrcode.vue';
 
 const tickets = ref();
 const accessToken = useCookie('accessToken');
-const refreshToken = useCookie('refreshToken');
+// const refreshToken = useCookie('refreshToken');
 const getTokenForQR = async (eventId: string) => {
   const token = await useFetchWithAuth(
     `v1/check-in/${eventId}`,

@@ -74,7 +74,7 @@ const dateInput = ref({
   ticket_end_time: '',
 });
 const accessToken = useCookie('accessToken');
-const refreshToken = useCookie('refreshToken');
+// const refreshToken = useCookie('refreshToken');
 async function fetchData() {
   const fetchedData = await useFetchWithAuth(
     `v1/backoffice/events/${param}`,

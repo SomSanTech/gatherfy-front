@@ -63,6 +63,7 @@ const getLast7DaysData = (data: any) => {
     };
   });
 };
+const token = useCookie('accessToken');
 
 const fetchViewsData = async () => {
   try {
@@ -137,10 +138,15 @@ const fetchRegisData = async () => {
     ])
   );
 };
+
 const eventDetail = ref();
 const fetchEventDetail = async () => {
-  const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
-  eventDetail.value = fetchedData || [];
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events/${param}`,
+    'GET',
+    token.value
+  );
+  eventDetail.value = fetchedData.data || [];
 };
 onMounted(async () => {
   try {

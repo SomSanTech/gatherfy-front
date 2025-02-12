@@ -6,32 +6,42 @@ export const useFetchWithAuth = async (
 ) => {
   const config = useRuntimeConfig();
   try {
-    const response = await fetch(`${config.public.baseUrl}/api/${url}`, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    const fetchData = async (token: string) => {
+      const response = await fetch(`${config.public.baseUrl}/api/${url}`, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
 
-    const status = response.status;
+      const status = response.status;
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type');
-    let data = null;
+      if (!response.ok) {
+        if (status === 401) {
+          console.log('error 401 i sud');
+          const auth = useAuth();
+          await auth.refresh();
+          return fetchData(auth.accessToken.value);
+        }
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
+      const contentType = response.headers.get('content-type');
+      let data = null;
 
-    return { status, data };
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      return { status, data };
+    };
+    return await fetchData(token);
   } catch (error) {
     console.error('Error fetching data:', error);
-    return { error: 'Failed to fetch data' };
+    throw error;
   }
 };

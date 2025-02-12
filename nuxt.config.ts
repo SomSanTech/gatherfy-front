@@ -37,5 +37,5 @@ export default defineNuxtConfig({
   app: {
     baseURL: '',
   },
-  plugins: ['~/plugins/preline.client.ts'],
+  plugins: ['~/plugins/preline.client.ts', '~/plugins/error-handler.ts'],
 });

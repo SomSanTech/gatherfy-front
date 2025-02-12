@@ -150,9 +150,9 @@ onMounted(async () => {
   try {
     console.log(isUserSignIn.value);
     const accessToken = useCookie('accessToken').value;
-    const refreshToken = useCookie('refreshToken').value;
+    // const refreshToken = useCookie('refreshToken').value;
 
-    if (accessToken && refreshToken) {
+    if (accessToken) {
       console.log('User is logged in');
     } else {
       console.log('User is not logged in');

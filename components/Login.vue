@@ -221,9 +221,9 @@ const handleSignin = async () => {
       console.log('Sending Data:', dataSend);
 
       const fetchedData = await useFetch(`login`, 'POST', dataSend);
-      console.log('Fetched Data:', fetchedData);
+      console.log('login Data:', fetchedData);
 
-      if (fetchedData.accessToken && fetchedData.refreshToken) {
+      if (fetchedData.accessToken) {
         isWaitAuthen.value = false;
         const accessCookie = useCookie('accessToken', {
           httpOnly: false, // Debugging Phase
@@ -234,10 +234,10 @@ const handleSignin = async () => {
 
         const refreshCookie = useCookie('refreshToken', {
           httpOnly: false, // Debugging Phase
-          secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60 * 24 * 7,
         });
         refreshCookie.value = fetchedData.refreshToken;
+
         const userProfileData = await useFetchWithAuth(
           'v1/profile',
           'GET',
