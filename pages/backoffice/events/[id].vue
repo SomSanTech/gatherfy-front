@@ -77,7 +77,7 @@ const accessToken = useCookie('accessToken');
 // const refreshToken = useCookie('refreshToken');
 async function fetchData() {
   const fetchedData = await useFetchWithAuth(
-    `v1/backoffice/events/${param}`,
+    `v2/backoffice/events/${param}`,
     'GET',
     accessToken.value
   );
@@ -88,6 +88,8 @@ async function fetchData() {
     event.value = (await fetchedData.data) || [];
     tags.value = (await fetchedTags) || [];
     selectedTags.value = event.value.tags;
+    console.log('selectedTags', selectedTags.value);
+    currentDateTime();
     compareExistTags.value = selectedTags.value.map((item: any) => ({
       ...item,
     }));
@@ -95,6 +97,8 @@ async function fetchData() {
 }
 async function currentDateTime() {
   if (event.value.ticket_start_date) {
+    console.log('event mee ja');
+
     dateInput.value.ticket_start_date = useFormatDateTime(
       event.value.ticket_start_date,
       'ISOdate'
@@ -147,9 +151,10 @@ const fetchEventEdit = async () => {
         editEventDto.event_image = currentFileName;
       }
       concatDateTime();
-      const fetchedData = await useFetchCreateUpdate(
+      const fetchedData = await useFetchWithAuth(
         `v1/events/${param}`,
         'PUT',
+        accessToken.value,
         editEventDto
       );
       if (fetchedData) {

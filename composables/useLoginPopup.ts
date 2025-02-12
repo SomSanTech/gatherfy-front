@@ -1,5 +1,5 @@
 import { useRuntimeConfig } from '#app';
-
+export const isSessionTimeOut = () => useState('isSessionTimeOut', () => false);
 export const useLoginPopup = () => useState('loginPopup', () => false);
 export const useUserProfile = () => useState('userProfile', () => null);
 export const useRole = () => useState('useRole', () => null);

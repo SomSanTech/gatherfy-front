@@ -283,14 +283,22 @@ watchEffect(() => {
           <div class="flex flex-col gap-2 lg:gap-5">
             <p class="t3 font-semibold">Tags</p>
             <div class="tag-group flex gap-2">
-              <div v-for="tag in event?.tags">
+              <div
+                v-for="tag in event?.tags"
+                class="flex h-full items-center justify-center"
+              >
                 <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
                   <button
-                    class="b3 w-fit rounded-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
+                    class="b3 flex w-fit items-center gap-1 rounded-l-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
                   >
                     {{ tag }}
                   </button>
                 </NuxtLink>
+                <div
+                  class="flex h-full w-full items-center justify-center rounded-r-lg border border-black/60 px-2"
+                >
+                  <AddAlert class="text-xl" />
+                </div>
               </div>
             </div>
           </div>

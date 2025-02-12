@@ -22,8 +22,10 @@ export const useFetchWithAuth = async (
         if (status === 401) {
           console.log('error 401 i sud');
           const auth = useAuth();
-          await auth.refresh();
-          return fetchData(auth.accessToken.value);
+          const refreshedToken = await auth.refresh();
+          if (refreshedToken) {
+            return fetchData(auth.accessToken.value);
+          }
         }
         throw new Error(`HTTP error! Status: ${response.status}`);
       }

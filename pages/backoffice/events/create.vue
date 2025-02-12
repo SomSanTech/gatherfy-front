@@ -167,7 +167,9 @@ async function fetchEventCreate() {
       event.value
     );
     let fetchedUpload;
-    if (fetchData.status === 200) {
+    console.log('fetchData status', fetchedData.status);
+
+    if (fetchedData.status === 200) {
       console.log('dai ja');
       fetchedUpload = await useFetchUpload(
         `v1/files/upload`,

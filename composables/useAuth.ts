@@ -1,12 +1,14 @@
 export const useAuth = () => {
   const accessToken = useCookie('accessToken');
-  //   const accessToken = useCookie('accessToken', {
-  //         httpOnly: false, // Debugging Phase
-  //         secure: process.env.NODE_ENV === 'production',
-  //         maxAge: 60 * 60,
-  //       });
-  const refreshToken = useCookie('refresh_token'); // ✅ HTTP-only Cookie
+  const refreshToken = useCookie('refreshToken');
+  const role = useCookie('roleCookie');
+  const profileData = useCookie('profileData');
+  const isSessionTimeOuts = useState('isSessionTimeOut');
+  const loginPopup = useLoginPopup();
+
+  const router = useRouter();
   const config = useRuntimeConfig();
+
   // const login = async (credentials) => {
   //   const res = await $fetch('/api/auth/login', { method: 'POST', body: credentials })
   //   accessToken.value = res.accessToken // เก็บ Access Token ใน state
@@ -22,19 +24,45 @@ export const useAuth = () => {
         credentials: 'include',
       });
 
+      if (!res.ok) {
+        throw new Error(`Refresh failed with status ${res.status}`);
+      }
+
       const data = await res.json();
       console.log('res from auth refresh', data);
       console.log(data.accessToken);
 
       accessToken.value = data.accessToken;
+      return true;
     } catch {
-      logout();
+      console.log('cant refresh');
+      // logout();
+      isSessionTimeOuts.value = true;
+      return false;
     }
   };
 
   const logout = () => {
+    if (!accessToken.value && !refreshToken.value) {
+      console.log('Already logged out, skipping reload');
+      return;
+    }
     accessToken.value = null;
+    refreshToken.value = null;
+    role.value = null;
+    profileData.value = null;
+    router.push('/').then(() => {
+      window.location.reload();
+    });
   };
 
-  return { accessToken, refresh, logout };
+  const handleSessionExpire = () => {
+    router.push('/').then(() => {
+      window.location.reload();
+    });
+    isSessionTimeOuts.value = false;
+    loginPopup.value = true;
+  };
+
+  return { accessToken, refresh, logout, handleSessionExpire };
 };

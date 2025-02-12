@@ -4,18 +4,18 @@ import type { UserProfile } from '~/models/userProfile';
 // const userProfile: Ref<UserProfile | null> = useUserProfile();
 // const accessToken = useCookie('accessToken');
 const router = useRouter();
-
-const signOut = () => {
-  const accessToken = useCookie('accessToken');
-  // const refreshToken = useCookie('refreshToken');
-  const role = useCookie('roleCookie');
-  accessToken.value = null;
-  // refreshToken.value = null;
-  role.value = null;
-  router.push('/').then(() => {
-    window.location.reload();
-  });
-};
+const signOut = useAuth().logout;
+// const signOut = () => {
+//   const accessToken = useCookie('accessToken');
+//   // const refreshToken = useCookie('refreshToken');
+//   const role = useCookie('roleCookie');
+//   accessToken.value = null;
+//   // refreshToken.value = null;
+//   role.value = null;
+//   router.push('/').then(() => {
+//     window.location.reload();
+//   });
+// };
 const profileData = useCookie<UserProfile>('profileData');
 // onMounted(async () => {
 //   const userProfileData = await useFetchWithAuth(
