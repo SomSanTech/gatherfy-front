@@ -135,7 +135,7 @@ const profileData = useCookie<UserProfile>('profileData');
             <p class="b2 font-medium">Scan QR Code</p>
           </div>
         </NuxtLink>
-        <div class="b3">General</div>
+        <!-- <div class="b3">General</div>
         <NuxtLink
           :to="{
             name: `backoffice-feedback-notification`,
@@ -147,7 +147,7 @@ const profileData = useCookie<UserProfile>('profileData');
             <Feedback class="t3" />
             <p class="b2 font-medium">Feedback</p>
           </div>
-        </NuxtLink>
+        </NuxtLink> -->
       </div>
     </div>
 

@@ -27,12 +27,11 @@ const fetchData = async () => {
   eventData.value = (await fetchedData) || [];
   tagsData.value = (await fetchTagData) || [];
   recommendedData.value = (await fetchRecommendedData) || [];
-
+  const currentDate = new Date().getTime();
   bannerEventData.value = eventData.value
+    .filter((event) => new Date(event.end_date).getTime() > currentDate)
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
     .slice(0, 5);
-
-  console.log('bannerEventData ', bannerEventData.value);
 };
 
 const handleReccomEvent = (type: string) => {
@@ -140,10 +139,6 @@ onMounted(async () => {
   }
 });
 
-const accessToken = useCookie('accessToken');
-// const refreshToken = useCookie('refreshToken');
-
-console.log(accessToken.value);
 const filteredTimeData = ref();
 const filterTimeEventData = (time: string) => {
   let filter;
@@ -208,7 +203,7 @@ watch(selectedEventTime, (newValue) => {
                   <button
                     class="b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
                   >
-                    {{ tag }}
+                    {{ tag.tag_title }}
                   </button>
                 </NuxtLink>
               </div>
@@ -254,7 +249,7 @@ watch(selectedEventTime, (newValue) => {
                       <button
                         class="b4 rounded-md border border-dark-grey/60 px-4 drop-shadow-md duration-200 hover:bg-dark-grey/20"
                       >
-                        {{ tag }}
+                        {{ tag.tag_title }}
                       </button>
                     </NuxtLink>
                   </div>

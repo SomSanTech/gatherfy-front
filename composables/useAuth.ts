@@ -4,6 +4,8 @@ export const useAuth = () => {
   const role = useCookie('roleCookie');
   const profileData = useCookie('profileData');
   const isSessionTimeOuts = useState('isSessionTimeOut');
+  const isUserSignIn = useState('isUserSignIn'); // เก็บสถานะผู้ใช้
+
   const loginPopup = useLoginPopup();
 
   const router = useRouter();
@@ -57,10 +59,11 @@ export const useAuth = () => {
   };
 
   const handleSessionExpire = () => {
-    router.push('/').then(() => {
-      window.location.reload();
-    });
+    // router.push('/').then(() => {
+    //   window.location.reload();
+    // });
     isSessionTimeOuts.value = false;
+    logout();
     loginPopup.value = true;
   };
 

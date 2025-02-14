@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import EventDetail from '~/components/backoffice/EventDetail.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
@@ -73,8 +72,9 @@ const dateInput = ref({
   ticket_end_date: '',
   ticket_end_time: '',
 });
+
 const accessToken = useCookie('accessToken');
-// const refreshToken = useCookie('refreshToken');
+
 async function fetchData() {
   const fetchedData = await useFetchWithAuth(
     `v2/backoffice/events/${param}`,
@@ -95,6 +95,7 @@ async function fetchData() {
     }));
   }
 }
+
 async function currentDateTime() {
   if (event.value.ticket_start_date) {
     console.log('event mee ja');
@@ -134,6 +135,7 @@ function getFormattedTags(tags: Tag[]) {
   return tags.map(({ tag_id }) => tag_id);
 }
 const fetchEventEdit = async () => {
+  console.log('fetchEventEdit called');
   try {
     if (validateForm()) {
       const formattedTags = await getFormattedTags(selectedTags.value);
@@ -146,13 +148,18 @@ const fetchEventEdit = async () => {
       if (uploadFileName.value) {
         await useFetchDelete(`v1/files/delete/${currentFileName}`);
         editEventDto.event_image = uploadFileName.value;
-        await useFetchUpload(`v1/files/upload`, fileToUpload.value);
+        await useFetchUpload(
+          `v1/files/upload`,
+          fileToUpload.value,
+          'thumbnails',
+          accessToken.value
+        );
       } else {
         editEventDto.event_image = currentFileName;
       }
       concatDateTime();
       const fetchedData = await useFetchWithAuth(
-        `v1/events/${param}`,
+        `v2/backoffice/events/${param}`,
         'PUT',
         accessToken.value,
         editEventDto
@@ -260,7 +267,7 @@ onMounted(async () => {
     isLoading.value = true;
     // await fetchData();
     await currentDateTime();
-    await renderIframe(event.value.map);
+    renderIframe(event.value.map);
   } finally {
     isLoading.value = false;
   }
@@ -569,7 +576,7 @@ watchEffect(() => {
                 </div>
               </div>
               <div class="flex justify-end gap-5">
-                <BtnComp text="Save" @click="fetchEventEdit" color="green" />
+                <BtnComp text="Save" color="green" />
               </div>
             </div>
           </form>

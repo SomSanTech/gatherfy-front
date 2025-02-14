@@ -9,7 +9,7 @@ import type { Registration } from '~/models/registration';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import PieChart from '~/components/backoffice/PieChart.vue';
-// import { calculateWidth } from '~/composables/useFormatDashboard';
+import type { Answer, ExistingQuestion, Feedback } from '~/models/feedback';
 
 const error = useError();
 definePageMeta({
@@ -18,6 +18,8 @@ definePageMeta({
 
 const route = useRoute();
 const param = route.params.id;
+const feedbackData = ref<Feedback[]>([]);
+const averageRating = ref();
 
 const registrationsData = ref<Registration[]>([]);
 const isLoading = ref(true);
@@ -40,7 +42,16 @@ const statusColor: any = {
   'Checked in': '#D71515',
   Unattended: '#cccccc',
 };
-
+function getAverage() {
+  const total = feedbackData.value.reduce(
+    (sum, curr) => sum + curr.feedbackRating,
+    0
+  );
+  const avg = total / feedbackData.value.length;
+  // nuxtRating.value = Math.round(avg * 10) / 10;
+  averageRating.value =
+    total === 0 ? 0 : (Math.round(avg * 10) / 10).toFixed(1);
+}
 const getLast7DaysData = (data: any) => {
   const sortedData = data.sort(
     (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -151,6 +162,13 @@ const fetchEventDetail = async () => {
 onMounted(async () => {
   try {
     isLoading.value = true;
+    const fetchedFeedbackData = await useFetchWithAuth(
+      `v1/feedbacks/event/${param}`,
+      'GET',
+      token.value
+    );
+    feedbackData.value = fetchedFeedbackData.data || [];
+    getAverage();
     await fetchRegisData();
     await fetchViewsData();
     await fetchEventDetail();
@@ -288,7 +306,13 @@ onMounted(async () => {
                   class="flex h-full w-full flex-col items-center justify-center text-center"
                 >
                   <p class="t3">
-                    {{ Math.round((registrationsData?.length / goals) * 100) }}%
+                    {{
+                      Math.floor(
+                        (registrationsData?.length /
+                          eventDetail.registration_goal) *
+                          100
+                      )
+                    }}%
                   </p>
                   <p class="b3">of Goals</p>
                 </div>
@@ -297,7 +321,7 @@ onMounted(async () => {
 
             <p class="b1 text-center font-semibold">
               <span class="text-burgundy">{{ registrationsData?.length }}</span>
-              from {{ goals }} Registration
+              from {{ eventDetail.registration_goal }} Registration
             </p>
           </div>
         </div>
@@ -402,13 +426,16 @@ onMounted(async () => {
               <div class="text-center">
                 <div class="flex items-center justify-center gap-1">
                   <Star class="t3 fill-burgundy" />
-                  <p class="t3 font-semibold">4.7</p>
+                  <p class="t3 font-semibold">{{ averageRating }}</p>
                 </div>
 
                 <p class="b2">Average feedback score</p>
               </div>
               <NuxtLink
-                :to="{ name: `backoffice-feedback-id`, params: { id: param } }"
+                :to="{
+                  name: `backoffice-feedback-response-id`,
+                  params: { id: param },
+                }"
                 class="b4 flex items-center justify-end gap-1 self-end pt-2 text-dark-grey/60"
               >
                 more feedback details

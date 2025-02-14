@@ -5,67 +5,46 @@ import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import UserProfile from '~/components/icons/UserProfile.vue';
 import Organisation from '~/components/icons/Organisation.vue';
-import FeedbackForm from '~/components/backoffice/FeedbackForm.vue';
 import type { User } from '~/models/user';
-import type {
-  AnswerBody,
-  DefaultQuestion,
-  ExistingQuestion,
-  FeedbackBody,
-} from '~/models/feedback';
 
 const route = useRoute();
 const error = useError();
 const param = route.params.id;
 const isOpenPopup = ref(false);
-const previewFeedback = ref(false);
 const event = ref();
 const userData = ref<User | null>(null);
-const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
-const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
-const feedback = ref<FeedbackBody[]>([]);
 const registrationBody = ref({});
-const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const isLoading = ref(true);
-const mockUserLogin = {
-  userId: 5,
-  firstname: 'Michael',
-  lastname: 'Brown',
-  username: 'mikeb',
-  gender: 'Male',
-  email: 'mikeb@example.com',
-  phone: '6677889900',
-  role: 'Attendee',
-};
-
-const defaultQuestion: DefaultQuestion[] = [
-  {
-    questionText: 'How satisfied are you after joining the event ?',
-    questionType: 'rating',
-    questionTypeName: 'Rating (1-5)',
-  },
-  { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
-];
+const plsLoginPopUp = ref(false);
+const userProfile = useCookie('profileData');
+const loginPopup = useLoginPopup();
 const token = useCookie('accessToken');
 
+const handleGoSignIn = () => {
+  loginPopup.value = true;
+  plsLoginPopUp.value = false;
+};
+
 const regis = async () => {
-  const regsitered = await useFetchWithAuth(
-    `v2/registrations`,
-    'POST',
-    token.value,
-    {
-      eventId: event.value.eventId,
+  if (event.value) {
+    const regsitered = await useFetchWithAuth(
+      `v2/registrations`,
+      'POST',
+      token.value,
+      {
+        eventId: event.value.eventId,
+      }
+    );
+
+    console.log(regsitered);
+
+    if (regsitered.status === 200) {
+      alert('Thank you for registration');
+    } else {
+      alert('Already Registered for the Event');
     }
-  );
-
-  console.log(regsitered);
-
-  if (regsitered.status === 200) {
-    alert('Thank you for registration');
-  } else {
-    alert('Already Registered for the Event');
+    isOpenPopup.value = false;
   }
-  isOpenPopup.value = false;
 };
 
 const fetchData = async () => {
@@ -73,84 +52,56 @@ const fetchData = async () => {
   if (fetchedData.error) {
     error.value = fetchData;
   } else {
-    event.value = fetchedData || [];
+    event.value = (await fetchedData) || [];
   }
 };
 
-const userProfile = useCookie('profileData');
+const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
+  console.log('isEventAvaliable', isEventAvaliable);
+  console.log('is userProfile', userProfile.value);
+  const isEndSaleTicket =
+    new Date(ticketEndDate).getTime() < new Date().getTime();
+  console.log('isEndSaleTicket', isEndSaleTicket);
 
-const onReviewFeedback = async () => {
-  const fetchedQuestionData = await useFetchData(
-    `v1/questions/event/${event.value.eventId}`
-  );
-  if (fetchedQuestionData.length === 0) {
-    finalQuestion.value = [...defaultQuestion];
-    feedbackQuestion.value = [];
-    previewFeedback.value = true;
+  if (userProfile.value && !isEventAvaliable) {
+    isOpenPopup.value = true;
   } else {
-    feedbackQuestion.value = fetchedQuestionData;
-    finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
-    previewFeedback.value = true;
+    plsLoginPopUp.value = true;
   }
-  document.body.style.overflow = 'hidden';
-  console.log(feedbackQuestion.value);
-  for (const item of feedbackQuestion.value) {
-    addAnswerField(item.questionId);
-  }
-  for (const item of defaultQuestion) {
-    addFeedbackField();
-  }
-  console.log(answers.value);
 };
+const accessToken = useCookie('accessToken');
 
-function addAnswerField(questionId: number) {
-  answers.value.push({
-    feedbackId: 0,
-    questionId: questionId,
-    eventId: event.value.eventId,
-    answerText: '',
-  });
-}
-function addFeedbackField() {
-  answers.value.push({
-    eventId: event.value.eventId,
-    userId: userData.value?.userId,
-    feedbackRating: 0,
-    feedbackComment: '',
-  });
-}
+const handleSubscribeTag = async (tagId: number) => {
+  console.log('click');
+  try {
+    const response = await useFetchWithAuth(
+      'v1/subscribe',
+      'POST',
+      accessToken.value,
+      {
+        tagId: tagId,
+      }
+    );
 
-function closePreview() {
-  previewFeedback.value = false;
-  document.body.style.overflow = '';
-}
+    console.log('response', response);
 
-async function submitFeedback() {
-  const feedbackResponse = await useFetchCreateUpdate(
-    `v1/feedbacks`,
-    'POST',
-    answers.value[answers.value.length - 1]
-  );
-  console.log(feedbackResponse);
-  if (feedbackResponse) {
-    const feedbackId = feedbackResponse.feedbackId; // Assuming `feedbackId` is in the response
-    for (let i = 0; i < feedbackQuestion.value.length; i++) {
-      (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
-      await useFetchCreateUpdate(`v1/answers`, 'POST', answers.value[i]);
+    if (response.status === 200) {
+      alert('follow this tag ja');
     }
-  } else {
-    // isChangeStatusComplete.value = false;
-  }
-  previewFeedback.value = false;
-}
+  } catch (error: any) {
+    console.error('Error:', error);
 
-const isUserSignIn = useIsUserSignIn();
+    if (error.response?.status === 409) {
+      alert('u follow this tag leaw na');
+    } else {
+      alert('Something went wrong, please try again.');
+    }
+  }
+};
 
 onMounted(async () => {
   try {
-    console.log(isUserSignIn.value);
     const accessToken = useCookie('accessToken').value;
-    // const refreshToken = useCookie('refreshToken').value;
 
     if (accessToken) {
       console.log('User is logged in');
@@ -158,11 +109,16 @@ onMounted(async () => {
       console.log('User is not logged in');
     }
     isLoading.value = true;
-    localStorage.setItem('user', JSON.stringify(mockUserLogin));
     const storedUser = localStorage.getItem('user');
     userData.value = storedUser ? JSON.parse(storedUser) : {};
 
     await fetchData();
+    if (event.value) {
+      await useFetchCreateUpdate(
+        `v1/countView/${event.value?.eventId}`,
+        'POST'
+      );
+    }
     registrationBody.value = {
       eventId: event.value?.eventId,
       userId: userData.value?.userId,
@@ -213,7 +169,7 @@ watchEffect(() => {
                     <button
                       class="detail-tag b3 rounded-md border border-light-grey px-4"
                     >
-                      {{ tag }}
+                      {{ tag.tag_title }}
                     </button>
                   </NuxtLink>
                 </div>
@@ -252,8 +208,32 @@ watchEffect(() => {
                 <p>{{ event?.location }}</p>
               </div>
               <div class="flex gap-2">
-                <BtnComp @click="isOpenPopup = true" text="Registor event" />
-                <BtnComp @click="onReviewFeedback" text="Leave a review" />
+                <BtnComp
+                  :class="
+                    new Date(event?.ticket_start_date).getTime() >
+                      new Date().getTime() ||
+                    new Date(event?.ticket_end_date).getTime() <
+                      new Date().getTime()
+                      ? 'pointer-events-none'
+                      : ''
+                  "
+                  @click="
+                    handleRegisPopup(
+                      new Date(event?.ticket_start_date).getTime() >
+                        new Date().getTime(),
+                      event.ticket_end_date
+                    )
+                  "
+                  :text="
+                    new Date(event?.ticket_start_date).getTime() >
+                    new Date().getTime()
+                      ? 'Comming soon'
+                      : new Date(event?.ticket_end_date).getTime() <
+                          new Date().getTime()
+                        ? 'Sale close'
+                        : 'Registor event'
+                  "
+                />
               </div>
             </div>
           </div>
@@ -291,14 +271,15 @@ watchEffect(() => {
                   <button
                     class="b3 flex w-fit items-center gap-1 rounded-l-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
                   >
-                    {{ tag }}
+                    {{ tag.tag_title }}
                   </button>
                 </NuxtLink>
-                <div
-                  class="flex h-full w-full items-center justify-center rounded-r-lg border border-black/60 px-2"
+                <button
+                  @click="handleSubscribeTag(tag.tag_id)"
+                  class="flex h-full w-full items-center justify-center rounded-r-lg border-y border-r border-dark-grey/60 px-2 duration-300 hover:bg-burgundy hover:text-light-grey"
                 >
                   <AddAlert class="text-xl" />
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -306,6 +287,13 @@ watchEffect(() => {
       </div>
     </div>
     <!-- pop up -->
+    <div
+      v-show="plsLoginPopUp"
+      class="fixed right-1/2 top-1/2 z-50 flex -translate-y-1/2 translate-x-1/2 flex-col items-center justify-center gap-5 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[400px] lg:p-7"
+    >
+      <p class="b2">Please Sign in before Registor event</p>
+      <BtnComp @click="handleGoSignIn" text="Go Sign in" />
+    </div>
     <div
       v-show="isOpenPopup"
       class="regis-popup fixed right-1/2 top-1/2 z-50 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[600px] lg:p-7"
@@ -346,6 +334,28 @@ watchEffect(() => {
                 >{{ userProfile?.users_email }}
               </p>
             </div>
+            <div
+              class="mt-4 flex items-start gap-2 rounded-lg bg-burgundy/20 p-4 text-sm text-burgundy"
+            >
+              <svg
+                class="h-5 w-5 flex-shrink-0 text-burgundy"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 8a1 1 0 112 0v3a1 1 0 11-2 0V8zm1 6a1 1 0 100-2 1 1 0 000 2z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <p>
+                By registering for this event, you agree to receive event
+                updates, announcements, and important information via your
+                registered email.
+              </p>
+            </div>
+
             <button
               class="b3 mt-4 rounded-lg bg-black px-4 py-1 text-white"
               @click="regis"
@@ -362,14 +372,5 @@ watchEffect(() => {
         />
       </div>
     </div>
-    <FeedbackForm
-      v-if="previewFeedback"
-      :questions="finalQuestion"
-      :preview-feedback="previewFeedback"
-      :close-preview="closePreview"
-      :answer-field="answers"
-      :submit-feedback="submitFeedback"
-      :existing-question-count="feedbackQuestion.length"
-    />
   </div>
 </template>

@@ -58,11 +58,16 @@ onMounted(async () => {
 // });
 </script>
 <template>
-  <div class="ml-80">
-    <video ref="video" width="300" height="300"></video>
-    <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p>
-    <p v-if="apiResponse" class="mt-4 text-blue-600">
-      API Response: {{ apiResponse }}
-    </p>
+  <div class="ml-80 h-screen w-full">
+    <div class="flex h-full justify-center px-10 text-center">
+      <div class="my-auto flex h-full w-full">
+        <video ref="video" width="400" height="400" class="rounded-lg"></video>
+        <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p>
+        <p v-if="apiResponse" class="mt-4 text-blue-600">
+          API Response: {{ apiResponse }}
+        </p>
+      </div>
+      <div></div>
+    </div>
   </div>
 </template>

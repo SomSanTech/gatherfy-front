@@ -7,7 +7,7 @@ import {
 } from 'vue3-google-signin';
 
 const loginPopup = useLoginPopup();
-const isSignup = ref(false);
+const isSignup = useState('isSignup');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const selectedGender = ref('female');
@@ -200,7 +200,8 @@ const validateFields = () => {
 
   return hasError;
 };
-
+const isUserSignIn = useState('isUserSignIn');
+const isOTPPopup = useState('isOTPPopup');
 const handleSignin = async () => {
   isClickSignBtn.value = true;
   isWaitAuthen.value = true;
@@ -233,8 +234,8 @@ const handleSignin = async () => {
         accessCookie.value = fetchedData.accessToken;
 
         const refreshCookie = useCookie('refreshToken', {
-          httpOnly: false, // Debugging Phase
-          maxAge: 60 * 60 * 24 * 7,
+          httpOnly: false,
+          maxAge: 60 * 60,
         });
         refreshCookie.value = fetchedData.refreshToken;
 
@@ -276,6 +277,7 @@ const handleSignin = async () => {
         }
         console.log('Access Token:', accessCookie.value);
         loginPopup.value = false;
+        isUserSignIn.value = true;
       } else {
         loginStatus.value = false;
         isWaitAuthen.value = false;
@@ -296,6 +298,7 @@ const handleSignin = async () => {
       );
       console.log('response', response);
       if (!response.error) {
+        localStorage.setItem('email', signupData.value.email);
         // loginPopup.value = !loginPopup.value;
         isWaitAuthen.value = false;
         signupData.value = {
@@ -310,10 +313,13 @@ const handleSignin = async () => {
           birthday: '',
           password: '',
         };
-        changeToSignUp();
+        // changeToSignUp();
         password.value = '';
         username.value = '';
         isAlreadySignup.value = true;
+        // isUserSignIn.value = true
+        isOTPPopup.value = true;
+        loginPopup.value = false;
       }
     } else {
       isWaitAuthen.value = false;

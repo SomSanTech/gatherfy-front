@@ -72,9 +72,14 @@ const defaultQuestion = [
   },
   { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
 ];
+const accessToken = useCookie('accessToken');
 
 async function fetchData() {
-  const fetchedEventData = await useFetchData(`v1/events/backoffice/${param}`);
+  const fetchedEventData = await useFetchWithAuth(
+    `v2/backoffice/events/${param}`,
+    'GET',
+    accessToken.value
+  );
   const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
 
   if (fetchedEventData.error || fetchedQuestionData.error) {
@@ -91,9 +96,10 @@ async function fetchData() {
 const createQuestion = async () => {
   const formattedQuestions = getFormattedQuestions('create');
   formattedQuestions.forEach(async (question) => {
-    const fetchedData = await useFetchCreateUpdate(
-      `v1/questions`,
+    const fetchedData = await useFetchWithAuth(
+      `v2/questions`,
       'POST',
+      accessToken.value,
       question
     );
   });

@@ -1,6 +1,6 @@
 import { useRuntimeConfig } from '#app';
 
-export const useFetchCreateUpdate = async (
+export const useFetchCreateUpdate2 = async (
   url: string,
   method: string,
   body?: object
@@ -14,11 +14,16 @@ export const useFetchCreateUpdate = async (
       },
       body: JSON.stringify(body),
     });
+    console.log('useFetchCreateUpdate2', response);
+
     if (!response.ok) {
       throw new Error(`Error fetching`);
     }
-    return await response.json();
+    console.log('Request Body:', JSON.stringify(body, null, 2));
+
+    return response;
   } catch (error) {
+    console.error(error);
     return { error: 'Failed to fetch data' };
   }
 };

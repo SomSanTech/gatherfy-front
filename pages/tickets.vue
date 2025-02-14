@@ -1,9 +1,30 @@
 <script setup lang="ts">
 import QrcodeVue from 'qrcode.vue';
+import type {
+  AnswerBody,
+  DefaultQuestion,
+  ExistingQuestion,
+  FeedbackBody,
+} from '~/models/feedback';
 
 const tickets = ref();
 const accessToken = useCookie('accessToken');
-// const refreshToken = useCookie('refreshToken');
+const profileData = useCookie('profileData');
+const qrValues = ref<{ [key: string]: string }>({});
+
+const previewFeedback = ref(false);
+const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
+const defaultQuestion: DefaultQuestion[] = [
+  {
+    questionText: 'How satisfied are you after joining the event ?',
+    questionType: 'rating',
+    questionTypeName: 'Rating (1-5)',
+  },
+  { questionText: 'Comment', questionType: 'text', questionTypeName: 'Text' },
+];
+const feedbackQuestion = ref<ExistingQuestion[]>([]);
+const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
+
 const getTokenForQR = async (eventId: string) => {
   const token = await useFetchWithAuth(
     `v1/check-in/${eventId}`,
@@ -12,7 +33,7 @@ const getTokenForQR = async (eventId: string) => {
   );
   return token.data?.qrToken;
 };
-const qrValues = ref<{ [key: string]: string }>({});
+
 const generateQRCode = async (eventId: string) => {
   const tokenResponse = await getTokenForQR(eventId);
 
@@ -20,6 +41,73 @@ const generateQRCode = async (eventId: string) => {
     qrValues.value[eventId] = `${tokenResponse}`;
   }
 };
+function closePreview() {
+  previewFeedback.value = false;
+  document.body.style.overflow = '';
+}
+function addAnswerField(questionId: number, eventId: number) {
+  answers.value.push({
+    feedbackId: 0,
+    questionId: questionId,
+    eventId: eventId,
+    answerText: '',
+  });
+}
+function addFeedbackField(eventId: number, userId: number) {
+  answers.value.push({
+    eventId: eventId,
+    userId: userId,
+    feedbackRating: 0,
+    feedbackComment: '',
+  });
+}
+const onReviewFeedback = async (eventId: string) => {
+  const fetchedQuestionData = await useFetchData(
+    `v1/questions/event/${eventId}`
+  );
+  if (fetchedQuestionData.length === 0) {
+    finalQuestion.value = [...defaultQuestion];
+    feedbackQuestion.value = [];
+    previewFeedback.value = true;
+  } else {
+    feedbackQuestion.value = fetchedQuestionData;
+    finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
+    previewFeedback.value = true;
+  }
+  document.body.style.overflow = 'hidden';
+  console.log(feedbackQuestion.value);
+  for (const item of feedbackQuestion.value) {
+    addAnswerField(item.questionId, parseInt(eventId));
+  }
+  for (const item of defaultQuestion) {
+    addFeedbackField(parseInt(eventId), profileData.value?.users_id);
+  }
+  console.log(answers.value);
+};
+async function submitFeedback() {
+  const feedbackResponse = await useFetchWithAuth(
+    `v2/feedbacks`,
+    'POST',
+    accessToken.value,
+    answers.value[answers.value.length - 1]
+  );
+  console.log(feedbackResponse);
+  if (feedbackResponse) {
+    const feedbackId = feedbackResponse.data.feedbackId; // Assuming `feedbackId` is in the response
+    for (let i = 0; i < feedbackQuestion.value.length; i++) {
+      (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
+      await useFetchWithAuth(
+        `v2/answers`,
+        'POST',
+        accessToken.value,
+        answers.value[i]
+      );
+    }
+  } else {
+    // isChangeStatusComplete.value = false;
+  }
+  previewFeedback.value = false;
+}
 onMounted(async () => {
   const response = await useFetchWithAuth(
     'v1/tickets',
@@ -60,69 +148,87 @@ onMounted(async () => {
       <div>
         <div
           v-for="ticket in tickets"
-          class="relative mt-4 overflow-hidden rounded-lg"
-          :style="{
-            backgroundImage: `url(${ticket?.image})`,
-            borderRadius: '12px',
-          }"
+          class="relative mt-4 overflow-hidden bg-[#d13732]"
         >
-          <div
-            class="relative z-10 flex h-full rounded-xl bg-white bg-opacity-50 p-2 backdrop-blur-xl"
-          >
-            <div class="aspect-square w-[290px] shrink-0 rounded-[5px]">
+          <div class="relative z-10 flex h-full p-4 backdrop-blur-xl">
+            <div
+              class="aspect-square w-[260px] shrink-0 border-r-[1px] border-dashed border-black pr-4"
+            >
               <img
                 :src="ticket.image"
-                class="aspect-square rounded-[6px] object-cover"
+                class="aspect-square object-cover"
                 alt=""
               />
+              <p class="b3 pt-2">Powered by Gatherfy</p>
             </div>
-            <div
-              class="flex w-full flex-col justify-between rounded-[5px] p-3 px-5"
-            >
-              <div class="pb-5">
-                <h1 class="t2">{{ ticket.name }}</h1>
-                <div class="flex items-center gap-2">
-                  <p v-for="tag in ticket.tags" class="b3">{{ tag }}</p>
-                </div>
-                <div class="mt-4">
-                  <p class="b2 font-semibold">25.12.2025</p>
-                  <p class="b2">Sunday 7PM - 11PM</p>
-                </div>
-              </div>
-
-              <div class="">
-                <p class="b3 font-semibold">Co-Working Space</p>
-                <p class="b3">Chiang Mai, Thailand</p>
-              </div>
-            </div>
-            <div
-              class="b3 relative flex w-1/3 items-center justify-center border-l-[1px] border-dashed border-black/80 pl-2 text-center"
-            >
+            <div class="w-full">
               <div
-                class="absolute -top-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
-              ></div>
-              <div
-                class="absolute -bottom-5 left-0 z-50 h-7 w-7 -translate-x-1/2 rounded-full bg-white"
-              ></div>
-              <button
-                v-if="!qrValues[ticket.eventId]"
-                @click="generateQRCode(ticket.eventId)"
-                class="mx-auto"
+                class="flex h-full w-full flex-col justify-between rounded-[5px] pl-5"
               >
-                Click to view <br />
-                QR Code
-              </button>
-              <div
-                v-if="qrValues[ticket.eventId]"
-                class="rounded-lg bg-white p-2"
-              >
-                <qrcode-vue :value="qrValues[ticket.eventId]" size="100" />
+                <div class="pb-5">
+                  <h1 class="t2">{{ ticket.name }}</h1>
+                  <div class="flex items-center gap-2">
+                    <p v-for="tag in ticket.tags" class="b3">{{ tag }}</p>
+                  </div>
+                </div>
+                <div class="flex items-end justify-between">
+                  <div>
+                    <div class="">
+                      <p class="b3 font-semibold">Co-Working Space</p>
+                      <p class="b3">Chiang Mai, Thailand</p>
+                    </div>
+                    <div class="mt-4">
+                      <p class="b2 font-semibold">25.12.2025</p>
+                      <p class="b2">Sunday 7PM - 11PM</p>
+                    </div>
+                  </div>
+                  <div class="w- flex flex-col items-end gap-3 self-end">
+                    <div class="w-full">
+                      <button
+                        @click="onReviewFeedback(ticket.eventId)"
+                        class="b3 w-full rounded-md bg-white px-2 py-1"
+                      >
+                        Review event
+                      </button>
+                    </div>
+                    <div
+                      class="b3 relative flex aspect-square w-[120px] items-center justify-center text-center"
+                    >
+                      <button
+                        v-if="!qrValues[ticket.eventId]"
+                        @click="generateQRCode(ticket.eventId)"
+                        class="h-full w-full border-[1px] border-dashed border-black"
+                      >
+                        Click to view <br />
+                        QR Code
+                      </button>
+                      <div
+                        v-if="qrValues[ticket.eventId]"
+                        class="rounded-g bg-white p-2"
+                      >
+                        <qrcode-vue
+                          :value="qrValues[ticket.eventId]"
+                          size="100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <FeedbackForm
+      v-if="previewFeedback"
+      :questions="finalQuestion"
+      :preview-feedback="previewFeedback"
+      :close-preview="closePreview"
+      :answer-field="answers"
+      :submit-feedback="submitFeedback"
+      :existing-question-count="feedbackQuestion.length"
+    />
   </div>
 </template>
 
