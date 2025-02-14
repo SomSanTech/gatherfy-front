@@ -10,10 +10,15 @@ const route = useRoute();
 const param = route.params.id;
 const registrationsData = ref<Registration[]>([]);
 const isLoading = ref(true);
+const accessToken = useCookie('accessToken');
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(`v1/registrations/event/${param}`);
-  registrationsData.value = fetchedData || [];
+  const fetchedData = await useFetchWithAuth(
+    `v1/registrations/event/${param}`,
+    'GET',
+    accessToken.value
+  );
+  registrationsData.value = fetchedData.data || [];
 };
 
 onMounted(() => {

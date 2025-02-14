@@ -99,11 +99,17 @@ const profileData = useCookie<UserProfile>('profileData');
             class="h-8 w-8 rounded-full bg-zinc-300"
           >
             <img
-              v-if="profileData"
+              v-if="profileData?.users_image"
               :src="profileData?.users_image"
               alt=""
               class="h-8 w-8 rounded-full"
             />
+            <div
+              v-else
+              class="flex h-full w-full items-center justify-center text-zinc-600"
+            >
+              <UserProfileImg />
+            </div>
           </div>
           <div
             v-if="isOpenProfilePopup"
