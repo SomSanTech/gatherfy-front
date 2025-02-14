@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import EventDetail from '~/components/backoffice/EventDetail.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
@@ -73,22 +72,34 @@ const dateInput = ref({
   ticket_end_date: '',
   ticket_end_time: '',
 });
+
+const accessToken = useCookie('accessToken');
+
 async function fetchData() {
-  const fetchedData = await useFetchData(`v2/events/backoffice/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v2/backoffice/events/${param}`,
+    'GET',
+    accessToken.value
+  );
   const fetchedTags = await useFetchData(`v1/tags`);
   if (fetchedData.error || fetchedTags.error) {
     error.value = fetchedData ? fetchedData : fetchedTags;
   } else {
-    event.value = (await fetchedData) || [];
+    event.value = (await fetchedData.data) || [];
     tags.value = (await fetchedTags) || [];
     selectedTags.value = event.value.tags;
+    console.log('selectedTags', selectedTags.value);
+    currentDateTime();
     compareExistTags.value = selectedTags.value.map((item: any) => ({
       ...item,
     }));
   }
 }
+
 async function currentDateTime() {
   if (event.value.ticket_start_date) {
+    console.log('event mee ja');
+
     dateInput.value.ticket_start_date = useFormatDateTime(
       event.value.ticket_start_date,
       'ISOdate'
@@ -124,6 +135,7 @@ function getFormattedTags(tags: Tag[]) {
   return tags.map(({ tag_id }) => tag_id);
 }
 const fetchEventEdit = async () => {
+  console.log('fetchEventEdit called');
   try {
     if (validateForm()) {
       const formattedTags = await getFormattedTags(selectedTags.value);
@@ -136,14 +148,20 @@ const fetchEventEdit = async () => {
       if (uploadFileName.value) {
         await useFetchDelete(`v1/files/delete/${currentFileName}`);
         editEventDto.event_image = uploadFileName.value;
-        await useFetchUpload(`v1/files/upload`, fileToUpload.value);
+        await useFetchUpload(
+          `v1/files/upload`,
+          fileToUpload.value,
+          'thumbnails',
+          accessToken.value
+        );
       } else {
         editEventDto.event_image = currentFileName;
       }
       concatDateTime();
-      const fetchedData = await useFetchCreateUpdate(
-        `v1/events/${param}`,
+      const fetchedData = await useFetchWithAuth(
+        `v2/backoffice/events/${param}`,
         'PUT',
+        accessToken.value,
         editEventDto
       );
       if (fetchedData) {
@@ -247,9 +265,9 @@ function validateForm() {
 onMounted(async () => {
   try {
     isLoading.value = true;
-    await fetchData();
+    // await fetchData();
     await currentDateTime();
-    await renderIframe(event.value.map);
+    renderIframe(event.value.map);
   } finally {
     isLoading.value = false;
   }
@@ -558,7 +576,7 @@ watchEffect(() => {
                 </div>
               </div>
               <div class="flex justify-end gap-5">
-                <BtnComp text="Save" @click="fetchEventEdit" color="green" />
+                <BtnComp text="Save" color="green" />
               </div>
             </div>
           </form>

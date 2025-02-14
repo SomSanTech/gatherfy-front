@@ -27,8 +27,9 @@ const fetchData = async () => {
   eventData.value = (await fetchedData) || [];
   tagsData.value = (await fetchTagData) || [];
   recommendedData.value = (await fetchRecommendedData) || [];
-
+  const currentDate = new Date().getTime();
   bannerEventData.value = eventData.value
+    .filter((event) => new Date(event.end_date).getTime() > currentDate)
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
     .slice(0, 5);
 };
@@ -114,7 +115,9 @@ const selectedEventTime = ref('today');
 const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
+
 const isLoading = ref(false);
+
 onMounted(async () => {
   isLoading.value = true;
   try {
@@ -128,13 +131,14 @@ onMounted(async () => {
     const intervalId = setInterval(() => {
       if (!isFirstClickSampleEvent.value) {
         sampleEventIndex.value =
-          (sampleEventIndex.value + 1) % eventData?.value?.length;
+          (sampleEventIndex.value + 1) % bannerEventData?.value?.length;
       } else {
         clearInterval(intervalId);
       }
     }, 5000);
   }
 });
+
 const filteredTimeData = ref();
 const filterTimeEventData = (time: string) => {
   let filter;
@@ -199,7 +203,7 @@ watch(selectedEventTime, (newValue) => {
                   <button
                     class="b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
                   >
-                    {{ tag }}
+                    {{ tag.tag_title }}
                   </button>
                 </NuxtLink>
               </div>
@@ -245,7 +249,7 @@ watch(selectedEventTime, (newValue) => {
                       <button
                         class="b4 rounded-md border border-dark-grey/60 px-4 drop-shadow-md duration-200 hover:bg-dark-grey/20"
                       >
-                        {{ tag }}
+                        {{ tag.tag_title }}
                       </button>
                     </NuxtLink>
                   </div>

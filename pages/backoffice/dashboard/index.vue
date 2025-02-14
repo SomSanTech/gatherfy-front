@@ -8,6 +8,7 @@ import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
@@ -146,10 +147,12 @@ const initializeChart = () => {
 };
 
 const fetchAllRegisData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/registrations/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations`,
+    'GET',
+    accessToken.value
   );
-  registrationsData.value = fetchedData || [];
+  registrationsData.value = fetchedData.data || [];
 
   groupedByGender.value = Object.fromEntries(
     d3.rollup(
@@ -188,11 +191,16 @@ const fetchAllRegisData = async () => {
     ])
   );
 };
+
+const accessToken = useCookie('accessToken');
+
 const fetchAllEventData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
   // eventsData.value =  [];
 };
 const fetchAllViewData = async () => {
@@ -223,9 +231,12 @@ const fetchAllViewData = async () => {
     });
   }
 };
-
+const profileData = useCookie<UserProfile>('profileData');
 onMounted(async () => {
   try {
+    console.log(profileData.value);
+    console.log('actk', accessToken.value);
+
     isLoading.value = true;
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
@@ -265,10 +276,11 @@ watch(chartCanvasRef, (newValue) => {
     <div v-else class="ml-80 flex h-full">
       <div class="mx-20 mt-32 flex w-full flex-col gap-3">
         <SumaryOfView
+          v-if="profileData"
           :sumOfViews="sumOfViews?.totalViews"
           :viewsEntries="sumOfViews?.totalEntries"
           :allRegistration="registrationsData?.length"
-          :adminData
+          :profileData
           format="row"
         />
 
