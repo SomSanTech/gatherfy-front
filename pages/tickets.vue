@@ -147,8 +147,16 @@ onMounted(async () => {
       </div>
       <div>
         <div
-          v-for="ticket in tickets"
-          class="relative mt-4 overflow-hidden bg-[#d13732]"
+          v-for="(ticket, index) in tickets"
+          class="relative mt-4 overflow-hidden"
+          :class="[
+            'relative mt-4 overflow-hidden',
+            index % 3 === 0
+              ? 'bg-[#C33D32]'
+              : index % 3 === 1
+                ? 'bg-[#fff6f6] text-[#C33D32]'
+                : 'bg-[#e7e8eb]',
+          ]"
         >
           <div class="relative z-10 flex h-full p-4 backdrop-blur-xl">
             <div

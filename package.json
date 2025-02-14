@@ -37,6 +37,7 @@
     "v-calendar": "^3.1.2",
     "vue": "latest",
     "vue-on-click-outside": "^1.0.3",
+    "vue-qrcode-reader": "^5.7.1",
     "vue3-apexcharts": "^1.8.0",
     "vue3-google-map": "^0.21.0"
   },

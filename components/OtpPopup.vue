@@ -22,6 +22,8 @@ const loginPopup = useLoginPopup();
 const isSignup = useState('isSignup');
 
 const verifyOTP = async () => {
+  console.log('email', email.value);
+
   const otpString = otpValues.value.join('');
   console.log('OTP:', otpString);
   const response = await useFetchCreateUpdate2('v1/verify-otp', 'POST', {

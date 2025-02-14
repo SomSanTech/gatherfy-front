@@ -1,16 +1,72 @@
 <script setup lang="ts">
 import { BrowserQRCodeReader } from '@zxing/browser';
+import RegistrationList from '~/components/backoffice/RegistrationList.vue';
+import { QrcodeStream } from 'vue-qrcode-reader';
 
+// const scannedValue = ref<string | null>(null);
+
+const onDecode = (result: string) => {
+  scannedValue.value = result;
+};
+
+const onInit = (error: any) => {
+  if (error) {
+    console.error('QR code scanner initialization failed', error);
+  } else {
+    console.log('QR code scanner initialized');
+  }
+};
 definePageMeta({
   layout: 'backoffice',
 });
 const video = ref<HTMLVideoElement | null>(null);
 const scannedValue = ref<string | null>(null);
-
+const isLoading = ref(false);
 const apiResponse = ref<string | null>(null);
 let qrCodeReader: BrowserQRCodeReader;
+const selectedOption = ref();
+const eventsData = ref();
+const accessToken = useCookie('accessToken');
+const fetchData = async () => {
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
+  );
+  eventsData.value = fetchedData.data || [];
+};
+
+const registrationsData = ref();
+const fetchRegisListData = async (eventId: string) => {
+  const fetchedData = await useFetchWithAuth(
+    `v1/registrations/event/${eventId}`,
+    'GET',
+    accessToken.value
+  );
+  registrationsData.value = fetchedData.data || [];
+};
+const handleSelectEvent = async () => {
+  // try {
+  const selectedEvent = eventsData.value.find(
+    (event: any) => event.eventName === selectedOption.value
+  );
+  if (selectedEvent) {
+    console.log('Selected Event ID:', selectedEvent.eventId);
+    console.log('Selected Event Name:', selectedEvent.eventName);
+    // alert(
+    //   `Selected Event ID: ${selectedEvent.eventId}, Name: ${selectedEvent.eventName}`
+    // );
+  }
+  console.log(selectedOption.value);
+  // isLoading.value = true;
+  await fetchRegisListData(selectedEvent.eventId);
+  // } finally {
+  //   isLoading.value = false;
+  // }
+};
 
 onMounted(async () => {
+  await fetchData();
   qrCodeReader = new BrowserQRCodeReader();
   qrCodeReader.decodeFromVideoDevice(
     null,
@@ -25,21 +81,16 @@ onMounted(async () => {
           try {
             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
             const response = await useFetchWithAuth(
-              `v1/check-in`,
+              `v2/check-in`,
               'PUT',
-              scannedValue.value
+              accessToken.value,
+              {
+                qrToken: scannedValue.value,
+              }
             );
-            // const response = await fetch(
-            //   'http://localhost:4040/api/v1/check-in',
-            //   {
-            //     method: 'PUT',
-            //     headers: {
-            //       Authorization: `Bearer ${scannedValue.value}`, // แนบ token ใน header
-            //     },
-            //   }
-            // );
-            // apiResponse.value = JSON.stringify(data, null, 2); // แสดงผลลัพธ์
+
             apiResponse.value = response.data;
+            handleSelectEvent();
           } catch (err) {
             console.error('API call failed:', err);
             apiResponse.value = 'API call failed!';
@@ -59,15 +110,54 @@ onMounted(async () => {
 </script>
 <template>
   <div class="ml-80 h-screen w-full">
-    <div class="flex h-full justify-center px-10 text-center">
-      <div class="my-auto flex h-full w-full">
-        <video ref="video" width="400" height="400" class="rounded-lg"></video>
-        <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p>
-        <p v-if="apiResponse" class="mt-4 text-blue-600">
+    <div class="flex h-full justify-between gap-3 px-5 text-center">
+      <div class="my-auto flex aspect-square h-fit w-[400px] shrink-0">
+        <video
+          ref="video"
+          width="400"
+          height="400"
+          class="rounded-lg object-cover"
+        ></video>
+        <!-- <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p> -->
+        <!-- <p v-if="apiResponse" class="mt-4 text-blue-600">
           API Response: {{ apiResponse }}
-        </p>
+        </p> -->
       </div>
-      <div></div>
+      <div>
+        <p>Event</p>
+        <div>
+          <label for="dropdown" class="font-bold">Select an option:</label>
+          <select
+            id="dropdown"
+            v-model="selectedOption"
+            class="rounded border p-2"
+            @change="handleSelectEvent()"
+          >
+            <option
+              v-for="event in eventsData?.filter(
+                (e: any) =>
+                  new Date(e.eventStartDate).getTime() >= new Date().getTime()
+              )"
+              :key="event.eventId"
+              :value="event.eventName"
+            >
+              {{ event.eventName }}
+            </option>
+          </select>
+
+          <p class="mt-2">Selected: {{ selectedOption }}</p>
+        </div>
+        <div class="tbody-container overflow-y-auto">
+          <div
+            v-for="registration in registrationsData"
+            class="regis-list border-default-300 cursor-default border-b transition-colors"
+          >
+            <RegistrationList :registration="registration" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style></style>
