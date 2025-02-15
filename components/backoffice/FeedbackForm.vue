@@ -17,6 +17,7 @@ const props = withDefaults(
       | DefaultQuestion
       | ExistingQuestion
     )[];
+    feedBackErrorResponse?: string;
     previewFeedback: boolean;
     answerField: (AnswerBody | FeedbackBody)[];
     existingQuestionCount: number;
@@ -54,6 +55,14 @@ function ratingAnswer(index: number, rating: number) {
       </div>
       <p class="t2 mb-5">Event Feedback</p>
       <p class="b1">Please share your feedback regarding the event</p>
+      <div
+        v-if="feedBackErrorResponse"
+        class="mt-4 rounded-md bg-red-200 px-3 py-1"
+      >
+        <p class="b2 flex items-center gap-1 text-red-900">
+          <Cancle />{{ feedBackErrorResponse }}
+        </p>
+      </div>
       <div v-for="(question, index) in questions" :key="index" class="my-10">
         <p class="b3 text-cool-gray">Question {{ index + 1 }}</p>
         <p class="b1 mt-3">

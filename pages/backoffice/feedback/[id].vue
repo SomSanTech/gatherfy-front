@@ -80,15 +80,18 @@ async function fetchData() {
     'GET',
     accessToken.value
   );
-  const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
+  const fetchedQuestionData = await useFetchData(
+    `v1/questions/event/${param}`,
+    'GET'
+  );
 
   if (fetchedEventData.error || fetchedQuestionData.error) {
     error.value = fetchedEventData ? fetchedEventData : fetchedQuestionData;
   } else {
     event.value = fetchedEventData || [];
-    existQuestions.value = fetchedQuestionData || [];
+    existQuestions.value = fetchedQuestionData.data || [];
     // Create a deep copy of fetchedQuestionData for compareExistQuestion
-    compareExistQuestion.value = fetchedQuestionData.map((item: any) => ({
+    compareExistQuestion.value = fetchedQuestionData.data.map((item: any) => ({
       ...item,
     }));
   }
@@ -102,6 +105,11 @@ const createQuestion = async () => {
       accessToken.value,
       question
     );
+
+    // if (fetchedData.errorData) {
+    //   console.log(fetchedData.errorData.details);
+    //   // throw fetchedData.errorData
+    // }
   });
 };
 

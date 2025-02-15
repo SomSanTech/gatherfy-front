@@ -29,6 +29,7 @@ const event = ref<EditEvent>({
   event_owner: 0,
   tags: [],
 });
+
 const dateInput = ref({
   start_date: '',
   start_time: '',
@@ -39,20 +40,6 @@ const dateInput = ref({
   ticket_end_date: '',
   ticket_end_time: '',
 });
-const tags = ref<Tag[]>([]);
-const isChangeStatusComplete = ref();
-const filteredTag = ref();
-const isDropdownVisible = ref(false);
-const inputTag = ref('');
-const isLoading = ref(false);
-const iframeSrc = ref();
-const selectedTags = ref<Tag[]>([]);
-const previewImage = ref();
-const uploadFileName = ref();
-const fileToUpload = ref();
-const autoGenerateSlug = ref('');
-const validateTagsInput = ref('');
-const validateFileInput = ref('');
 
 const validateInput = ref({
   name: true,
@@ -110,53 +97,36 @@ const statusStyle = {
     text: 'Sorry, nothing changed',
   },
 };
+const tags = ref<Tag[]>([]);
+const isChangeStatusComplete = ref();
+const filteredTag = ref();
+const isDropdownVisible = ref(false);
+const inputTag = ref('');
+const isLoading = ref(false);
+const iframeSrc = ref();
+const selectedTags = ref<Tag[]>([]);
+const previewImage = ref();
+const uploadFileName = ref();
+const fileToUpload = ref();
+const autoGenerateSlug = ref('');
+const validateTagsInput = ref('');
+const validateFileInput = ref('');
+const profileData = useCookie<UserProfile>('profileData');
+const accessToken = useCookie('accessToken');
+
 async function fetchData() {
-  const fetchedTags = await useFetchData(`v1/tags`);
+  const fetchedTags = await useFetchData(`v1/tags`, 'GET');
   if (fetchedTags.error) {
-    error.value = fetchedTags;
+    error.value = fetchedTags.error;
   } else {
-    tags.value = fetchedTags || [];
+    tags.value = fetchedTags.data || [];
   }
 }
 
-const accessToken = useCookie('accessToken');
-
-// async function fetchEventCreate() {
-//   const formattedTags = getFormattedTags(selectedTags.value);
-//   event.value.tags = formattedTags;
-//   if (validateForm()) {
-//     const fetchedUpload = await useFetchUpload(
-//       `v1/files/upload`,
-//       fileToUpload.value,
-//       'thumbnails',
-//       accessToken.value
-//     );
-//     if (fetchedUpload) {
-//       event.value.event_image = uploadFileName.value;
-//       concatDateTime();
-//       const fetchedData = await useFetchWithAuth(
-//         `v2/backoffice/events`,
-//         'POST',
-//         accessToken.value,
-//         event.value
-//       );
-//       if (fetchedData.data && fetchedUpload) {
-//         router.push('/backoffice/events');
-//       } else {
-//         isChangeStatusComplete.value = false;
-//       }
-//     }
-//   } else {
-//     window.scrollTo(0, 0);
-//   }
-// }
 async function fetchEventCreate() {
   const formattedTags = getFormattedTags(selectedTags.value);
   event.value.tags = formattedTags;
   concatDateTime();
-  console.log('rb', event.value);
-  // validateForm();
-  console.log(validateInput.value);
 
   if (!validateForm()) {
     event.value.event_image = uploadFileName.value;
@@ -200,13 +170,13 @@ function validateForm() {
     image: fileToUpload.value,
     desc: event.value.event_desc.trim(),
     detail: event.value.event_detail.trim(),
-    ticketStart: event.value.event_ticket_start_date,
-    ticketEnd: event.value.event_ticket_end_date,
+    ticketStart: event.value.event_ticket_start_date !== 'T',
+    ticketEnd: event.value.event_ticket_end_date !== 'T',
     ticketValid:
       new Date(event.value.event_ticket_end_date).getTime() >
       new Date(event.value.event_ticket_start_date).getTime(),
-    startDate: event.value.event_start_date,
-    endDate: event.value.event_end_date,
+    startDate: event.value.event_start_date !== 'T',
+    endDate: event.value.event_end_date !== 'T',
     dateValid:
       new Date(event.value.event_end_date).getTime() >
       new Date(event.value.event_start_date).getTime(),
@@ -222,37 +192,7 @@ function validateForm() {
   });
   const hasError = Object.values(validateInput.value).includes(false);
 
-  // if (hasError) {
-  //   triggerShake();
-  // }
-
   return hasError;
-  // if (event.value.event_name.length > 255) {
-  //   validateInput.value.name = '*Please keep event name within 255 characters.';
-  //   return false;
-  // }
-  // if (event.value.event_slug.length > 100) {
-  //   validateInput.value.slug = '*Please keep event slug within 100 characters.';
-  //   return false;
-  // }
-  // if (
-  //   new Date(event.value.event_start_date).getTime() >
-  //   new Date(event.value.event_end_date).getTime()
-  // ) {
-  //   validateInput.value.startDate =
-  //     '*Please keep event slug within 100 characters.';
-  //   return false;
-  // }
-  // if (selectedTags.value.length === 0) {
-  //   validateTagsInput.value = '*Select at least 1 tag';
-  //   validateInput.tag.value = '*Select at least 1 tag';
-  //   return false;
-  // } else if (!fileToUpload.value) {
-  //   validateFileInput.value = '*Select image';
-  //   return false;
-  // } else {
-  //   return true;
-  // }
 }
 
 function getFormattedTags(tags: Tag[]) {
@@ -312,6 +252,7 @@ function handelFileUpload(file: Event) {
     }
   }
 }
+
 function concatDateTime() {
   event.value.event_ticket_start_date =
     dateInput.value.ticket_start_date.concat(
@@ -331,14 +272,13 @@ function concatDateTime() {
     dateInput.value.end_time
   );
 }
+
 function getAutoGenerateSlug() {
   if (!autoGenerateSlug.value) {
     slugify(event.value.event_name);
   }
   event.value.event_slug = autoGenerateSlug.value;
 }
-
-const profileData = useCookie<UserProfile>('profileData');
 
 onMounted(async () => {
   try {
@@ -625,6 +565,12 @@ onMounted(async () => {
                       required
                     />
                   </div>
+                  <span
+                    v-if="!validateInput.ticketValid"
+                    class="b3 italic text-burgundy"
+                  >
+                    {{ validateInputErrText.ticketValid }}</span
+                  >
                 </div>
                 <div class="">
                   <p class="b1">
@@ -650,12 +596,6 @@ onMounted(async () => {
                       required
                     />
                   </div>
-                  <span
-                    v-if="!validateInput.ticketValid"
-                    class="b3 italic text-burgundy"
-                  >
-                    {{ validateInputErrText.ticketValid }}</span
-                  >
                 </div>
                 <div class="col-start-1">
                   <p class="b1">
@@ -681,6 +621,12 @@ onMounted(async () => {
                       required
                     />
                   </div>
+                  <span
+                    v-if="!validateInput.dateValid"
+                    class="b3 italic text-burgundy"
+                  >
+                    {{ validateInputErrText.dateValid }}</span
+                  >
                 </div>
                 <div class="">
                   <p class="b1">
@@ -707,12 +653,6 @@ onMounted(async () => {
                     />
                   </div>
                 </div>
-                <span
-                  v-if="!validateInput.dateValid"
-                  class="b3 italic text-burgundy"
-                >
-                  {{ validateInputErrText.dateValid }}</span
-                >
 
                 <div class="col-span-1 col-start-1">
                   <p class="b1">

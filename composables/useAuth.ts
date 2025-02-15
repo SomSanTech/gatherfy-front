@@ -5,11 +5,15 @@ export const useAuth = () => {
   const profileData = useCookie('profileData');
   const isSessionTimeOuts = useState('isSessionTimeOut');
   const isUserSignIn = useState('isUserSignIn'); // เก็บสถานะผู้ใช้
-
-  const loginPopup = useLoginPopup();
-
+  const isUserSignInCookie = useCookie('is_user_sign_in');
+  const loginPopup = useState('loginPopup');
+  const isClickOK = useState('isClickOk', () => false);
+  const isHavePopupOpen = useState('isHavePopupOpen', () => false);
+  const isLoggingOut = useState('isLoggingOut', () => false);
   const router = useRouter();
   const config = useRuntimeConfig();
+  // const userRegisHistory = useCookie('user_regis_history');
+  const userRegisHistory = useState('userRegisHistory', () => []);
 
   // const login = async (credentials) => {
   //   const res = await $fetch('/api/auth/login', { method: 'POST', body: credentials })
@@ -45,6 +49,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
+    isLoggingOut.value = true;
     if (!accessToken.value && !refreshToken.value) {
       console.log('Already logged out, skipping reload');
       return;
@@ -53,18 +58,37 @@ export const useAuth = () => {
     refreshToken.value = null;
     role.value = null;
     profileData.value = null;
+    isUserSignInCookie.value = null;
+    // userRegisHistory.value = null;
     router.push('/').then(() => {
       window.location.reload();
     });
   };
 
-  const handleSessionExpire = () => {
+  const handleSessionExpire = async () => {
     // router.push('/').then(() => {
     //   window.location.reload();
     // });
+    // if (!accessToken.value && !refreshToken.value) {
+    //   console.log('Already logged out, skipping reload');
+    //   return;
+    // }
+    accessToken.value = null;
+    refreshToken.value = null;
+    role.value = null;
+    profileData.value = null;
+    isUserSignInCookie.value = null;
     isSessionTimeOuts.value = false;
-    logout();
-    loginPopup.value = true;
+    isHavePopupOpen.value = false;
+    // userRegisHistory.value = null;
+
+    // logout();
+    router.push('/').then(() => {
+      window.location.reload();
+    });
+    // window.location.reload();
+    isClickOK.value = true;
+    // loginPopup.value = true;
   };
 
   return { accessToken, refresh, logout, handleSessionExpire };

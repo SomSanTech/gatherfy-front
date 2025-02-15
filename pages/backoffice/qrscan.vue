@@ -44,6 +44,7 @@ const fetchRegisListData = async (eventId: string) => {
     accessToken.value
   );
   registrationsData.value = fetchedData.data || [];
+  console.log('registrationsData.value', registrationsData.value);
 };
 const handleSelectEvent = async () => {
   // try {
@@ -76,7 +77,7 @@ onMounted(async () => {
         scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
         if (scannedValue.value) {
           apiResponse.value = scannedValue.value;
-          console.log(scannedValue.value);
+          // console.log(scannedValue.value);
 
           try {
             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
@@ -92,14 +93,14 @@ onMounted(async () => {
             apiResponse.value = response.data;
             handleSelectEvent();
           } catch (err) {
-            console.error('API call failed:', err);
+            // console.error('API call failed:', err);
             apiResponse.value = 'API call failed!';
           }
         } else {
           console.log('test');
         }
       }
-      if (error) console.error(error);
+      // if (error) console.error(error);
     }
   );
 });
@@ -109,8 +110,8 @@ onMounted(async () => {
 // });
 </script>
 <template>
-  <div class="ml-80 h-screen w-full">
-    <div class="flex h-full justify-between gap-3 px-5 text-center">
+  <div class="ml-80 h-screen w-full bg-ghost-white">
+    <div class="justify- flex h-full gap-12 px-5 text-center">
       <div class="my-auto flex aspect-square h-fit w-[400px] shrink-0">
         <video
           ref="video"
@@ -123,36 +124,48 @@ onMounted(async () => {
           API Response: {{ apiResponse }}
         </p> -->
       </div>
-      <div>
-        <p>Event</p>
-        <div>
-          <label for="dropdown" class="font-bold">Select an option:</label>
-          <select
-            id="dropdown"
-            v-model="selectedOption"
-            class="rounded border p-2"
-            @change="handleSelectEvent()"
-          >
-            <option
-              v-for="event in eventsData?.filter(
-                (e: any) =>
-                  new Date(e.eventStartDate).getTime() >= new Date().getTime()
-              )"
-              :key="event.eventId"
-              :value="event.eventName"
+      <div class="my-32 mr-10 w-full rounded-lg bg-white p-7 drop-shadow-lg">
+        <div class="flex w-full flex-col items-start gap-4">
+          <p class="t3">Event Registration</p>
+          <div class="flex items-center gap-3">
+            <label for="dropdown" class="b2 font-semibold">Select Event </label>
+            <select
+              id="dropdown"
+              v-model="selectedOption"
+              class="b3 rounded border p-2"
+              @change="handleSelectEvent()"
             >
-              {{ event.eventName }}
-            </option>
-          </select>
-
-          <p class="mt-2">Selected: {{ selectedOption }}</p>
+              <option
+                v-for="event in eventsData?.filter(
+                  (e: any) =>
+                    new Date(e.eventStartDate).getTime() >= new Date().getTime()
+                )"
+                :key="event.eventId"
+                :value="event.eventName"
+              >
+                {{ event.eventName }}
+              </option>
+            </select>
+          </div>
         </div>
-        <div class="tbody-container overflow-y-auto">
+
+        <div v-if="registrationsData" class="h-full w-full">
           <div
-            v-for="registration in registrationsData"
-            class="regis-list border-default-300 cursor-default border-b transition-colors"
+            v-if="registrationsData.length === 0"
+            class="b2 flex h-full w-full items-center justify-center"
           >
-            <RegistrationList :registration="registration" />
+            <p>No Registration</p>
+          </div>
+          <div v-else class="overflow-y-auto">
+            <div
+              v-for="registration in registrationsData"
+              class="border-default-300 flex cursor-default items-center border-b transition-colors"
+            >
+              <RegistrationList
+                :registration="registration"
+                :is-show-in-q-r-scan="true"
+              />
+            </div>
           </div>
         </div>
       </div>

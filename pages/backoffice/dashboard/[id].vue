@@ -10,6 +10,7 @@ import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import PieChart from '~/components/backoffice/PieChart.vue';
 import type { Answer, ExistingQuestion, Feedback } from '~/models/feedback';
+const profileData = useCookie('profileData');
 
 const error = useError();
 definePageMeta({
@@ -36,6 +37,7 @@ const colors = {
   Female: '#989898',
   Male: '#D71515',
   Other: '#cccccc',
+  'Prefer not to say': '#f56042',
 };
 const statusColor: any = {
   'Awaiting Check-in': '#989898',
@@ -78,8 +80,8 @@ const token = useCookie('accessToken');
 
 const fetchViewsData = async () => {
   try {
-    const fetchedData = await useFetchData(`v1/views?eventIds=${param}`);
-    viewsData.value = fetchedData || [];
+    const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
+    viewsData.value = fetchedData.data || [];
 
     totalViewCount.value = viewsData.value[0].views.reduce(
       (sum: any, record: any) => sum + record.count,
@@ -97,11 +99,15 @@ const fetchViewsData = async () => {
 };
 
 const fetchRegisData = async () => {
-  const fetchedData = await useFetchData(`v1/registrations/event/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations/event/${param}`,
+    'GET',
+    token.value
+  );
   if (fetchedData.error) {
     error.value = 'error';
   } else {
-    registrationsData.value = fetchedData || [];
+    registrationsData.value = fetchedData.data || [];
   }
 
   groupedByGender.value = Object.fromEntries(
@@ -206,7 +212,7 @@ onMounted(async () => {
               v-for="tag in eventDetail?.tags"
               class="bg-zin-200 rounded-md border border-dark-grey/60 px-3"
             >
-              {{ tag }}
+              {{ tag.tag_title }}
             </button>
           </div>
           <NuxtLink
@@ -246,7 +252,7 @@ onMounted(async () => {
           <h1 class="b1 font-semibold">Engagement last 7 days</h1>
           <div class="view-by-7day flex h-full flex-col justify-center">
             <div class="flex justify-center gap-5">
-              <div
+              <!-- <div v-if="last7DayData.length>0"
                 class="b4 flex flex-col items-end justify-between text-dark-grey/60"
               >
                 <p>{{ Math.round(maxForLast7Day * 1.25) }}</p>
@@ -254,9 +260,12 @@ onMounted(async () => {
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.5) }}</p>
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.25) }}</p>
                 <p>{{ 0 }}</p>
-              </div>
+              </div> -->
 
-              <div class="b3 flex w-full items-end justify-between self-end">
+              <div
+                v-if="last7DayData.length > 0"
+                class="b3 flex w-full items-end justify-between self-end"
+              >
                 <div
                   v-for="data in last7DayData"
                   class="group relative flex cursor-pointer flex-col items-center"
@@ -277,11 +286,14 @@ onMounted(async () => {
                     {{ data.day }} <br />
                     {{ data.count }} views
                   </div>
-                  <p class="b4 absolute -bottom-7 text-dark-grey/60">
+                  <p
+                    class="b4 absolute -bottom-7 w-max shrink-0 text-dark-grey/60"
+                  >
                     {{ data.day }}
                   </p>
                 </div>
               </div>
+              <div v-else class="b2">No View Data</div>
             </div>
           </div>
         </div>
@@ -328,6 +340,7 @@ onMounted(async () => {
         <div class="col-span-2 flex h-full">
           <SumaryOfView
             v-if="viewsData"
+            :profile-data="profileData"
             :sumOfViews="totalViewCount"
             :viewsEntries="viewsData[0].views?.length"
             :allRegistration="registrationsData?.length"

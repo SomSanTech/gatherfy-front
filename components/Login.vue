@@ -5,8 +5,8 @@ import {
   GoogleSignInButton,
   type CredentialResponse,
 } from 'vue3-google-signin';
-
-const loginPopup = useLoginPopup();
+const loginPopup = useState('loginPopup');
+const isHavePopupOpen = useState('isHavePopupOpen');
 const isSignup = useState('isSignup');
 const confirmPassword = ref('');
 const showPassword = ref(false);
@@ -14,7 +14,7 @@ const selectedGender = ref('female');
 const birthday = ref();
 const username = ref('');
 const password = ref('');
-const userProfile = useUserProfile();
+const userProfile = useState('userProfile');
 const signupData = ref({
   firstname: '',
   lastname: '',
@@ -46,7 +46,7 @@ const checkField = ref<{ [key: string]: boolean }>({
   birthday: true,
 });
 const shouldShake = ref(false);
-const role = useRole();
+const role = useState('role');
 const isWaitAuthen = ref<boolean>(false);
 const loginStatus = ref<boolean>(true);
 const fieldErrorMessages = {
@@ -90,26 +90,6 @@ const decodeToken = (token: any): any => {
   const tokenPayload = JSON.parse(atob(arrayToken[1]));
   console.log('tokenPayload:', tokenPayload);
   return tokenPayload;
-};
-
-const useFetch = async (url: string, method: string, body: object) => {
-  const config = useRuntimeConfig();
-  try {
-    const response = await fetch(`${config.public.baseUrl}/api/v1/${url}`, {
-      method: `${method}`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      throw new Error(`Error fetching`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    return { error: 'Failed to fetch data' };
-  }
 };
 
 const selectRole = (role: string) => {
@@ -202,6 +182,11 @@ const validateFields = () => {
 };
 const isUserSignIn = useState('isUserSignIn');
 const isOTPPopup = useState('isOTPPopup');
+const isSignInCookie = useCookie('is_user_sign_in');
+
+const handleAuthen = async () => {};
+const signUpErrorResponse = ref();
+const userRegisHistory = useState('userRegisHistory');
 const handleSignin = async () => {
   isClickSignBtn.value = true;
   isWaitAuthen.value = true;
@@ -213,40 +198,43 @@ const handleSignin = async () => {
   validateFields();
 
   if (!isSignup.value) {
+    loginStatus.value = true;
+    // Sign in
     if (username.value.length !== 0 && password.value.length !== 0) {
       const dataSend = {
         username: username.value,
         password: password.value,
       };
 
-      console.log('Sending Data:', dataSend);
+      const fetchedData = await useFetchData(`v1/login`, 'POST', dataSend);
+      console.log('fetchedData.data', fetchedData.data);
 
-      const fetchedData = await useFetch(`login`, 'POST', dataSend);
-      console.log('login Data:', fetchedData);
-
-      if (fetchedData.accessToken) {
+      if (fetchedData.status === 200) {
         isWaitAuthen.value = false;
-        const accessCookie = useCookie('accessToken', {
-          httpOnly: false, // Debugging Phase
+
+        const accessToken = useCookie('accessToken', {
+          httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60,
         });
-        accessCookie.value = fetchedData.accessToken;
 
-        const refreshCookie = useCookie('refreshToken', {
+        accessToken.value = fetchedData.data.accessToken;
+
+        const refreshToken = useCookie('refreshToken', {
           httpOnly: false,
           maxAge: 60 * 60,
         });
-        refreshCookie.value = fetchedData.refreshToken;
+        refreshToken.value = fetchedData.data.refreshToken;
 
-        const userProfileData = await useFetchWithAuth(
-          'v1/profile',
-          'GET',
-          accessCookie.value
-        );
-        userProfile.value = userProfileData.data;
-        console.log(userProfile.value);
-        role.value = decodeToken(accessCookie.value)?.role;
+        // const userProfileData = await useFetchWithAuth(
+        //   'v1/profile',
+        //   'GET',
+        //   accessToken.value
+        // );
+
+        // userProfile.value = userProfileData.data;
+
+        role.value = decodeToken(accessToken.value)?.role;
         console.log(role);
         const roleCookie = useCookie('roleCookie', {
           httpOnly: false,
@@ -254,18 +242,18 @@ const handleSignin = async () => {
           maxAge: 60 * 60,
         });
 
-        roleCookie.value = decodeToken(accessCookie.value)?.role;
+        roleCookie.value = decodeToken(accessToken.value)?.role;
 
         const profileData = useCookie('profileData', {
           httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60,
         });
-        if (fetchedData.accessToken) {
+        if (fetchedData.data.accessToken) {
           const userProfileData = await useFetchWithAuth(
             'v1/profile',
             'GET',
-            fetchedData.accessToken
+            fetchedData.data.accessToken
           );
           profileData.value = userProfileData.data;
         }
@@ -275,9 +263,24 @@ const handleSignin = async () => {
         } else {
           router.push('/backoffice');
         }
-        console.log('Access Token:', accessCookie.value);
+
+        // const userRegisData = useCookie('user_regis_history', {
+        //   default: () => [],
+        // });
+
+        const regisData = await useFetchWithAuth(
+          'v1/tickets',
+          'GET',
+          accessToken.value
+        );
+        userRegisHistory.value = regisData.data;
+
+        console.log('Access Token:', accessToken.value);
         loginPopup.value = false;
+        isHavePopupOpen.value = false;
         isUserSignIn.value = true;
+        isSignInCookie.value = 'yes';
+        console.log('isUserSignIn:', isUserSignIn.value);
       } else {
         loginStatus.value = false;
         isWaitAuthen.value = false;
@@ -291,13 +294,18 @@ const handleSignin = async () => {
     console.log(signupData.value);
     if (!validateFields()) {
       signupData.value.birthday = birthday.value + 'T00:00:00';
-      const response = await useFetchCreateUpdate(
+      const response = await useFetchData(
         'v1/signup',
         'POST',
         signupData.value
       );
-      console.log('response', response);
-      if (!response.error) {
+      console.log('response', response.data);
+      if (response.errorData) {
+        isWaitAuthen.value = false;
+        console.log('response.errorData', response.errorData);
+        signUpErrorResponse.value = response.errorData;
+      }
+      if (!response.errorData) {
         localStorage.setItem('email', signupData.value.email);
         // loginPopup.value = !loginPopup.value;
         isWaitAuthen.value = false;
@@ -320,6 +328,7 @@ const handleSignin = async () => {
         // isUserSignIn.value = true
         isOTPPopup.value = true;
         loginPopup.value = false;
+        isHavePopupOpen.value = false;
       }
     } else {
       isWaitAuthen.value = false;
@@ -327,6 +336,7 @@ const handleSignin = async () => {
   }
 };
 const handleLoginPopup = () => {
+  isHavePopupOpen.value = false;
   if (isSignup.value) {
     signupData.value = {
       firstname: '',
@@ -404,10 +414,18 @@ const handleLoginError = () => {
         <p class="t3 text-center">Create an account!</p>
         <p class="b1 text-gray-600">Sign up and join with us.</p>
       </div>
-      <GoogleSignInButton
+      <div class="b3 text-red-600" v-if="signUpErrorResponse">
+        <p
+          v-for="er in signUpErrorResponse.details"
+          class="flex items-center gap-1"
+        >
+          <Cancle /> {{ er }}
+        </p>
+      </div>
+      <!-- <GoogleSignInButton
         @success="handleLoginSuccess"
         @error="handleLoginError"
-      ></GoogleSignInButton>
+      ></GoogleSignInButton> -->
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
@@ -496,10 +514,12 @@ const handleLoginError = () => {
           {{ fieldErrorMessages['phone'] }}
         </p>
         <div>
-          <p v-if="!isSignup" class="b2 font pb-1 font-semibold">Username</p>
+          <p v-if="!isSignup" class="b2 font pb-1 font-semibold">
+            Username or Email
+          </p>
           <input
             type="text"
-            placeholder="Username"
+            :placeholder="!isSignup ? 'Username or Email' : 'Username'"
             v-model="username"
             class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
           />
@@ -738,47 +758,4 @@ const handleLoginError = () => {
   </div>
 </template>
 
-<style scoped>
-.load {
-  aspect-ratio: 0.75;
-  --c: no-repeat linear-gradient(#e4e4e4 0 0);
-  background:
-    var(--c) 0% 100%,
-    var(--c) 50% 100%,
-    var(--c) 100% 100%;
-  background-size: 20% 65%;
-  animation: l8 1s infinite linear;
-}
-@keyframes l8 {
-  16.67% {
-    background-position:
-      0% 0%,
-      50% 100%,
-      100% 100%;
-  }
-  33.33% {
-    background-position:
-      0% 0%,
-      50% 0%,
-      100% 100%;
-  }
-  50% {
-    background-position:
-      0% 0%,
-      50% 0%,
-      100% 0%;
-  }
-  66.67% {
-    background-position:
-      0% 100%,
-      50% 0%,
-      100% 0%;
-  }
-  83.33% {
-    background-position:
-      0% 100%,
-      50% 100%,
-      100% 0%;
-  }
-}
-</style>
+<style scoped></style>

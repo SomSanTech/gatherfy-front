@@ -18,19 +18,20 @@ const handleBackspace = (index: number, event: KeyboardEvent) => {
     otpInputs.value[index - 1]?.focus();
   }
 };
-const loginPopup = useLoginPopup();
+const loginPopup = useState('loginPopup');
+
 const isSignup = useState('isSignup');
 
 const verifyOTP = async () => {
   console.log('email', email.value);
-
+  email.value = localStorage.getItem('email') || '';
   const otpString = otpValues.value.join('');
   console.log('OTP:', otpString);
-  const response = await useFetchCreateUpdate2('v1/verify-otp', 'POST', {
+  const response = await useFetchData('v1/verify-otp', 'POST', {
     email: email.value,
     otp: otpString,
   });
-  console.log('res OTP', response);
+  console.log('res OTP', response.data);
   if (response?.error) {
     console.error('Error verifying OTP:', response.error);
     return;

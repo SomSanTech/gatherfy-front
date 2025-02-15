@@ -3,27 +3,31 @@ import Calendar from '~/components/icons/Calendar.vue';
 import Location from '~/components/icons/Location.vue';
 import Clock from '~/components/icons/Clock.vue';
 import Cancle from '~/components/icons/Cancle.vue';
-import UserProfile from '~/components/icons/UserProfile.vue';
+import UserProfileIcon from '~/components/icons/UserProfile.vue';
 import Organisation from '~/components/icons/Organisation.vue';
-import type { User } from '~/models/user';
+import Subscribe from '~/components/icons/Subscribe.vue';
+import type { UserProfile } from '~/models/userProfile';
 
 const route = useRoute();
 const error = useError();
 const param = route.params.id;
 const isOpenPopup = ref(false);
 const event = ref();
-const userData = ref<User | null>(null);
-const registrationBody = ref({});
-const isLoading = ref(true);
+const isLoading: Ref<boolean> = ref(true);
 const plsLoginPopUp = ref(false);
-const userProfile = useCookie('profileData');
-const loginPopup = useLoginPopup();
+const userProfile = useCookie<UserProfile>('profileData');
+const loginPopup = useState('loginPopup');
+const isSignInCookie = useCookie('is_user_sign_in');
 const token = useCookie('accessToken');
-
+const checkIsAlreadyRegis = ref(false);
+const userSubscribeTagData = ref([]);
+const isHavePopupOpen = useState('isHavePopupOpen');
 const handleGoSignIn = () => {
   loginPopup.value = true;
+  isHavePopupOpen.value = true;
   plsLoginPopUp.value = false;
 };
+const userRegisHistory = useState('userRegisHistory');
 
 const regis = async () => {
   if (event.value) {
@@ -36,11 +40,19 @@ const regis = async () => {
       }
     );
 
-    console.log(regsitered);
+    console.log('regsitered', regsitered);
 
     if (regsitered.status === 200) {
-      alert('Thank you for registration');
-    } else {
+      const regisData = await useFetchWithAuth(
+        'v1/tickets',
+        'GET',
+        accessToken.value
+      );
+
+      userRegisHistory.value = regisData.data;
+      isShowSuccessRegisPopup.value = true;
+    }
+    if (regsitered.error) {
       alert('Already Registered for the Event');
     }
     isOpenPopup.value = false;
@@ -48,14 +60,14 @@ const regis = async () => {
 };
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(`v1/events/${param}`);
+  const fetchedData = await useFetchData(`v1/events/${param}`, 'GET');
   if (fetchedData.error) {
     error.value = fetchData;
   } else {
-    event.value = (await fetchedData) || [];
+    event.value = (await fetchedData.data) || [];
   }
 };
-
+const isShowSuccessRegisPopup = ref(false);
 const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
   console.log('isEventAvaliable', isEventAvaliable);
   console.log('is userProfile', userProfile.value);
@@ -71,9 +83,20 @@ const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
 };
 const accessToken = useCookie('accessToken');
 
+const checkIsAlreadySubTag = (tagId: number) => {
+  let compareResult = false;
+  if (accessToken.value) {
+    compareResult = userSubscribeTagData.value.tagId.includes(tagId);
+  }
+  return compareResult;
+};
+const subAction = ref('');
+const isShowSubTagPopup = ref(false);
 const handleSubscribeTag = async (tagId: number) => {
   console.log('click');
-  try {
+  // try {
+  if (!checkIsAlreadySubTag(tagId)) {
+    subAction.value = 'follow';
     const response = await useFetchWithAuth(
       'v1/subscribe',
       'POST',
@@ -86,31 +109,49 @@ const handleSubscribeTag = async (tagId: number) => {
     console.log('response', response);
 
     if (response.status === 200) {
-      alert('follow this tag ja');
-    }
-  } catch (error: any) {
-    console.error('Error:', error);
+      const subscribeTagData = await useFetchWithAuth(
+        'v1/subscribed',
+        'GET',
+        accessToken.value
+      );
 
-    if (error.response?.status === 409) {
+      userSubscribeTagData.value = subscribeTagData.data;
+      isShowSubTagPopup.value = true;
+    }
+
+    if (response.error) {
       alert('u follow this tag leaw na');
-    } else {
-      alert('Something went wrong, please try again.');
+    }
+  } else {
+    subAction.value = 'delete';
+
+    const response = await useFetchWithAuth(
+      `v1/subscribe/${tagId}`,
+      'DELETE',
+      accessToken.value
+    );
+
+    console.log('response', response);
+
+    if (response.status === 200) {
+      const subscribeTagData = await useFetchWithAuth(
+        'v1/subscribed',
+        'GET',
+        accessToken.value
+      );
+
+      userSubscribeTagData.value = subscribeTagData.data;
+      isShowSubTagPopup.value = true;
+    }
+
+    if (response.error) {
+      alert('cant log try again later na');
     }
   }
 };
-
 onMounted(async () => {
   try {
-    const accessToken = useCookie('accessToken').value;
-
-    if (accessToken) {
-      console.log('User is logged in');
-    } else {
-      console.log('User is not logged in');
-    }
     isLoading.value = true;
-    const storedUser = localStorage.getItem('user');
-    userData.value = storedUser ? JSON.parse(storedUser) : {};
 
     await fetchData();
     if (event.value) {
@@ -119,14 +160,40 @@ onMounted(async () => {
         'POST'
       );
     }
-    registrationBody.value = {
-      eventId: event.value?.eventId,
-      userId: userData.value?.userId,
-      status: 'Awaiting Check-in',
-    };
+    if (accessToken.value) {
+      const regisData = await useFetchWithAuth(
+        'v1/tickets',
+        'GET',
+        accessToken.value
+      );
+      if ('data' in regisData) {
+        userRegisHistory.value = regisData.data;
+      } else {
+        console.error('Fetch failed:', regisData.error);
+      }
+
+      const subscribeTagData = await useFetchWithAuth(
+        'v1/subscribed',
+        'GET',
+        accessToken.value
+      );
+      if ('data' in subscribeTagData) {
+        userSubscribeTagData.value = subscribeTagData.data;
+      } else {
+        console.error('Fetch failed:', subscribeTagData.error);
+      }
+    }
   } finally {
     isLoading.value = false;
   }
+});
+
+watchEffect(() => {
+  if (!event.value || !userRegisHistory.value) return;
+
+  checkIsAlreadyRegis.value = userRegisHistory.value.some((regis) => {
+    return regis.eventId === event.value.eventId;
+  });
 });
 
 watchEffect(() => {
@@ -161,7 +228,6 @@ watchEffect(() => {
                 class="detail-img h-full w-full object-cover"
               />
             </div>
-
             <div class="flex w-fit flex-col justify-center gap-3">
               <div class="flex gap-2">
                 <div v-for="tag in event?.tags">
@@ -213,7 +279,8 @@ watchEffect(() => {
                     new Date(event?.ticket_start_date).getTime() >
                       new Date().getTime() ||
                     new Date(event?.ticket_end_date).getTime() <
-                      new Date().getTime()
+                      new Date().getTime() ||
+                    checkIsAlreadyRegis
                       ? 'pointer-events-none'
                       : ''
                   "
@@ -225,13 +292,15 @@ watchEffect(() => {
                     )
                   "
                   :text="
-                    new Date(event?.ticket_start_date).getTime() >
-                    new Date().getTime()
-                      ? 'Comming soon'
-                      : new Date(event?.ticket_end_date).getTime() <
+                    checkIsAlreadyRegis
+                      ? 'You’re already registered for this event'
+                      : new Date(event?.ticket_start_date).getTime() >
                           new Date().getTime()
-                        ? 'Sale close'
-                        : 'Registor event'
+                        ? 'Comming soon'
+                        : new Date(event?.ticket_end_date).getTime() <
+                            new Date().getTime()
+                          ? 'Sale close'
+                          : 'Registor event'
                   "
                 />
               </div>
@@ -246,9 +315,10 @@ watchEffect(() => {
       >
         <div class="col-span-3 flex flex-col gap-2 lg:gap-4">
           <h1 class="t2 font-semibold">Event detail</h1>
-          <p class="b2 detail-detail">
-            {{ event?.detail }}
-          </p>
+          <p
+            class="b2 detail-detail"
+            v-html="event?.detail.replace(/\n/g, '<br/>')"
+          ></p>
           <div class="w-full bg-zinc-200">
             <img :src="event?.image" alt="" class="w-full object-cover" />
           </div>
@@ -278,7 +348,11 @@ watchEffect(() => {
                   @click="handleSubscribeTag(tag.tag_id)"
                   class="flex h-full w-full items-center justify-center rounded-r-lg border-y border-r border-dark-grey/60 px-2 duration-300 hover:bg-burgundy hover:text-light-grey"
                 >
-                  <AddAlert class="text-xl" />
+                  <Check
+                    v-if="checkIsAlreadySubTag(tag.tag_id)"
+                    class="text-3xl"
+                  />
+                  <Subscribe v-else class="text-xl" />
                 </button>
               </div>
             </div>
@@ -287,13 +361,28 @@ watchEffect(() => {
       </div>
     </div>
     <!-- pop up -->
-    <div
-      v-show="plsLoginPopUp"
-      class="fixed right-1/2 top-1/2 z-50 flex -translate-y-1/2 translate-x-1/2 flex-col items-center justify-center gap-5 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[400px] lg:p-7"
-    >
-      <p class="b2">Please Sign in before Registor event</p>
-      <BtnComp @click="handleGoSignIn" text="Go Sign in" />
-    </div>
+    <BasicPopup
+      :showPopup="plsLoginPopUp"
+      text="Please Sign in before Registor event"
+      btn-text="Go Sign in"
+      @handleBasicPopAction="handleGoSignIn"
+    />
+    <BasicPopup
+      :showPopup="isShowSubTagPopup"
+      :text="
+        subAction === 'follow'
+          ? 'Thank you for subscribing to this event tag! Stay tuned for updates and announcements'
+          : 'You have successfully unsubscribed from this event tag'
+      "
+      btn-text="Continue"
+      @handleBasicPopAction="isShowSubTagPopup = false"
+    />
+    <BasicPopup
+      :showPopup="isShowSuccessRegisPopup"
+      text="Thank you for registration"
+      btn-text="Continue"
+      @handleBasicPopAction="isShowSuccessRegisPopup = false"
+    />
     <div
       v-show="isOpenPopup"
       class="regis-popup fixed right-1/2 top-1/2 z-50 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[600px] lg:p-7"
@@ -326,7 +415,7 @@ watchEffect(() => {
               </p>
             </div>
             <div class="mt-2 flex items-center gap-2">
-              <UserProfile class="b1" />
+              <UserProfileIcon class="b1" />
               <p class="regis-user b2">
                 <span class="mr-3 font-semibold">{{
                   userProfile?.username

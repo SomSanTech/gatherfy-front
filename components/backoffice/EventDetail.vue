@@ -42,30 +42,7 @@ const props = defineProps<{
 const filteredTag = ref();
 const inputTag = ref('');
 const isDropdownVisible = ref(false);
-// const editEventDto = ref<EditEvent>({})
-// const fetchData = async () => {
-//     const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
 
-//     if (fetchedData.error) {
-//         error.value = fetchData;
-//     } else {
-//         event.value = fetchedData || [];
-//         console.log(event.value)
-//     }
-// };
-
-// function separateDate(date: Date, format: 'date' | 'time'){
-//   const parsedDate = new Date(date);
-//   const dateTime = parsedDate.toISOString().split("T");
-//   console.log(parsedDate)
-//   if(format === 'date'){
-//     return dateTime[0]
-//   }
-//   else{
-//     const time = dateTime[1]
-//     return time.substring(0, 5); // "HH:mm"
-//   }
-// }
 function filterTag(value: string) {
   const tagLeft = props.tags?.filter(
     (item) => !props.event?.tags.includes(item.tag_title)

@@ -64,14 +64,16 @@ const filterFeedback = ref([
 
 const fetchData = async () => {
   const fetchedEventData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+    `v1/events/owner/${adminData.value?.userId}`,
+    'GET'
   );
   const fetchedFeedbackData = await useFetchData(
-    `v1/feedbacks/owner/${adminData.value?.userId}`
+    `v1/feedbacks/owner/${adminData.value?.userId}`,
+    'GET'
   );
-  eventsData.value = fetchedEventData || [];
-  feedbackData.value = fetchedFeedbackData || [];
-  filterFeedbackData.value = fetchedFeedbackData || [];
+  eventsData.value = fetchedEventData.data || [];
+  feedbackData.value = fetchedFeedbackData.data || [];
+  filterFeedbackData.value = fetchedFeedbackData.data || [];
 };
 
 // const filterRating = (star: number) => {

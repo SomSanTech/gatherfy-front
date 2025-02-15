@@ -32,7 +32,14 @@ export const useFetchWithAuth = async (
             return fetchData(auth.accessToken.value);
           }
         }
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        if (status === 400 && errorData) {
+          return { status, errorData };
+        }
+
+        throw new Error(
+          errorData?.message || `Request failed with status ${status}`
+        );
       }
 
       const contentType = response.headers.get('content-type');
@@ -48,7 +55,7 @@ export const useFetchWithAuth = async (
     };
     return await fetchData(token);
   } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error;
+    console.error('Fetch Error:', error);
+    return { error: (error as Error).message, status: 500 };
   }
 };

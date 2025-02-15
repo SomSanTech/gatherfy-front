@@ -26,7 +26,7 @@ const averageRating = ref();
 const nuxtRating = ref();
 const conicGradientStyle = ref();
 const groupedByAnswerText = ref<Record<string, number>>({});
-
+const error = useError();
 export interface GroupedAnswers {
   [key: string]: Answer[];
 }
@@ -41,17 +41,26 @@ const colors: Record<string, string> = {
 const token = useCookie('accessToken');
 
 async function fetchData() {
-  const fetchedData = (
-    await useFetchWithAuth(`v1/backoffice/events/${param}`, 'GET', token.value)
-  ).data;
-  const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events/${param}`,
+    'GET',
+    token.value
+  );
+  const fetchedQuestionData = await useFetchData(
+    `v1/questions/event/${param}`,
+    'GET'
+  );
   const fetchedFeedbackData = await useFetchWithAuth(
     `v1/feedbacks/event/${param}`,
     'GET',
     token.value
   );
-  eventData.value = fetchedData || [];
-  questionData.value = fetchedQuestionData || [];
+
+  if (fetchedFeedbackData.status !== 200) {
+    error.value = 'error';
+  }
+  eventData.value = fetchedData.data || [];
+  questionData.value = fetchedQuestionData.data || [];
   feedbackData.value = fetchedFeedbackData.data || [];
   filterFeedbackData.value = fetchedFeedbackData.data || [];
 
@@ -160,7 +169,7 @@ onMounted(async () => {
                 v-for="tag in eventData?.tags"
                 class="bg-zin-200 rounded-md border border-dark-grey/60 px-3"
               >
-                {{ tag }}
+                {{ tag.tag_title }}
               </button>
             </div>
             <NuxtLink

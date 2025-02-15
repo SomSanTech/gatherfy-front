@@ -81,12 +81,12 @@ async function fetchData() {
     'GET',
     accessToken.value
   );
-  const fetchedTags = await useFetchData(`v1/tags`);
+  const fetchedTags = await useFetchData(`v1/tags`, 'GET');
   if (fetchedData.error || fetchedTags.error) {
     error.value = fetchedData ? fetchedData : fetchedTags;
   } else {
     event.value = (await fetchedData.data) || [];
-    tags.value = (await fetchedTags) || [];
+    tags.value = (await fetchedTags.data) || [];
     selectedTags.value = event.value.tags;
     console.log('selectedTags', selectedTags.value);
     currentDateTime();

@@ -206,8 +206,11 @@ const fetchAllEventData = async () => {
 const fetchAllViewData = async () => {
   if (eventsData.value) {
     const eventIds = eventsData.value.map((event) => event.eventId).join(',');
-    const fetchedData = await useFetchData(`v1/views?eventIds=${eventIds}`);
-    viewsData.value = fetchedData || [];
+    const fetchedData = await useFetchData(
+      `v1/views?eventIds=${eventIds}`,
+      'GET'
+    );
+    viewsData.value = fetchedData.data || [];
     sumOfViews.value = sumAllViews(viewsData.value);
 
     viewsData.value.forEach((event: any, index: number) => {

@@ -79,13 +79,16 @@ const compareDate = (startDate: Date) => {
 };
 
 const onPreviewFeedback = async (param: number) => {
-  const fetchedQuestionData = await useFetchData(`v1/questions/event/${param}`);
+  const fetchedQuestionData = await useFetchData(
+    `v1/questions/event/${param}`,
+    'GET'
+  );
   if (fetchedQuestionData.error) {
     finalQuestion.value = [...defaultQuestion];
     previewFeedback.value = true;
     feedbackQuestion.value = [];
   } else {
-    feedbackQuestion.value = fetchedQuestionData || [];
+    feedbackQuestion.value = fetchedQuestionData.data || [];
     finalQuestion.value = [...feedbackQuestion.value, ...defaultQuestion];
     previewFeedback.value = true;
   }
@@ -151,7 +154,7 @@ onMounted(async () => {
               <td
                 class="h-14 w-48 px-4 text-base font-semibold text-lavender-gray"
               >
-                Edit avalaiable until
+                Edit available until
               </td>
               <td
                 class="h-14 w-24 px-4 text-center text-base font-semibold text-lavender-gray"

@@ -10,7 +10,6 @@ import BtnComp from '~/components/BtnComp.vue';
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
-import { useFetchData } from '~/composables/useFetchData';
 import ExploreBar from '~/components/ExploreBar.vue';
 
 const today = ref(new Date());
@@ -21,12 +20,15 @@ const bannerEventData = ref<Event[]>([]);
 const tagsData = ref<Event[]>([]);
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData('v1/events');
-  const fetchTagData = await useFetchData('v1/tags');
-  const fetchRecommendedData = await useFetchData('v1/events/recommended');
-  eventData.value = (await fetchedData) || [];
-  tagsData.value = (await fetchTagData) || [];
-  recommendedData.value = (await fetchRecommendedData) || [];
+  const fetchedData = await useFetchData('v1/events', 'GET');
+  const fetchTagData = await useFetchData('v1/tags', 'GET');
+  const fetchRecommendedData = await useFetchData(
+    'v1/events/recommended',
+    'GET'
+  );
+  eventData.value = fetchedData.data || [];
+  tagsData.value = fetchTagData.data || [];
+  recommendedData.value = fetchRecommendedData.data || [];
   const currentDate = new Date().getTime();
   bannerEventData.value = eventData.value
     .filter((event) => new Date(event.end_date).getTime() > currentDate)

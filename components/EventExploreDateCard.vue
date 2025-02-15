@@ -34,7 +34,7 @@ const props = defineProps<{
             <button
               class="b4 rounded-md border px-5 py-1 text-black-1 duration-200 hover:border-dark-grey/60"
             >
-              {{ tag }}
+              {{ tag.tag_title }}
             </button>
           </NuxtLink>
         </div>
