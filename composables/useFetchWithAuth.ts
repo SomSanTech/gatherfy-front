@@ -16,6 +16,7 @@ export const useFetchWithAuth = async (
           Authorization: `Bearer ${token}`,
         },
         body: body ? JSON.stringify(body) : undefined,
+        credentials: 'include',
       });
 
       const status = response.status;
