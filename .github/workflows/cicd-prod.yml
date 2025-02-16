@@ -34,7 +34,7 @@ jobs:
         run: tar -czf build.tar.gz ./.output
 
       - name: Upload build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: build.tar.gz
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download build files
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-files
           path: ./build
