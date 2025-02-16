@@ -96,6 +96,8 @@ async function fetchData() {
     }));
   }
 }
+
+const errorMessage = ref();
 const createQuestion = async () => {
   const formattedQuestions = getFormattedQuestions('create');
   formattedQuestions.forEach(async (question) => {
@@ -105,11 +107,16 @@ const createQuestion = async () => {
       accessToken.value,
       question
     );
+    if (fetchedData.errorData) {
+      errorMessage.value = await fetchedData.errorData;
+      console.log('test222', errorMessage.value);
+    }
 
-    // if (fetchedData.errorData) {
-    //   console.log(fetchedData.errorData.details);
-    //   // throw fetchedData.errorData
-    // }
+    await Promise.all(formattedQuestions);
+
+    if (errorMessage.value) {
+      throw new Error(errorMessage.value);
+    }
   });
 };
 
@@ -117,17 +124,33 @@ async function editQuestion(difference: EditQuestion[]) {
   const formattedQuestions = getEditFormattedQuestions(difference);
   let createResult = true;
   difference.forEach(async (question, index) => {
-    const fetchedData = await useFetchCreateUpdate(
-      `v1/questions/${question.questionId}`,
+    const fetchedData = await useFetchWithAuth(
+      `v2/questions/${question.questionId}`,
       'PUT',
+      accessToken.value,
       formattedQuestions[index]
     );
+
+    if (fetchedData.errorData) {
+      errorMessage.value = await fetchedData.errorData;
+      console.log('test222', errorMessage.value);
+    }
+
+    await Promise.all(formattedQuestions);
+
+    if (errorMessage.value) {
+      throw new Error(errorMessage.value);
+    }
   });
 }
 
 const deleteQuestion = async (questionId: number) => {
-  const fetchedDelete = await useFetchDelete(`v1/questions/${questionId}`);
-  if (fetchedDelete === 200) {
+  const fetchedDelete = await useFetchWithAuth(
+    `v2/questions/${questionId}`,
+    'DELETE',
+    accessToken.value
+  );
+  if (fetchedDelete.status === 200) {
     isChangeStatusComplete.value = true;
   } else {
     isChangeStatusComplete.value = false;
@@ -166,16 +189,25 @@ async function toSave() {
     } else if (newQuestions.value.length === 0 && difference.length !== 0) {
       await editQuestion(difference);
     }
+
+    if (errorMessage.value) {
+      console.log('error ja');
+
+      throw new Error(errorMessage.value);
+    }
   } catch {
     processResult = false;
+    throw new Error(errorMessage.value);
   } finally {
-    saveCompleted.value = true;
-    newQuestions.value.splice(0);
-    await fetchData();
-    setTimeout(() => {
-      saveCompleted.value = false;
-    }, 3000);
-    isLoading.value = false;
+    if (!errorMessage.value) {
+      saveCompleted.value = true;
+      newQuestions.value.splice(0);
+      await fetchData();
+      setTimeout(() => {
+        saveCompleted.value = false;
+      }, 3000);
+      isLoading.value = false;
+    }
   }
 }
 
@@ -359,6 +391,17 @@ watchEffect(() => {
             </div>
             <div class="col-span-4">
               <p class="b1">Craete feedback for event {{ event?.name }}</p>
+            </div>
+            <div
+              v-if="errorMessage"
+              class="flex w-full shrink-0 flex-col gap-2"
+            >
+              <p
+                v-for="e in errorMessage.details"
+                class="flex items-center gap-2 rounded-md bg-red-300 px-3 py-1 text-red-700"
+              >
+                <Cancle />{{ e }}
+              </p>
             </div>
             <div class="col-span-4 my-6">
               <p class="t3">General Feedback</p>

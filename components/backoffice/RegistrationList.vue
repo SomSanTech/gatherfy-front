@@ -42,7 +42,7 @@ const props = defineProps<{
       "
     />
   </td>
-  <td>
+  <td v-if="!isShowInQRScan">
     <div class="flex justify-center gap-5 text-xl text-gray-600">
       <NuxtLink
         class="regis-edit"

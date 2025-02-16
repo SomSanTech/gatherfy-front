@@ -46,12 +46,15 @@ const fetchRegisListData = async (eventId: string) => {
   registrationsData.value = fetchedData.data || [];
   console.log('registrationsData.value', registrationsData.value);
 };
+
+const selectedEventId = ref(0);
 const handleSelectEvent = async () => {
   // try {
   const selectedEvent = eventsData.value.find(
     (event: any) => event.eventName === selectedOption.value
   );
   if (selectedEvent) {
+    selectedEventId.value = selectedEvent.eventId;
     console.log('Selected Event ID:', selectedEvent.eventId);
     console.log('Selected Event Name:', selectedEvent.eventName);
     // alert(
@@ -65,7 +68,51 @@ const handleSelectEvent = async () => {
   //   isLoading.value = false;
   // }
 };
+const decodeToken = (token: any): any => {
+  const arrayToken = token.split('.');
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+  console.log('tokenPayload:', tokenPayload);
+  return tokenPayload;
+};
+const config = useRuntimeConfig();
 
+const checkInFetch = async (
+  url: string,
+  method: string,
+  token: any,
+  body?: object
+) => {
+  const response = await fetch(`${config.public.baseUrl}/api/${url}`, {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const status = response.status;
+
+  const contentType = response.headers.get('content-type');
+  let data = null;
+
+  if (contentType && contentType.includes('application/json')) {
+    data = await response.json();
+  } else {
+    data = await response.text();
+  }
+
+  return { status, data };
+};
+const filteredEvents = computed(() => {
+  return (
+    eventsData.value?.filter(
+      (e) =>
+        new Date(e.eventStartDate).getTime() <= new Date().getTime() &&
+        new Date(e.eventEndDate).getTime() >= new Date().setHours(0, 0, 0, 0)
+    ) || []
+  );
+});
 onMounted(async () => {
   await fetchData();
   qrCodeReader = new BrowserQRCodeReader();
@@ -76,12 +123,15 @@ onMounted(async () => {
       if (result) {
         scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
         if (scannedValue.value) {
-          apiResponse.value = scannedValue.value;
-          // console.log(scannedValue.value);
+          console.log('scannedValue', decodeToken(scannedValue.value));
+          const decodedData = decodeToken(scannedValue.value);
+          if (decodedData.eventId === selectedEventId.value) {
+            // apiResponse.value = scannedValue.value;
+            // console.log(scannedValue.value);
+            console.log('yes ja');
 
-          try {
             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
-            const response = await useFetchWithAuth(
+            const response = await checkInFetch(
               `v2/check-in`,
               'PUT',
               accessToken.value,
@@ -89,12 +139,19 @@ onMounted(async () => {
                 qrToken: scannedValue.value,
               }
             );
+            console.log('response', response);
 
-            apiResponse.value = response.data;
-            handleSelectEvent();
-          } catch (err) {
-            // console.error('API call failed:', err);
-            apiResponse.value = 'API call failed!';
+            if (response.status === 401) {
+              alert('QRCODE time out');
+            } else {
+              alert('checked in');
+            }
+          } else {
+            if (!selectedOption.value) {
+              alert(`Please select event first`);
+            } else {
+              alert(`QR code not match event ${selectedOption.value}`);
+            }
           }
         } else {
           console.log('test');
@@ -127,6 +184,7 @@ onMounted(async () => {
       <div class="my-32 mr-10 w-full rounded-lg bg-white p-7 drop-shadow-lg">
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
+          {{ selectedOption }}
           <div class="flex items-center gap-3">
             <label for="dropdown" class="b2 font-semibold">Select Event </label>
             <select
@@ -135,16 +193,20 @@ onMounted(async () => {
               class="b3 rounded border p-2"
               @change="handleSelectEvent()"
             >
-              <option
-                v-for="event in eventsData?.filter(
-                  (e: any) =>
-                    new Date(e.eventStartDate).getTime() >= new Date().getTime()
-                )"
-                :key="event.eventId"
-                :value="event.eventName"
-              >
-                {{ event.eventName }}
-              </option>
+              <!-- Default option -->
+              <option value="" disabled>Please select an event</option>
+
+              <template v-if="filteredEvents.length > 0">
+                <option
+                  v-for="event in filteredEvents"
+                  :key="event.eventId"
+                  :value="event.eventName"
+                >
+                  {{ event.eventName }}
+                </option>
+              </template>
+
+              <option v-else value="" disabled>No event available</option>
             </select>
           </div>
         </div>
@@ -159,7 +221,7 @@ onMounted(async () => {
           <div v-else class="overflow-y-auto">
             <div
               v-for="registration in registrationsData"
-              class="border-default-300 flex cursor-default items-center border-b transition-colors"
+              class="border-default-300 jus flex cursor-default items-center border-b transition-colors"
             >
               <RegistrationList
                 :registration="registration"
