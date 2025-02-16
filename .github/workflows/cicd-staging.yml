@@ -26,6 +26,8 @@ jobs:
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
           echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
+          echo ${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}
+          echo ${{ secrets.NUXT_BASE_URL_QA }}
 
       - name: Build project
         run: npm run build
