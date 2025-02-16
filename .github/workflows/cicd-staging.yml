@@ -26,7 +26,7 @@ jobs:
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
           echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
-          
+
       - name: Build project
         run: npm run build
 
@@ -34,7 +34,7 @@ jobs:
         run: tar -czf build.tar.gz ./.output
 
       - name: Upload build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: build.tar.gz
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download build files
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-files
           path: ./build
@@ -62,7 +62,7 @@ jobs:
           sudo apt install -y openvpn openvpn-systemd-resolved
 
       - name: Connect to VPN
-        uses: "kota65535/github-openvpn-connect-action@v2"
+        uses: 'kota65535/github-openvpn-connect-action@v2'
         with:
           config_file: .github/workflows/sitst-client.ovpn
           username: ${{ secrets.VPN_USERNAME }}
@@ -78,14 +78,14 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
           ssh-keyscan -p 22 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
-          
+
       - name: Install sshpass
-        run: sudo apt-get install -y sshpass    
+        run: sudo apt-get install -y sshpass
 
       - name: Copy build files to VM
         run: |
           sshpass -p "${{ secrets.REMOTE_PASSWORD }}" scp -P 22 ./build/build.tar.gz ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/somsan/Gatherfy/staging/front
-          
+
       - name: Deploy Docker container on VM
         env:
           REMOTE_PASSWORD: ${{ secrets.REMOTE_PASSWORD }}
