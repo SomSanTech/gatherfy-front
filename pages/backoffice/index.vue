@@ -2,17 +2,7 @@
 definePageMeta({
   layout: 'backoffice',
 });
-
-const mockAdminLogin = {
-  userId: 2,
-  firstname: 'Jane',
-  lastname: 'Smith',
-  username: 'Janesmith',
-  gender: 'Female',
-  email: 'janesmith@example.com',
-  phone: '0987654321',
-  role: 'Organization',
-};
+const profileData = useCookie('profileData');
 
 function parseJSONSafe(value: string | null) {
   try {
@@ -23,20 +13,14 @@ function parseJSONSafe(value: string | null) {
   }
 }
 
-const user = useState('user', () =>
-  process.client ? parseJSONSafe(localStorage.getItem('admin')) || {} : {}
-);
+const user = ref();
 
 onMounted(() => {
-  if (process.client) {
-    const storedAdmin = localStorage.getItem('admin');
-    if (!storedAdmin) {
-      localStorage.setItem('admin', JSON.stringify(mockAdminLogin));
-      user.value = mockAdminLogin;
-    } else {
-      user.value = parseJSONSafe(storedAdmin) || {};
-    }
+  // if (process.client) {
+  if (profileData.value) {
+    user.value = profileData.value;
   }
+  // }
 });
 </script>
 
