@@ -8,7 +8,8 @@ import type { Tag } from '~/models/tag';
 definePageMeta({
   layout: 'backoffice',
 });
-
+const originalEvent = ref<EventDto | null>(null);
+const originalDateInput = ref();
 const error = useError();
 const event = ref();
 const tags = ref<Tag[]>([]);
@@ -86,6 +87,7 @@ async function fetchData() {
     error.value = fetchedData ? fetchedData : fetchedTags;
   } else {
     event.value = (await fetchedData.data) || [];
+    originalEvent.value = JSON.parse(JSON.stringify(event.value));
     tags.value = (await fetchedTags.data) || [];
     selectedTags.value = event.value.tags;
     console.log('selectedTags', selectedTags.value);
@@ -129,25 +131,117 @@ async function currentDateTime() {
       'ISOdate'
     );
     dateInput.value.end_time = useFormatDateTime(event.value.end_date, 'time');
+
+    originalDateInput.value = JSON.parse(JSON.stringify(dateInput.value));
   }
 }
 function getFormattedTags(tags: Tag[]) {
   return tags.map(({ tag_id }) => tag_id);
 }
+function getChangedFields<T>(original: T, updated: T): Partial<T> {
+  const changedFields: Partial<T> = {};
+  for (const key in updated) {
+    if (updated[key] !== original[key]) {
+      changedFields[key] = updated[key];
+    }
+  }
+  return changedFields;
+}
+
+function getChangeTimeed(originalDateInput, dateInput) {
+  const changedFields = getChangedFields(originalDateInput, dateInput);
+  const updatedData = {};
+
+  for (const key in changedFields) {
+    if (key.includes('_date')) {
+      const timeKey = key.replace('_date', '_time');
+
+      // ถ้ามีค่าใหม่ของเวลา ใช้ค่าจาก dateInput
+      // ถ้าไม่มี ให้ใช้ค่าของเวลาเดิมจาก originalDateInput
+      const timeValue = dateInput[timeKey] ?? originalDateInput[timeKey];
+
+      updatedData[key] = `${changedFields[key]}T${timeValue}`;
+    }
+  }
+
+  return updatedData;
+}
+
+function transformEventData(input) {
+  const fieldMap = {
+    name: 'event_name',
+    description: 'event_desc',
+    detail: 'event_detail',
+    start_date: 'event_start_date',
+    end_date: 'event_end_date',
+    ticket_start_date: 'event_ticket_start_date',
+    ticket_end_date: 'event_ticket_end_date',
+    registration_goal: 'event_registration_goal',
+    location: 'event_location',
+    map: 'event_google_map',
+    capacity: 'event_capacity',
+    slug: 'event_slug',
+    image: 'event_image',
+  };
+
+  return Object.keys(input).reduce((acc, key) => {
+    if (fieldMap[key]) {
+      acc[fieldMap[key]] = input[key];
+    } else if (
+      [
+        'start_date',
+        'end_date',
+        'ticket_start_date',
+        'ticket_end_date',
+      ].includes(key)
+    ) {
+      acc[fieldMap[key]] = new Date(input[key]).toISOString();
+    } else if (key === 'tags' && Array.isArray(input[key])) {
+      acc['tags'] = input[key].map((tag) => tag.tag_id);
+    } else {
+      acc[key] = input[key]; // ถ้าไม่มีใน fieldMap ก็เก็บไว้เหมือนเดิม
+    }
+    return acc;
+  }, {});
+}
+
+const errorMsg = ref();
 const fetchEventEdit = async () => {
   console.log('fetchEventEdit called');
   try {
-    if (validateForm()) {
+    if (validateForm() && originalEvent.value) {
+      const changedFields = getChangedFields(originalEvent.value, event.value);
+      if (Object.keys(changedFields).length === 0) {
+        console.log('No changes detected');
+        return;
+      }
+      const getChangeTime = getChangeTimeed(
+        originalDateInput.value,
+        dateInput.value
+      );
+      if (Object.keys(changedFields).length === 0) {
+        console.log('No changes detected');
+        return;
+      } else {
+        changedFields;
+      }
+      const updatedChangedFields = { ...changedFields, ...getChangeTime };
+      console.log('updatedChangedFields', updatedChangedFields);
+      console.log('getChangeTime', getChangeTime);
+      const dataDTO = transformEventData(updatedChangedFields);
       const formattedTags = await getFormattedTags(selectedTags.value);
-      event.value.tags = await formattedTags;
-      const editEventDto = toEditEventDTO(event.value);
-      const currentFileName = editEventDto.event_image.replace(
+      dataDTO.tags = formattedTags;
+
+      console.log('dataDTO', dataDTO);
+
+      const currentFileName = event.value.image.replace(
         'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
         ''
       );
+
       if (uploadFileName.value) {
         await useFetchDelete(`v1/files/delete/${currentFileName}`);
-        editEventDto.event_image = uploadFileName.value;
+        dataDTO.event_image = uploadFileName.value;
         await useFetchUpload(
           `v1/files/upload`,
           fileToUpload.value,
@@ -155,24 +249,27 @@ const fetchEventEdit = async () => {
           accessToken.value
         );
       } else {
-        editEventDto.event_image = currentFileName;
+        dataDTO.event_image = currentFileName;
+        console.log('currentFileName2', changedFields);
       }
+
+      console.log('changedFields', dataDTO);
       concatDateTime();
       const fetchedData = await useFetchWithAuth(
         `v2/backoffice/events/${param}`,
         'PUT',
         accessToken.value,
-        editEventDto
+        dataDTO // ส่งเฉพาะค่าที่เปลี่ยนแปลง
       );
-      if (fetchedData) {
-        isChangeStatusComplete.value = true;
-        saveAlertMessage.value = 'Your change are saved';
-      } else {
-        isChangeStatusComplete.value = false;
-        saveAlertMessage.value = 'Something went wrong';
+      if (fetchedData.errorData) {
+        errorMsg.value = fetchedData.errorData;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else {
-      window.scrollTo(0, 0);
+      if (fetchedData) {
+        console.log('Update successful');
+      } else {
+        console.log('Update failed');
+      }
     }
   } finally {
     saveAlert.value = true;
@@ -181,6 +278,54 @@ const fetchEventEdit = async () => {
     }, 3000);
   }
 };
+
+// const fetchEventEdit = async () => {
+//   console.log('fetchEventEdit called');
+//   try {
+//     if (validateForm()) {
+//       const formattedTags = await getFormattedTags(selectedTags.value);
+//       event.value.tags = await formattedTags;
+//       const editEventDto = toEditEventDTO(event.value);
+//       const currentFileName = editEventDto.event_image.replace(
+//         'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
+//         ''
+//       );
+//       if (uploadFileName.value) {
+//         await useFetchDelete(`v1/files/delete/${currentFileName}`);
+//         editEventDto.event_image = uploadFileName.value;
+//         await useFetchUpload(
+//           `v1/files/upload`,
+//           fileToUpload.value,
+//           'thumbnails',
+//           accessToken.value
+//         );
+//       } else {
+//         editEventDto.event_image = currentFileName;
+//       }
+//       concatDateTime();
+//       const fetchedData = await useFetchWithAuth(
+//         `v2/backoffice/events/${param}`,
+//         'PUT',
+//         accessToken.value,
+//         editEventDto
+//       );
+//       if (fetchedData) {
+//         isChangeStatusComplete.value = true;
+//         saveAlertMessage.value = 'Your change are saved';
+//       } else {
+//         isChangeStatusComplete.value = false;
+//         saveAlertMessage.value = 'Something went wrong';
+//       }
+//     } else {
+//       window.scrollTo(0, 0);
+//     }
+//   } finally {
+//     saveAlert.value = true;
+//     setTimeout(() => {
+//       saveAlert.value = false;
+//     }, 3000);
+//   }
+// };
 function filterTag(value: string) {
   const tagLeftFromEvent = tags.value.filter(
     (item) => !event.value.tags.includes(item.tag_title)
@@ -222,6 +367,8 @@ function renderIframe(content: string) {
   iframeSrc.value = srcMatch ? srcMatch[1] : '';
 }
 function handelFileUpload(file: Event) {
+  console.log('file', file);
+
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
@@ -235,19 +382,20 @@ function concatDateTime() {
     'T',
     dateInput.value.ticket_start_time
   );
-  // event.value.ticket_start_time = dateInput.value.ticket_end_date.concat(
-  //   'T',
-  //   dateInput.value.ticket_end_time
-  // );
+  event.value.ticket_end_date = dateInput.value.ticket_end_date.concat(
+    'T',
+    dateInput.value.ticket_end_time
+  );
   event.value.start_date = dateInput.value.start_date.concat(
     'T',
     dateInput.value.start_time
   );
-  // dateInput.value.start_time = dateInput.value.end_date.concat(
-  //   'T',
-  //   dateInput.value.end_time
-  // );
+  dateInput.value.end_time = dateInput.value.end_date.concat(
+    'T',
+    dateInput.value.end_time
+  );
 }
+
 function getGenerateSlug() {
   if (!autoGenerateSlug.value) {
     slugify(event.value.name);
@@ -304,6 +452,17 @@ watchEffect(() => {
           >
             <BtnComp text="Manage Feedback" color="blue" />
           </NuxtLink>
+        </div>
+        <div
+          v-if="errorMsg"
+          class="b2 flex w-full shrink-0 flex-col gap-2 pt-4"
+        >
+          <p
+            v-for="e in errorMsg.details"
+            class="flex items-center gap-2 rounded-md bg-red-200 px-3 py-1 text-red-600"
+          >
+            <Cancle />{{ e }}
+          </p>
         </div>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>

@@ -596,7 +596,7 @@ const handleLoginError = () => {
               "
             >
               <Check v-if="patternCheck['specialChar']" /><Cancle v-else />At
-              least one special character (@, #, $, %, ^, &, +, =, etc.)
+              least one special character (@, #, $, %, ^, &, +, =, ., *, etc.)
             </div>
           </div>
           <p

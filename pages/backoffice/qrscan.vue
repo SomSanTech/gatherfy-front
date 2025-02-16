@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { BrowserQRCodeReader } from '@zxing/browser';
 import RegistrationList from '~/components/backoffice/RegistrationList.vue';
-import { QrcodeStream } from 'vue-qrcode-reader';
 
 // const scannedValue = ref<string | null>(null);
 

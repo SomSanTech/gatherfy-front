@@ -236,11 +236,14 @@ onMounted(async () => {
             </div>
             <div v-else v-for="item in filterFeedbackData">
               <div class="my-2 flex gap-5 rounded-xl border p-5 pb-6">
-                <div class="mt-4 flex items-start">
-                  <img
+                <div
+                  class="mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-200"
+                >
+                  <!-- <img
                     src="/components/images/kornnaphat.png"
-                    class="h-12 w-12 rounded-full object-cover"
-                  />
+                    class="h-12 w-12 rounded-full object-cover bg-zinc-200"
+                  /> -->
+                  <UserProfileImg class="text-xl" />
                 </div>
                 <div class="flex flex-col gap-y-2">
                   <p class="b2 font-medium">
@@ -269,7 +272,7 @@ onMounted(async () => {
           src="/components/images/catch-feedback.png"
           class="h-64 object-contain"
         />
-        <p class="b1 mb-3 font-normal">Awaiting feedback</p>
+        <p class="b1 no-feedback-msg mb-3 font-normal">Awaiting feedback</p>
         <p class="b2">Once guests respond, you will see their feedback here.</p>
       </div>
       <div
