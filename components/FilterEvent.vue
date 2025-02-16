@@ -37,7 +37,6 @@ const updateDate = (newDate: Date) => {
   date.value = newDate;
   emit('update-date', newDate);
 };
-console.log(props.isMobile);
 </script>
 
 <template>

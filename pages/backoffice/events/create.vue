@@ -138,13 +138,11 @@ async function fetchEventCreate() {
     );
 
     let fetchedUpload;
-    console.log('fetchData status', fetchedData.status);
     if (fetchedData.errorData) {
       errorMsg.value = fetchedData.errorData;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     if (fetchedData.status === 200) {
-      console.log('dai ja');
       fetchedUpload = await useFetchUpload(
         `v1/files/upload`,
         fileToUpload.value,
@@ -163,8 +161,6 @@ async function fetchEventCreate() {
 }
 
 function validateForm() {
-  console.log('event', event.value);
-
   const checkField = {
     name: event.value.event_name.trim(),
     nameLength: event.value.event_name.trim().length <= 255,

@@ -83,7 +83,6 @@ const viewportWidth = computed(() => window.innerWidth);
 
 const isMobile = computed(() => viewportWidth.value <= 450);
 onMounted(async () => {
-  console.log(viewportWidth.value);
   if (isMobile.value) {
     showFilter.value = false;
   } else {

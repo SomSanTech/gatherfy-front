@@ -14,8 +14,6 @@ export const useFetchData = async <T>(
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    console.log('useFetchCreateUpdate2 Response:', response);
-
     const status = response.status;
 
     if (!response.ok) {

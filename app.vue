@@ -2,7 +2,6 @@
 import Nav from './components/Nav.vue';
 import { nextTick } from 'vue';
 
-const loginPopup = useState('loginPopup');
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup');
 const route = useRoute();
@@ -11,22 +10,18 @@ const isBackoffice = ref(route.fullPath.includes('backoffice'));
 const isSignUpPage = ref(route.fullPath.includes('signup'));
 const isSessionTimeOuts = useState('isSessionTimeOut');
 const handleSessionExpire = useAuth().handleSessionExpire;
-const refreshCookie = useCookie('refreshToken');
-const isUserSignIn = useState('isUserSignIn');
 const isSignInCookie = useCookie('is_user_sign_in');
 const isHavePopupOpen = useState('isHavePopupOpen', () => false);
 const isClickOK = useState('isClickOk');
 
 onMounted(() => {
   const observer = new MutationObserver(() => {
-    // console.log('Cookies changed:', document.cookie);
     if (isLoggingOut.value) return;
     if (!isClickOK.value) {
       if (
         !document.cookie.includes('refreshToken=') &&
         isSignInCookie.value === 'yes'
       ) {
-        console.log('Session timeout detected');
         isSessionTimeOuts.value = true;
         isHavePopupOpen.value = true;
       }
@@ -39,21 +34,7 @@ onMounted(() => {
     attributes: true,
   });
 });
-// watch(
-//   refreshCookie,
-//   async (newValue) => {
-//     console.log('isUserSignIn', isSignInCookie.value);
-//     console.log('refreshCookie', refreshCookie.value);
 
-//     if (!newValue && isSignInCookie.value === 'yes') {
-//       console.log('time out');
-
-//       isSessionTimeOuts.value = true;
-//       await nextTick();
-//     }
-//   },
-//   { deep: true, immediate: true }
-// );
 watch(
   [isHavePopupOpen, isOTPPopup, isSessionTimeOuts],
   ([openPopup, otp, session]) => {

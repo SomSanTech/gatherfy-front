@@ -43,7 +43,6 @@ const fetchRegisListData = async (eventId: string) => {
     accessToken.value
   );
   registrationsData.value = fetchedData.data || [];
-  console.log('registrationsData.value', registrationsData.value);
 };
 
 const selectedEventId = ref(0);
@@ -54,13 +53,10 @@ const handleSelectEvent = async () => {
   );
   if (selectedEvent) {
     selectedEventId.value = selectedEvent.eventId;
-    console.log('Selected Event ID:', selectedEvent.eventId);
-    console.log('Selected Event Name:', selectedEvent.eventName);
     // alert(
     //   `Selected Event ID: ${selectedEvent.eventId}, Name: ${selectedEvent.eventName}`
     // );
   }
-  console.log(selectedOption.value);
   // isLoading.value = true;
   await fetchRegisListData(selectedEvent.eventId);
   // } finally {
@@ -70,7 +66,6 @@ const handleSelectEvent = async () => {
 const decodeToken = (token: any): any => {
   const arrayToken = token.split('.');
   const tokenPayload = JSON.parse(atob(arrayToken[1]));
-  console.log('tokenPayload:', tokenPayload);
   return tokenPayload;
 };
 const config = useRuntimeConfig();
@@ -120,16 +115,10 @@ onMounted(async () => {
     video.value,
     async (result, error) => {
       if (result) {
-        scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
+        scannedValue.value = result.getText();
         if (scannedValue.value) {
-          console.log('scannedValue', decodeToken(scannedValue.value));
           const decodedData = decodeToken(scannedValue.value);
           if (decodedData.eventId === selectedEventId.value) {
-            // apiResponse.value = scannedValue.value;
-            // console.log(scannedValue.value);
-            console.log('yes ja');
-
-            // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
             const response = await checkInFetch(
               `v2/check-in`,
               'PUT',
@@ -138,7 +127,6 @@ onMounted(async () => {
                 qrToken: scannedValue.value,
               }
             );
-            console.log('response', response);
 
             if (response.status === 401) {
               alert('QRCODE time out');
@@ -153,10 +141,8 @@ onMounted(async () => {
             }
           }
         } else {
-          console.log('test');
         }
       }
-      // if (error) console.error(error);
     }
   );
 });

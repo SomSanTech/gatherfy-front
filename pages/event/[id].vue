@@ -40,8 +40,6 @@ const regis = async () => {
       }
     );
 
-    console.log('regsitered', regsitered);
-
     if (regsitered.status === 200) {
       const regisData = await useFetchWithAuth(
         'v1/tickets',
@@ -69,11 +67,8 @@ const fetchData = async () => {
 };
 const isShowSuccessRegisPopup = ref(false);
 const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
-  console.log('isEventAvaliable', isEventAvaliable);
-  console.log('is userProfile', userProfile.value);
   const isEndSaleTicket =
     new Date(ticketEndDate).getTime() < new Date().getTime();
-  console.log('isEndSaleTicket', isEndSaleTicket);
 
   if (userProfile.value && !isEventAvaliable) {
     isOpenPopup.value = true;
@@ -93,8 +88,6 @@ const checkIsAlreadySubTag = (tagId: number) => {
 const subAction = ref('');
 const isShowSubTagPopup = ref(false);
 const handleSubscribeTag = async (tagId: number) => {
-  console.log('click');
-  // try {
   if (!checkIsAlreadySubTag(tagId)) {
     subAction.value = 'follow';
     const response = await useFetchWithAuth(
@@ -105,8 +98,6 @@ const handleSubscribeTag = async (tagId: number) => {
         tagId: tagId,
       }
     );
-
-    console.log('response', response);
 
     if (response.status === 200) {
       const subscribeTagData = await useFetchWithAuth(
@@ -130,8 +121,6 @@ const handleSubscribeTag = async (tagId: number) => {
       'DELETE',
       accessToken.value
     );
-
-    console.log('response', response);
 
     if (response.status === 200) {
       const subscribeTagData = await useFetchWithAuth(

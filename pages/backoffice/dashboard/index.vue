@@ -237,9 +237,6 @@ const fetchAllViewData = async () => {
 const profileData = useCookie<UserProfile>('profileData');
 onMounted(async () => {
   try {
-    console.log(profileData.value);
-    console.log('actk', accessToken.value);
-
     isLoading.value = true;
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};

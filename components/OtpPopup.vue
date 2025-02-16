@@ -23,15 +23,12 @@ const loginPopup = useState('loginPopup');
 const isSignup = useState('isSignup');
 
 const verifyOTP = async () => {
-  console.log('email', email.value);
   email.value = localStorage.getItem('email') || '';
   const otpString = otpValues.value.join('');
-  console.log('OTP:', otpString);
   const response = await useFetchData('v1/verify-otp', 'POST', {
     email: email.value,
     otp: otpString,
   });
-  console.log('res OTP', response.data);
   if (response?.error) {
     console.error('Error verifying OTP:', response.error);
     return;
@@ -68,7 +65,6 @@ const startCountdown = () => {
 };
 const resendOTP = async () => {
   if (!isResendDisabled.value) {
-    console.log('Resend OTP...');
     const response = await useFetchCreateUpdate('v1/resend-otp', 'POST', {
       email: email.value,
     });

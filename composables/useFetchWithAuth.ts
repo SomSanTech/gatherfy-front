@@ -9,7 +9,6 @@ export const useFetchWithAuth = async (
 
   try {
     const fetchData = async (token: string) => {
-      console.log('useFetchWithAuth called');
       const response = await fetch(`${config.public.baseUrl}/api/${url}`, {
         method: method,
         headers: {
@@ -22,9 +21,7 @@ export const useFetchWithAuth = async (
       const status = response.status;
 
       if (!response.ok) {
-        console.log('res not ok wei');
         if (status === 401) {
-          console.log('error 401 i sud');
           isRetrying = true;
           const auth = useAuth();
           const refreshedToken = await auth.refresh();

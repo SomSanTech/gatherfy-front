@@ -80,14 +80,12 @@ const onReviewFeedback = async (eventId: string) => {
     previewFeedback.value = true;
   }
   document.body.style.overflow = 'hidden';
-  console.log(feedbackQuestion.value);
   for (const item of feedbackQuestion.value) {
     addAnswerField(item.questionId, parseInt(eventId));
   }
   for (const item of defaultQuestion) {
     addFeedbackField(parseInt(eventId), profileData.value?.users_id);
   }
-  console.log(answers.value);
 };
 
 async function submitFeedback() {

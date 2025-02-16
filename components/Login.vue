@@ -65,6 +65,9 @@ const fieldErrorMessages = {
 const isAlreadySignup = ref<boolean>(false);
 
 const changeToSignUp = () => {
+  signUpErrorResponse.value = null;
+  username.value = '';
+  password.value = '';
   checkField.value = {
     testPass: true,
     confirmPassword: true,
@@ -78,6 +81,18 @@ const changeToSignUp = () => {
     role: true,
     birthday: true,
   };
+  signupData.value = {
+    firstname: '',
+    lastname: '',
+    username: '',
+    gender: '',
+    email: '',
+    phone: '',
+    image: 'test.png',
+    role: '',
+    birthday: '',
+    password: '',
+  };
   isSignup.value = !isSignup.value;
 };
 
@@ -88,7 +103,6 @@ const togglePasswordVisibility = () => {
 const decodeToken = (token: any): any => {
   const arrayToken = token.split('.');
   const tokenPayload = JSON.parse(atob(arrayToken[1]));
-  console.log('tokenPayload:', tokenPayload);
   return tokenPayload;
 };
 
@@ -100,7 +114,7 @@ const checkPasswordPattern = () => {
   const hasUppercase = /[A-Z]/.test(password.value);
   const hasLowercase = /[a-z]/.test(password.value);
   const hasNumber = /[0-9]/.test(password.value);
-  const hasSpecialChar = /[@#$%^&+=!]/.test(password.value);
+  const hasSpecialChar = /[@#$%^&+=.*!]/.test(password.value);
   const isMinLength = password.value.length >= 8;
 
   if (hasUppercase) {
@@ -170,8 +184,6 @@ const validateFields = () => {
     checkField.value[key] = Boolean(value);
   });
 
-  console.log(checkField.value);
-
   const hasError = Object.values(checkField.value).includes(false);
 
   if (hasError) {
@@ -207,7 +219,6 @@ const handleSignin = async () => {
       };
 
       const fetchedData = await useFetchData(`v1/login`, 'POST', dataSend);
-      console.log('fetchedData.data', fetchedData.data);
 
       if (fetchedData.status === 200) {
         isWaitAuthen.value = false;
@@ -222,20 +233,11 @@ const handleSignin = async () => {
 
         const refreshToken = useCookie('refreshToken', {
           httpOnly: false,
-          maxAge: 60 * 60,
+          maxAge: 60 * 60 * 24 * 7,
         });
         refreshToken.value = fetchedData.data.refreshToken;
 
-        // const userProfileData = await useFetchWithAuth(
-        //   'v1/profile',
-        //   'GET',
-        //   accessToken.value
-        // );
-
-        // userProfile.value = userProfileData.data;
-
         role.value = decodeToken(accessToken.value)?.role;
-        console.log(role);
         const roleCookie = useCookie('roleCookie', {
           httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
@@ -264,10 +266,6 @@ const handleSignin = async () => {
           router.push('/backoffice');
         }
 
-        // const userRegisData = useCookie('user_regis_history', {
-        //   default: () => [],
-        // });
-
         const regisData = await useFetchWithAuth(
           'v1/tickets',
           'GET',
@@ -275,12 +273,10 @@ const handleSignin = async () => {
         );
         userRegisHistory.value = regisData.data;
 
-        console.log('Access Token:', accessToken.value);
         loginPopup.value = false;
         isHavePopupOpen.value = false;
         isUserSignIn.value = true;
         isSignInCookie.value = 'yes';
-        console.log('isUserSignIn:', isUserSignIn.value);
       } else {
         loginStatus.value = false;
         isWaitAuthen.value = false;
@@ -291,7 +287,7 @@ const handleSignin = async () => {
       isWaitAuthen.value = false;
     }
   } else if (isSignup.value) {
-    console.log(signupData.value);
+    signUpErrorResponse.value = null;
     if (!validateFields()) {
       signupData.value.birthday = birthday.value + 'T00:00:00';
       const response = await useFetchData(
@@ -299,10 +295,8 @@ const handleSignin = async () => {
         'POST',
         signupData.value
       );
-      console.log('response', response.data);
       if (response.errorData) {
         isWaitAuthen.value = false;
-        console.log('response.errorData', response.errorData);
         signUpErrorResponse.value = response.errorData;
       }
       if (!response.errorData) {
@@ -383,8 +377,6 @@ watch(
 // handle success event
 const handleLoginSuccess = (response: CredentialResponse) => {
   const { credential } = response;
-  console.log('Access Token', credential);
-  console.log(response);
 };
 
 // handle an error event

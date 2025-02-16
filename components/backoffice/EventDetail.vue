@@ -54,7 +54,6 @@ function filterTag(value: string) {
 }
 
 function selectTag(tag: {}) {
-  console.log(tag);
   isDropdownVisible.value = false;
 }
 

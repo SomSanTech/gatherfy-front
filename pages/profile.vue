@@ -7,7 +7,6 @@ import Edit from '~/components/icons/Edit.vue';
 // const scannedValue = ref<string | null>(null);
 
 const userProfile = useUserProfile();
-console.log(userProfile.value);
 
 // const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
 

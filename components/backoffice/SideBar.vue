@@ -1,31 +1,7 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/models/userProfile';
-
-// const userProfile: Ref<UserProfile | null> = useUserProfile();
-// const accessToken = useCookie('accessToken');
-const router = useRouter();
 const signOut = useAuth().logout;
-// const signOut = () => {
-//   const accessToken = useCookie('accessToken');
-//   // const refreshToken = useCookie('refreshToken');
-//   const role = useCookie('roleCookie');
-//   accessToken.value = null;
-//   // refreshToken.value = null;
-//   role.value = null;
-//   router.push('/').then(() => {
-//     window.location.reload();
-//   });
-// };
 const profileData = useCookie<UserProfile>('profileData');
-// onMounted(async () => {
-//   const userProfileData = await useFetchWithAuth(
-//     'v1/profile',
-//     'GET',
-//     accessToken.value
-//   );
-//   userProfile.value = userProfileData;
-//   console.log('userProfile.value', userProfile.value);
-// });
 </script>
 <template>
   <div
@@ -154,11 +130,17 @@ const profileData = useCookie<UserProfile>('profileData');
     <div class="flex w-full items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <img
-          v-if="profileData"
+          v-if="profileData?.users_image"
           :src="profileData?.users_image"
           alt=""
           class="h-8 w-8 rounded-full"
         />
+        <div
+          v-else
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-zinc-600"
+        >
+          <UserProfileImg />
+        </div>
         <p class="b2">{{ profileData?.username }}</p>
       </div>
       <button @click="signOut">

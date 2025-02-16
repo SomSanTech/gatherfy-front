@@ -90,7 +90,6 @@ async function fetchData() {
     originalEvent.value = JSON.parse(JSON.stringify(event.value));
     tags.value = (await fetchedTags.data) || [];
     selectedTags.value = event.value.tags;
-    console.log('selectedTags', selectedTags.value);
     currentDateTime();
     compareExistTags.value = selectedTags.value.map((item: any) => ({
       ...item,
@@ -100,8 +99,6 @@ async function fetchData() {
 
 async function currentDateTime() {
   if (event.value.ticket_start_date) {
-    console.log('event mee ja');
-
     dateInput.value.ticket_start_date = useFormatDateTime(
       event.value.ticket_start_date,
       'ISOdate'
@@ -207,7 +204,6 @@ function transformEventData(input) {
 
 const errorMsg = ref();
 const fetchEventEdit = async () => {
-  console.log('fetchEventEdit called');
   try {
     if (validateForm() && originalEvent.value) {
       const changedFields = getChangedFields(originalEvent.value, event.value);
@@ -226,13 +222,9 @@ const fetchEventEdit = async () => {
         changedFields;
       }
       const updatedChangedFields = { ...changedFields, ...getChangeTime };
-      console.log('updatedChangedFields', updatedChangedFields);
-      console.log('getChangeTime', getChangeTime);
       const dataDTO = transformEventData(updatedChangedFields);
       const formattedTags = await getFormattedTags(selectedTags.value);
       dataDTO.tags = formattedTags;
-
-      console.log('dataDTO', dataDTO);
 
       const currentFileName = event.value.image.replace(
         'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
@@ -250,16 +242,14 @@ const fetchEventEdit = async () => {
         );
       } else {
         dataDTO.event_image = currentFileName;
-        console.log('currentFileName2', changedFields);
       }
 
-      console.log('changedFields', dataDTO);
       concatDateTime();
       const fetchedData = await useFetchWithAuth(
         `v2/backoffice/events/${param}`,
         'PUT',
         accessToken.value,
-        dataDTO // ส่งเฉพาะค่าที่เปลี่ยนแปลง
+        dataDTO
       );
       if (fetchedData.errorData) {
         errorMsg.value = fetchedData.errorData;
