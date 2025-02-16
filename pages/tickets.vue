@@ -49,11 +49,11 @@ function closePreview() {
   document.body.style.overflow = '';
   feedBackErrorResponse.value = '';
 }
-function addAnswerField(questionId: number) {
+function addAnswerField(questionId: number, eventId: number) {
   answers.value.push({
-    // feedbackId: 0,
+    feedbackId: 0,
     questionId: questionId,
-    // eventId: eventId,
+    eventId: eventId,
     answerText: '',
   });
 }
@@ -82,7 +82,7 @@ const onReviewFeedback = async (eventId: string) => {
   document.body.style.overflow = 'hidden';
   console.log(feedbackQuestion.value);
   for (const item of feedbackQuestion.value) {
-    addAnswerField(item.questionId);
+    addAnswerField(item.questionId, parseInt(eventId));
   }
   for (const item of defaultQuestion) {
     addFeedbackField(parseInt(eventId), profileData.value?.users_id);
@@ -101,7 +101,7 @@ async function submitFeedback() {
   if (feedbackResponse.status === 200) {
     const feedbackId = feedbackResponse.data.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
-      // (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
+      (answers.value[i] as AnswerBody).feedbackId = await feedbackId;
       await useFetchWithAuth(
         `v2/answers`,
         'POST',
