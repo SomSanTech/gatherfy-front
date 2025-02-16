@@ -8,6 +8,7 @@ import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
+import type { UserProfile } from '~/models/userProfile';
 
 definePageMeta({
   layout: 'backoffice',
@@ -146,10 +147,12 @@ const initializeChart = () => {
 };
 
 const fetchAllRegisData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/registrations/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations`,
+    'GET',
+    accessToken.value
   );
-  registrationsData.value = fetchedData || [];
+  registrationsData.value = fetchedData.data || [];
 
   groupedByGender.value = Object.fromEntries(
     d3.rollup(
@@ -188,18 +191,26 @@ const fetchAllRegisData = async () => {
     ])
   );
 };
+
+const accessToken = useCookie('accessToken');
+
 const fetchAllEventData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
   // eventsData.value =  [];
 };
 const fetchAllViewData = async () => {
   if (eventsData.value) {
     const eventIds = eventsData.value.map((event) => event.eventId).join(',');
-    const fetchedData = await useFetchData(`v1/views?eventIds=${eventIds}`);
-    viewsData.value = fetchedData || [];
+    const fetchedData = await useFetchData(
+      `v1/views?eventIds=${eventIds}`,
+      'GET'
+    );
+    viewsData.value = fetchedData.data || [];
     sumOfViews.value = sumAllViews(viewsData.value);
 
     viewsData.value.forEach((event: any, index: number) => {
@@ -223,9 +234,12 @@ const fetchAllViewData = async () => {
     });
   }
 };
-
+const profileData = useCookie<UserProfile>('profileData');
 onMounted(async () => {
   try {
+    console.log(profileData.value);
+    console.log('actk', accessToken.value);
+
     isLoading.value = true;
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
@@ -247,7 +261,7 @@ watch(chartCanvasRef, (newValue) => {
 </script>
 
 <template>
-  <div class="w-full bg-ghost-white">
+  <div class="mb-44 w-full bg-ghost-white">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"
@@ -265,10 +279,11 @@ watch(chartCanvasRef, (newValue) => {
     <div v-else class="ml-80 flex h-full">
       <div class="mx-20 mt-32 flex w-full flex-col gap-3">
         <SumaryOfView
+          v-if="profileData"
           :sumOfViews="sumOfViews?.totalViews"
           :viewsEntries="sumOfViews?.totalEntries"
           :allRegistration="registrationsData?.length"
-          :adminData
+          :profileData
           format="row"
         />
 

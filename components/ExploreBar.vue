@@ -10,6 +10,7 @@ const props = defineProps<{
   isShowSort: Boolean;
   selectedEventTime?: string;
   showFilter?: boolean;
+  isShowPastEventBtn?: boolean;
 }>();
 
 const selectedEventTimeStyle = {
@@ -72,8 +73,15 @@ const sortByData = [
       >
         Upcoming event
       </button>
+      <button
+        v-if="isShowPastEventBtn"
+        @click="selectTime('past')"
+        :class="`btn b3 rounded-md px-2 py-2 lg:px-4 ${selectedEventTime === 'past' ? selectedEventTimeStyle?.active : 'duration-200 hover:bg-zinc-200'}`"
+      >
+        Past event
+      </button>
     </div>
-    <div v-if="!isShowSort">
+    <div v-if="!isShowSort && !isShowPastEventBtn">
       <NuxtLink to="/events">
         <button
           :class="`btn b3 flex items-center gap-1 rounded-md px-2 py-2 duration-500 hover:translate-x-2 lg:px-4`"

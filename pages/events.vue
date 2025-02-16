@@ -63,7 +63,7 @@ const filterAndSearchEvents = async () => {
     } else {
       url = `v1/events?${buildFilterUrl()}`;
     }
-    eventSearch.value = await useFetchData(url);
+    eventSearch.value = (await useFetchData(url, 'GET')).data;
   } catch (error) {
     console.error('Error fetching events:', error);
   } finally {
@@ -91,17 +91,17 @@ onMounted(async () => {
   }
   isLoading.value = true;
   try {
-    tags.value = await useFetchData('v1/tags');
+    tags.value = (await useFetchData('v1/tags', 'GET')).data;
     if (tagsTerm.value) {
       selectedTags.value.add(tagsTerm.value);
 
       await filterAndSearchEvents();
     } else if (searchTerm.value) {
-      eventSearch.value = await useFetchData(
-        `v1/events?keyword=${searchTerm.value}`
-      );
+      eventSearch.value = (
+        await useFetchData(`v1/events?keyword=${searchTerm.value}`, 'GET')
+      ).data;
     } else {
-      eventSearch.value = await useFetchData(`v1/events`);
+      eventSearch.value = (await useFetchData(`v1/events`, 'GET')).data;
     }
   } catch (error) {
     console.error('Error fetching events:', error);

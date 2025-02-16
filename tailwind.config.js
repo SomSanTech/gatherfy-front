@@ -21,6 +21,17 @@ export default {
         'cool-gray': '#9197B3',
         'lavender-gray': '#B5B7C0',
       },
+      animation: {
+        shake: 'shake 0.5s ease-in-out',
+      },
+      keyframes: {
+        shake: {
+          '0%, 100%': { left: '50%' },
+          '25%': { left: '49.5%' },
+          '50%': { left: '50.5%' },
+          '75%': { left: '49.5%' },
+        },
+      },
     },
   },
   plugins: [require('preline/plugin')],

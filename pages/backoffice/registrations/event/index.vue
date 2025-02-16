@@ -9,12 +9,14 @@ definePageMeta({
 const eventsData = ref<Event[]>([]);
 const adminData = ref<User | null>(null);
 const isLoading = ref(true);
-
+const accessToken = useCookie('accessToken');
 const fetchData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/events/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events`,
+    'GET',
+    accessToken.value
   );
-  eventsData.value = fetchedData || [];
+  eventsData.value = fetchedData.data || [];
 };
 
 onMounted(() => {

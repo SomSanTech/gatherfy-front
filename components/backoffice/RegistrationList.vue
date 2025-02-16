@@ -5,6 +5,7 @@ import Trash from '../icons/Trash.vue';
 
 const props = defineProps<{
   registration?: Registration;
+  isShowInQRScan?: boolean;
 }>();
 </script>
 
@@ -18,7 +19,10 @@ const props = defineProps<{
   <td class="back-regis-email b2 p-4 align-middle">
     {{ registration?.email }}
   </td>
-  <td class="back-regis-event-name b2 p-4 align-middle font-medium">
+  <td
+    v-if="!isShowInQRScan"
+    class="back-regis-event-name b2 p-4 align-middle font-medium"
+  >
     {{ registration?.eventName }}
   </td>
   <td class="b2 p-4 text-center align-middle">
@@ -38,7 +42,7 @@ const props = defineProps<{
       "
     />
   </td>
-  <td>
+  <td v-if="!isShowInQRScan">
     <div class="flex justify-center gap-5 text-xl text-gray-600">
       <NuxtLink
         class="regis-edit"

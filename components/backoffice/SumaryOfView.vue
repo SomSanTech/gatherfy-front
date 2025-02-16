@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { User } from '~/models/user';
+import type { UserProfile } from '~/models/userProfile';
 import RegisPeople from '~/components/icons/RegisPeople.vue';
 import AllViews from '~/components/icons/AllViews.vue';
 import AvgViews from '~/components/icons/AvgViews.vue';
 
 const props = defineProps<{
-  adminData?: User;
+  profileData: UserProfile;
   allRegistration?: Number;
   sumOfViews?: Number;
   viewsEntries?: Number;
@@ -26,7 +26,7 @@ const someCalculation = Math.round(totalViews / totalEntries);
       v-if="format === 'row'"
       class="col-span-1 flex h-24 w-full items-center justify-between rounded-[20px] bg-white p-3 px-6 drop-shadow-md"
     >
-      <p class="t3">Hi, {{ adminData?.firstname }} {{ adminData?.lastname }}</p>
+      <p class="t3">Hi, {{ profileData?.username }}</p>
     </div>
     <div
       :class="`${format === 'row' ? 'col-span-3 flex h-24' : 'flex flex-grow flex-col'} h-full gap-3`"
