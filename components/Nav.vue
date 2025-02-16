@@ -1,8 +1,22 @@
 <script setup lang="ts">
+import type { UserProfile } from '~/models/userProfile';
+import { vOnClickOutside } from '@vueuse/components';
+
 import SearchIcon from './icons/Search.vue';
+import User from './icons/User.vue';
 
 const router = useRouter();
 const searchKw = ref('');
+const loginPopup = useState('loginPopup');
+
+const isUserSignIn = useState('isUserSignIn');
+const isOpenProfilePopup = ref(false);
+const isHavePopupOpen = useState('isHavePopupOpen');
+function openLoginPopup() {
+  loginPopup.value = true;
+  isHavePopupOpen.value = true;
+}
+
 const handleSearch = () => {
   if (searchKw.value.length > 0) {
     router.push({
@@ -15,6 +29,14 @@ const handleSearch = () => {
     });
   }
 };
+
+const handleOpenProfilePopup = () => {
+  isOpenProfilePopup.value = !isOpenProfilePopup.value;
+};
+
+const signOut = useAuth().logout;
+
+const profileData = useCookie<UserProfile>('profileData');
 </script>
 
 <template>
@@ -28,7 +50,7 @@ const handleSearch = () => {
         </button>
       </NuxtLink>
 
-      <div class="flex gap-5">
+      <div class="flex items-center gap-5">
         <div
           class="b3 flex rounded-2xl border border-grey px-2 lg:px-4 lg:py-2"
         >
@@ -45,7 +67,99 @@ const handleSearch = () => {
             <SearchIcon class="h-3 w-3 text-black" />
           </button>
         </div>
-        <BtnComp text="Sign in" color="red" />
+        <BtnComp
+          v-if="!profileData"
+          text="Sign in"
+          color="red"
+          @click="openLoginPopup"
+        />
+        <div class="relative" v-else>
+          <div
+            @click="handleOpenProfilePopup"
+            class="h-8 w-8 rounded-full bg-zinc-300"
+          >
+            <img
+              v-if="profileData?.users_image"
+              :src="profileData?.users_image"
+              alt=""
+              class="h-8 w-8 rounded-full"
+            />
+            <div
+              v-else
+              class="flex h-full w-full items-center justify-center text-zinc-600"
+            >
+              <UserProfileImg />
+            </div>
+          </div>
+          <div
+            v-if="isOpenProfilePopup"
+            v-on-click-outside="handleOpenProfilePopup"
+            @click="isOpenProfilePopup = false"
+            class="b2 absolute right-0 top-12 flex w-40 flex-col items-start gap-1 rounded-xl bg-white p-2 shadow-lg"
+          >
+            <NuxtLink to="/profile" class="w-full">
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <UserProfile class="h-5 w-5 text-gray-600" />
+                <span>My Profile</span>
+              </button>
+            </NuxtLink>
+            <NuxtLink to="/tickets" class="w-full">
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <Ticket class="h-5 w-5 text-gray-600" />
+                <span>My Tickets</span>
+              </button>
+            </NuxtLink>
+
+            <!-- Divider -->
+            <div class="my-1 h-px w-full bg-gray-200"></div>
+
+            <button
+              @click="signOut"
+              @click.stop
+              class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-red-600 transition-all hover:bg-red-100"
+            >
+              <SignOut class="fill-red-600 text-red-600" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+
+          <!-- <div
+            v-if="isOpenProfilePopup"
+            v-on-click-outside="handleOpenProfilePopup"
+            @click="isOpenProfilePopup = false" 
+            class="b2 absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-lg bg-white p-3 text-start shadow-xl"
+          >
+            <NuxtLink to="/profile">
+              <button
+              @click.stop
+                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
+              >
+                My Profile
+              </button>
+            </NuxtLink>
+            <NuxtLink to="/tickets">
+              <button
+              @click.stop
+                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
+              >
+                My Tickets
+              </button>
+            </NuxtLink>
+            <button
+              @click="signOut"
+              @click.stop
+              class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
+            >
+              Sign out
+            </button>
+          </div> -->
+        </div>
       </div>
     </div>
   </div>

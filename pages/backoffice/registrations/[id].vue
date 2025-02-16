@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AttendeeDetail from '~/components/backoffice/AttendeeDetail.vue';
+import RegistrationDetail from '~/components/backoffice/RegistrationDetail.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 
 definePageMeta({
@@ -21,7 +21,7 @@ definePageMeta({
           <p class="b2">Back to registration list</p>
         </NuxtLink>
         <h1 class="regis-detail-title t1">Registrations Detail</h1>
-        <AttendeeDetail />
+        <RegistrationDetail />
       </div>
     </div>
   </div>

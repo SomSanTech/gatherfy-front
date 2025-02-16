@@ -9,12 +9,15 @@ definePageMeta({
 const registrationsData = ref<Registration[]>([]);
 const adminData = ref<User | null>(null);
 const isLoading = ref(true);
+const accessToken = useCookie('accessToken');
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(
-    `v1/registrations/owner/${adminData.value?.userId}`
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations`,
+    'GET',
+    accessToken.value
   );
-  registrationsData.value = fetchedData || [];
+  registrationsData.value = fetchedData.data || [];
   // registrationsData.value =  [];
 };
 

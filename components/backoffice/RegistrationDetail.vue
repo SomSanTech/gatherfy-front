@@ -58,48 +58,50 @@ const selectStatus = (statusOption: CheckedInOption) => {
   selectedStatus.value.status = statusOption.urlSend;
   isShowStatusBy.value = !isShowStatusBy.value;
 };
+const accessToken = useCookie('accessToken');
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(`v1/registrations/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations/${param}`,
+    'GET',
+    accessToken.value
+  );
 
   if (fetchedData.error) {
     error.value = fetchData;
   } else {
-    registration.value = fetchedData || [];
+    registration.value = fetchedData.data || [];
   }
 };
 
 const fetchRegistration = async () => {
-  const fetchedData = await useFetchRegistration(
-    `v1/registrations/${param}`,
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations/${param}`,
     'PUT',
+    accessToken.value,
     selectedStatus.value
   );
-  if (fetchedData === 200) {
+  if (fetchedData.status === 200) {
     isChangeStatusComplete.value = true;
   } else {
     isChangeStatusComplete.value = false;
   }
 };
 
-onMounted(() => {
-  try {
-    isLoading.value = true;
-    fetchData();
-    isChangeStatusComplete.value = null;
-  } finally {
-    isLoading.value = false;
-  }
-});
-
 watchEffect(() => {
   if (param) {
-    fetchData();
-    isChangeStatusComplete.value = null;
+    try {
+      isLoading.value = true;
+      fetchData();
+      isChangeStatusComplete.value = null;
+    } finally {
+      isLoading.value = false;
+    }
   }
 });
 </script>
 
+<
 <template>
   <div v-if="isLoading" class="my-16 flex items-center justify-center">
     <span class="loader"></span>
@@ -220,3 +222,4 @@ watchEffect(() => {
     </div>
   </div>
 </template>
+>

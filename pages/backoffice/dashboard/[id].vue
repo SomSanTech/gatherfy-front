@@ -9,7 +9,8 @@ import type { Registration } from '~/models/registration';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import PieChart from '~/components/backoffice/PieChart.vue';
-// import { calculateWidth } from '~/composables/useFormatDashboard';
+import type { Answer, ExistingQuestion, Feedback } from '~/models/feedback';
+const profileData = useCookie('profileData');
 
 const error = useError();
 definePageMeta({
@@ -18,6 +19,8 @@ definePageMeta({
 
 const route = useRoute();
 const param = route.params.id;
+const feedbackData = ref<Feedback[]>([]);
+const averageRating = ref();
 
 const registrationsData = ref<Registration[]>([]);
 const isLoading = ref(true);
@@ -34,13 +37,23 @@ const colors = {
   Female: '#989898',
   Male: '#D71515',
   Other: '#cccccc',
+  'Prefer not to say': '#f56042',
 };
 const statusColor: any = {
   'Awaiting Check-in': '#989898',
   'Checked in': '#D71515',
   Unattended: '#cccccc',
 };
-
+function getAverage() {
+  const total = feedbackData.value.reduce(
+    (sum, curr) => sum + curr.feedbackRating,
+    0
+  );
+  const avg = total / feedbackData.value.length;
+  // nuxtRating.value = Math.round(avg * 10) / 10;
+  averageRating.value =
+    total === 0 ? 0 : (Math.round(avg * 10) / 10).toFixed(1);
+}
 const getLast7DaysData = (data: any) => {
   const sortedData = data.sort(
     (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -63,11 +76,12 @@ const getLast7DaysData = (data: any) => {
     };
   });
 };
+const token = useCookie('accessToken');
 
 const fetchViewsData = async () => {
   try {
-    const fetchedData = await useFetchData(`v1/views?eventIds=${param}`);
-    viewsData.value = fetchedData || [];
+    const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
+    viewsData.value = fetchedData.data || [];
 
     totalViewCount.value = viewsData.value[0].views.reduce(
       (sum: any, record: any) => sum + record.count,
@@ -85,11 +99,15 @@ const fetchViewsData = async () => {
 };
 
 const fetchRegisData = async () => {
-  const fetchedData = await useFetchData(`v1/registrations/event/${param}`);
+  const fetchedData = await useFetchWithAuth(
+    `v2/registrations/event/${param}`,
+    'GET',
+    token.value
+  );
   if (fetchedData.error) {
     error.value = 'error';
   } else {
-    registrationsData.value = fetchedData || [];
+    registrationsData.value = fetchedData.data || [];
   }
 
   groupedByGender.value = Object.fromEntries(
@@ -137,14 +155,26 @@ const fetchRegisData = async () => {
     ])
   );
 };
+
 const eventDetail = ref();
 const fetchEventDetail = async () => {
-  const fetchedData = await useFetchData(`v1/events/backoffice/${param}`);
-  eventDetail.value = fetchedData || [];
+  const fetchedData = await useFetchWithAuth(
+    `v1/backoffice/events/${param}`,
+    'GET',
+    token.value
+  );
+  eventDetail.value = fetchedData.data || [];
 };
 onMounted(async () => {
   try {
     isLoading.value = true;
+    const fetchedFeedbackData = await useFetchWithAuth(
+      `v1/feedbacks/event/${param}`,
+      'GET',
+      token.value
+    );
+    feedbackData.value = fetchedFeedbackData.data || [];
+    getAverage();
     await fetchRegisData();
     await fetchViewsData();
     await fetchEventDetail();
@@ -182,7 +212,7 @@ onMounted(async () => {
               v-for="tag in eventDetail?.tags"
               class="bg-zin-200 rounded-md border border-dark-grey/60 px-3"
             >
-              {{ tag }}
+              {{ tag.tag_title }}
             </button>
           </div>
           <NuxtLink
@@ -222,7 +252,7 @@ onMounted(async () => {
           <h1 class="b1 font-semibold">Engagement last 7 days</h1>
           <div class="view-by-7day flex h-full flex-col justify-center">
             <div class="flex justify-center gap-5">
-              <div
+              <!-- <div v-if="last7DayData.length>0"
                 class="b4 flex flex-col items-end justify-between text-dark-grey/60"
               >
                 <p>{{ Math.round(maxForLast7Day * 1.25) }}</p>
@@ -230,9 +260,12 @@ onMounted(async () => {
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.5) }}</p>
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.25) }}</p>
                 <p>{{ 0 }}</p>
-              </div>
+              </div> -->
 
-              <div class="b3 flex w-full items-end justify-between self-end">
+              <div
+                v-if="last7DayData.length > 0"
+                class="b3 flex w-full items-end justify-between self-end"
+              >
                 <div
                   v-for="data in last7DayData"
                   class="group relative flex cursor-pointer flex-col items-center"
@@ -253,11 +286,14 @@ onMounted(async () => {
                     {{ data.day }} <br />
                     {{ data.count }} views
                   </div>
-                  <p class="b4 absolute -bottom-7 text-dark-grey/60">
+                  <p
+                    class="b4 absolute -bottom-7 w-max shrink-0 text-dark-grey/60"
+                  >
                     {{ data.day }}
                   </p>
                 </div>
               </div>
+              <div v-else class="b2">No View Data</div>
             </div>
           </div>
         </div>
@@ -282,7 +318,13 @@ onMounted(async () => {
                   class="flex h-full w-full flex-col items-center justify-center text-center"
                 >
                   <p class="t3">
-                    {{ Math.round((registrationsData?.length / goals) * 100) }}%
+                    {{
+                      Math.floor(
+                        (registrationsData?.length /
+                          eventDetail.registration_goal) *
+                          100
+                      )
+                    }}%
                   </p>
                   <p class="b3">of Goals</p>
                 </div>
@@ -291,13 +333,14 @@ onMounted(async () => {
 
             <p class="b1 text-center font-semibold">
               <span class="text-burgundy">{{ registrationsData?.length }}</span>
-              from {{ goals }} Registration
+              from {{ eventDetail.registration_goal }} Registration
             </p>
           </div>
         </div>
         <div class="col-span-2 flex h-full">
           <SumaryOfView
             v-if="viewsData"
+            :profile-data="profileData"
             :sumOfViews="totalViewCount"
             :viewsEntries="viewsData[0].views?.length"
             :allRegistration="registrationsData?.length"
@@ -396,17 +439,21 @@ onMounted(async () => {
               <div class="text-center">
                 <div class="flex items-center justify-center gap-1">
                   <Star class="t3 fill-burgundy" />
-                  <p class="t3 font-semibold">4.7</p>
+                  <p class="t3 font-semibold">{{ averageRating }}</p>
                 </div>
 
                 <p class="b2">Average feedback score</p>
               </div>
-              <button
+              <NuxtLink
+                :to="{
+                  name: `backoffice-feedback-response-id`,
+                  params: { id: param },
+                }"
                 class="b4 flex items-center justify-end gap-1 self-end pt-2 text-dark-grey/60"
               >
                 more feedback details
                 <Arrow class="rotate-180" />
-              </button>
+              </NuxtLink>
             </div>
           </div>
         </div>

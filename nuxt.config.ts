@@ -1,5 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  modules: ['nuxt-rating', 'nuxt-vue3-google-signin'],
+  googleSignIn: {
+    clientId:
+      '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com',
+  },
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   css: ['~/assets/main.css'],
@@ -10,7 +15,16 @@ export default defineNuxtConfig({
     },
   },
   components: {
-    dirs: ['~/components', '~/components/backoffice'],
+    dirs: [
+      { path: '~/components', pathPrefix: false, extensions: ['vue'] },
+      { path: '~/components', pathPrefix: false },
+      {
+        path: '~/components/backoffice',
+        pathPrefix: false,
+        extensions: ['vue'],
+      },
+      { path: '~/components/icons', pathPrefix: false },
+    ],
   },
   typescript: {
     strict: true,
@@ -21,7 +35,7 @@ export default defineNuxtConfig({
     },
   },
   app: {
-    baseURL: '',
+    baseURL: process.env.NUXT_BASE_URL,
   },
-  plugins: ['~/plugins/preline.client.ts'],
+  plugins: ['~/plugins/preline.client.ts', '~/plugins/error-handler.ts'],
 });

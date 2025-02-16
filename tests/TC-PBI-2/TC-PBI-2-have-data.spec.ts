@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-2.1 go to event detail', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const goHomeBtn = await page.locator('.go-home-btn');
@@ -112,7 +112,7 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 });
 
 test('TC-PBI-2.2 go to event detail by url', async ({ page }) => {
-  await page.goto('/event/tech-conference-2024');
+  await page.goto('us1/event/tech-conference-2024');
   await page.waitForTimeout(3000);
 
   await expect(page.locator('.detail-name')).toBeVisible();
@@ -132,7 +132,7 @@ test('TC-PBI-2.2 go to event detail by url', async ({ page }) => {
 });
 
 test('TC-PBI-2.3 can not go to event detail by url', async ({ page }) => {
-  await page.goto('/event/ling-orm-fanmeet');
+  await page.goto('us1/event/ling-orm-fanmeet');
   await page.waitForTimeout(3000);
 
   await expect(page.locator('.error-text')).toContainText(

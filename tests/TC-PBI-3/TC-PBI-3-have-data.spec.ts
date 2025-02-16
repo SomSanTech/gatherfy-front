@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-3.1 search 100% event name', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -20,7 +20,7 @@ test('TC-PBI-3.1 search 100% event name', async ({ page }) => {
 });
 
 test('TC-PBI-3.2 search some keyword', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -39,7 +39,7 @@ test('TC-PBI-3.2 search some keyword', async ({ page }) => {
 });
 
 test('TC-PBI-3.3 search no case U u keyword', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -58,7 +58,7 @@ test('TC-PBI-3.3 search no case U u keyword', async ({ page }) => {
 });
 
 test('TC-PBI-3.4 search some special keyword', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -77,7 +77,7 @@ test('TC-PBI-3.4 search some special keyword', async ({ page }) => {
 });
 
 test('TC-PBI-3.5 search no keyword', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -97,7 +97,7 @@ test('TC-PBI-3.5 search no keyword', async ({ page }) => {
 });
 
 test('TC-PBI-3.6 search no keyword at home', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
   await page.locator('.search-btn').click();
@@ -115,7 +115,7 @@ test('TC-PBI-3.6 search no keyword at home', async ({ page }) => {
 });
 
 test('TC-PBI-3.7 search no keyword in db', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 

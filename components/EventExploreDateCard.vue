@@ -15,7 +15,7 @@ const props = defineProps<{
           {{ useFormatDateTime(props?.eventDetail?.start_date, 'time') }}
         </p>
         <p
-          class="explore-card-name b2 line-clamp-[2] w-[200px] pb-1 font-semibold lg:w-[390px]"
+          class="explore-card-name b2 line-clamp-[2] w-[140px] pb-1 font-semibold lg:w-[390px]"
         >
           {{ props.eventDetail?.name }}
         </p>
@@ -23,7 +23,7 @@ const props = defineProps<{
           By {{ props.eventDetail?.owner }}
         </p>
         <p
-          class="explore-card-location b3 line-clamp-1 w-[200px] text-zinc-400 lg:w-[390px]"
+          class="explore-card-location b3 line-clamp-1 w-[140px] text-zinc-400 lg:w-[390px]"
         >
           At {{ props.eventDetail?.location }}
         </p>
@@ -34,7 +34,7 @@ const props = defineProps<{
             <button
               class="b4 rounded-md border px-5 py-1 text-black-1 duration-200 hover:border-dark-grey/60"
             >
-              {{ tag }}
+              {{ tag.tag_title }}
             </button>
           </NuxtLink>
         </div>

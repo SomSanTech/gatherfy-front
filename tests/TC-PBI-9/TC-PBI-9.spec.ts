@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-9.1 admin edit status to check-in', async ({ page }) => {
-  await page.goto('/backoffice');
+  await page.goto('/us1/backoffice');
 
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);
@@ -49,7 +49,7 @@ test('TC-PBI-9.1 admin edit status to check-in', async ({ page }) => {
 });
 
 test('TC-PBI-9.2 admin edit status to Unattended', async ({ page }) => {
-  await page.goto('/backoffice');
+  await page.goto('/us1/backoffice');
 
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);
@@ -98,7 +98,7 @@ test('TC-PBI-9.2 admin edit status to Unattended', async ({ page }) => {
 });
 
 test('TC-PBI-9.3 admin edit status to Unattended', async ({ page }) => {
-  await page.goto('/backoffice');
+  await page.goto('/us1/backoffice');
 
   await page.getByRole('button', { name: 'Registration' }).click();
   await page.waitForTimeout(3000);

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('TC-PBI-7.1 not click regis', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const eventName = await page.locator('.event-name');
@@ -40,7 +40,7 @@ test('TC-PBI-7.1 not click regis', async ({ page }) => {
 });
 
 test('TC-PBI-7.2 regis', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const eventName = await page.locator('.event-name');
@@ -81,7 +81,7 @@ test('TC-PBI-7.2 regis', async ({ page }) => {
 });
 
 test('TC-PBI-7.3 regis again', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
   await page.waitForTimeout(3000);
 
   const eventName = await page.locator('.event-name');

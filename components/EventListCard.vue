@@ -24,7 +24,7 @@ const props = defineProps<{
             <button
               class="event-card-tag b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
             >
-              {{ tag }}
+              {{ tag.tag_title }}
             </button>
           </NuxtLink>
         </div>
