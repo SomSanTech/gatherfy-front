@@ -233,7 +233,7 @@ const fetchEventEdit = async () => {
       );
 
       if (uploadFileName.value) {
-        await useFetchDelete(`v1/files/delete/${currentFileName}`);
+        await useFetchData(`v1/files/delete/${currentFileName}`, 'DELETE');
         dataDTO.event_image = uploadFileName.value;
         await useFetchUpload(
           `v1/files/upload`,
