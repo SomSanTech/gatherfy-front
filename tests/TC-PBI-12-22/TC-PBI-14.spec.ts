@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('pbi14.1', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -41,7 +41,7 @@ test('pbi14.1', async ({ page }) => {
 });
 
 test('pbi14.2', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
