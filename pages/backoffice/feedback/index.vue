@@ -156,11 +156,11 @@ onMounted(async () => {
               >
                 Edit available until
               </td>
-              <td
+              <!-- <td
                 class="h-14 w-24 px-4 text-center text-base font-semibold text-lavender-gray"
               >
                 Responses
-              </td>
+              </td> -->
               <td
                 class="h-14 w-52 px-4 text-center text-base font-semibold text-lavender-gray"
               >

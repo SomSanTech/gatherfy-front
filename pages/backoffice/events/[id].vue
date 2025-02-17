@@ -203,6 +203,7 @@ function transformEventData(input) {
 }
 
 const errorMsg = ref();
+
 const fetchEventEdit = async () => {
   try {
     if (validateForm() && originalEvent.value) {
@@ -227,7 +228,7 @@ const fetchEventEdit = async () => {
       dataDTO.tags = formattedTags;
 
       const currentFileName = event.value.image.replace(
-        'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
+        'https://capstone24.sit.kmutt.ac.th/us1/minio/thumbnails/',
         ''
       );
 
@@ -251,11 +252,16 @@ const fetchEventEdit = async () => {
         accessToken.value,
         dataDTO
       );
+
+      console.log('DateInput', dateInput.value);
+      console.log('dataDTO', dataDTO);
+
       if (fetchedData.errorData) {
         errorMsg.value = fetchedData.errorData;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      if (fetchedData) {
+      if (fetchedData.status === 200) {
+        fetchData();
         console.log('Update successful');
       } else {
         console.log('Update failed');

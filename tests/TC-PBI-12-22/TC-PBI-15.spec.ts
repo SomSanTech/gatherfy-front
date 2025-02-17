@@ -17,7 +17,7 @@ test('pbi15.1', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Feedback' }).click();
   await page
-    .getByRole('row', { name: 'Ceramic Workshop 20 March' })
+    .getByRole('row', { name: 'Orm Korn‘s Graduation Gathering' })
     .getByRole('link')
     .first()
     .click();
@@ -44,7 +44,7 @@ test('pbi15.2', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Feedback' }).click();
   await page
-    .getByRole('row', { name: 'Ceramic Workshop 20 March' })
+    .getByRole('row', { name: 'Orm Korn‘s Graduation Gathering' })
     .getByRole('link')
     .first()
     .click();

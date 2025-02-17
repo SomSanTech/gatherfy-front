@@ -88,53 +88,57 @@ const checkIsAlreadySubTag = (tagId: number) => {
 const subAction = ref('');
 const isShowSubTagPopup = ref(false);
 const handleSubscribeTag = async (tagId: number) => {
-  if (!checkIsAlreadySubTag(tagId)) {
-    subAction.value = 'follow';
-    const response = await useFetchWithAuth(
-      'v1/subscribe',
-      'POST',
-      accessToken.value,
-      {
-        tagId: tagId,
-      }
-    );
-
-    if (response.status === 200) {
-      const subscribeTagData = await useFetchWithAuth(
-        'v1/subscribed',
-        'GET',
-        accessToken.value
-      );
-
-      userSubscribeTagData.value = subscribeTagData.data;
-      isShowSubTagPopup.value = true;
-    }
-
-    if (response.error) {
-      alert('u follow this tag leaw na');
-    }
+  if (!userProfile.value) {
+    alert('Please login first');
   } else {
-    subAction.value = 'delete';
+    if (!checkIsAlreadySubTag(tagId)) {
+      subAction.value = 'follow';
+      const response = await useFetchWithAuth(
+        'v1/subscribe',
+        'POST',
+        accessToken.value,
+        {
+          tagId: tagId,
+        }
+      );
 
-    const response = await useFetchWithAuth(
-      `v1/subscribe/${tagId}`,
-      'DELETE',
-      accessToken.value
-    );
+      if (response.status === 200) {
+        const subscribeTagData = await useFetchWithAuth(
+          'v1/subscribed',
+          'GET',
+          accessToken.value
+        );
 
-    if (response.status === 200) {
-      const subscribeTagData = await useFetchWithAuth(
-        'v1/subscribed',
-        'GET',
+        userSubscribeTagData.value = subscribeTagData.data;
+        isShowSubTagPopup.value = true;
+      }
+
+      if (response.error) {
+        alert('u follow this tag leaw na');
+      }
+    } else {
+      subAction.value = 'delete';
+
+      const response = await useFetchWithAuth(
+        `v1/subscribe/${tagId}`,
+        'DELETE',
         accessToken.value
       );
 
-      userSubscribeTagData.value = subscribeTagData.data;
-      isShowSubTagPopup.value = true;
-    }
+      if (response.status === 200) {
+        const subscribeTagData = await useFetchWithAuth(
+          'v1/subscribed',
+          'GET',
+          accessToken.value
+        );
 
-    if (response.error) {
-      alert('cant log try again later na');
+        userSubscribeTagData.value = subscribeTagData.data;
+        isShowSubTagPopup.value = true;
+      }
+
+      if (response.error) {
+        alert('cant log try again later na');
+      }
     }
   }
 };
@@ -220,7 +224,9 @@ watchEffect(() => {
             <div class="flex w-fit flex-col justify-center gap-3">
               <div class="flex gap-2">
                 <div v-for="tag in event?.tags">
-                  <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                  <NuxtLink
+                    :to="{ name: 'events', query: { tag: tag.tag_title } }"
+                  >
                     <button
                       class="detail-tag b3 rounded-md border border-light-grey px-4"
                     >
@@ -315,12 +321,7 @@ watchEffect(() => {
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
             <p class="t3 font-semibold">Event location</p>
-            <div class="">
-              <div
-                v-html="event?.map"
-                class="detail-map lg:h-[370px] lg:w-[370px]"
-              ></div>
-            </div>
+            <div v-html="event?.map" class="detail-map"></div>
           </div>
           <div class="flex flex-col gap-2 lg:gap-5">
             <p class="t3 font-semibold">Tags</p>
@@ -329,23 +330,26 @@ watchEffect(() => {
                 v-for="tag in event?.tags"
                 class="flex h-full items-center justify-center"
               >
-                <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                <NuxtLink
+                  :to="{ name: 'events', query: { tag: tag.tag_title } }"
+                >
                   <button
                     class="b3 flex w-fit items-center gap-1 rounded-l-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
                   >
                     {{ tag.tag_title }}
                   </button>
                 </NuxtLink>
-                <button
-                  @click="handleSubscribeTag(tag.tag_id)"
+                <div
                   class="flex h-full w-full items-center justify-center rounded-r-lg border-y border-r border-dark-grey/60 px-2 duration-300 hover:bg-burgundy hover:text-light-grey"
                 >
-                  <Check
-                    v-if="checkIsAlreadySubTag(tag.tag_id)"
-                    class="text-3xl"
-                  />
-                  <Subscribe v-else class="text-xl" />
-                </button>
+                  <button @click="handleSubscribeTag(tag.tag_id)" class=" ">
+                    <Check
+                      v-if="checkIsAlreadySubTag(tag.tag_id)"
+                      class="text-3xl"
+                    />
+                    <Subscribe v-else class="text-xl" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -456,4 +460,8 @@ watchEffect(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.detail-map iframe {
+  width: 100px;
+}
+</style>

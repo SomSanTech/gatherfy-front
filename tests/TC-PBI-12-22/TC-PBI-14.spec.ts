@@ -57,7 +57,9 @@ test('pbi14.2', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Feedback' }).click();
   await page
-    .getByRole('row', { name: 'Ceramic Workshop 20 March' })
+    .getByRole('row', {
+      name: 'Paper Petals: Watercolor Flowers and Make a Bouquet Class',
+    })
     .getByRole('link')
     .first()
     .click();

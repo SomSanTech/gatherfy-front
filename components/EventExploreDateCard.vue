@@ -30,7 +30,7 @@ const props = defineProps<{
       </div>
       <div class="flex gap-2">
         <div v-for="tag in eventDetail?.tags">
-          <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+          <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
             <button
               class="b4 rounded-md border px-5 py-1 text-black-1 duration-200 hover:border-dark-grey/60"
             >

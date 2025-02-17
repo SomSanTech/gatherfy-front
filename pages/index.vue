@@ -201,7 +201,9 @@ watch(selectedEventTime, (newValue) => {
           <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
             <div class="flex gap-1 pb-2">
               <div v-for="tag in bannerEventData[sampleEventIndex]?.tags">
-                <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                <NuxtLink
+                  :to="{ name: 'events', query: { tag: tag.tag_title } }"
+                >
                   <button
                     class="b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
                   >
@@ -247,7 +249,9 @@ watch(selectedEventTime, (newValue) => {
               <div>
                 <div class="flex gap-1 pb-1">
                   <div v-for="tag in recommendedData[reccommentIndex]?.tags">
-                    <NuxtLink :to="{ name: 'events', query: { tag: tag } }">
+                    <NuxtLink
+                      :to="{ name: 'events', query: { tag: tag.tag_title } }"
+                    >
                       <button
                         class="b4 rounded-md border border-dark-grey/60 px-4 drop-shadow-md duration-200 hover:bg-dark-grey/20"
                       >

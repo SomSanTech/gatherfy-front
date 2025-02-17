@@ -27,9 +27,9 @@ const emit = defineEmits(['previewFeedback']);
     {{ useFormatDateTime(event?.eventStartDate, 'date') }},
     {{ useFormatDateTime(event?.eventStartDate, 'time') }}
   </td>
-  <td class="b2 p-4 text-center align-middle">
+  <!-- <td class="b2 p-4 text-center align-middle">
     {{ responses }}
-  </td>
+  </td> -->
   <td>
     <div class="flex justify-center gap-5 text-xl text-gray-600">
       <div v-if="canEdit" class="flex items-center justify-center gap-2 p-4">

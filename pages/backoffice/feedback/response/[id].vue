@@ -237,7 +237,7 @@ onMounted(async () => {
             <div v-else v-for="item in filterFeedbackData">
               <div class="my-2 flex gap-5 rounded-xl border p-5 pb-6">
                 <div
-                  class="mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-200"
+                  class="mt-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-zinc-200"
                 >
                   <!-- <img
                     src="/components/images/kornnaphat.png"

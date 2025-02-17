@@ -43,6 +43,7 @@ const generateQRCode = async (eventId: string) => {
   isStartCountDown.value = true;
   startCountdown();
 };
+const isZoomed = ref(false);
 const feedBackErrorResponse = ref();
 function closePreview() {
   previewFeedback.value = false;
@@ -380,12 +381,19 @@ function formatTimeRange(start, end) {
                         </div>
 
                         <div
+                          @click="isZoomed = !isZoomed"
                           v-if="qrValues[ticket.eventId] && !isResendDisabled"
-                          class="rounded-g bg-white p-2"
+                          class="rounded-g cursor-pointer bg-white p-2 transition-transform duration-300 ease-in-out"
+                          :class="{
+                            'fixed inset-0 z-50 flex items-center justify-center bg-black/50':
+                              isZoomed,
+                            '': !isZoomed,
+                            'scale-105': isZoomed,
+                          }"
                         >
                           <qrcode-vue
                             :value="qrValues[ticket.eventId]"
-                            :size="100"
+                            :size="isZoomed ? 300 : 100"
                           />
                         </div>
                       </div>
