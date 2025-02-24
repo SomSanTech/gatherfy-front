@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('pbi19.1', async ({ page }) => {
+test('pbi20.1', async ({ page }) => {
   await page.goto('/us1');
 
   await page.waitForTimeout(3000);
@@ -15,10 +15,9 @@ test('pbi19.1', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Events' }).click();
   await page
-    .getByRole('row', { name: 'bad slug ja sdfsdfsdf' })
-    .getByRole('link')
+    .getByRole('row', { name: 'Ceramic Workshop EP2 41' })
+    .getByRole('img')
+    .nth(1)
     .click();
-  await page.getByPlaceholder('Enter event name').fill('bad slug jaja');
-  await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('alert')).toContainText('Your change are saved');
+  await page.getByRole('button', { name: 'Yes, Delete!' }).click();
 });

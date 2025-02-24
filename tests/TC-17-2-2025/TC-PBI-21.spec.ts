@@ -29,6 +29,7 @@ test('pbi21.3', async ({ page }) => {
 test('pbi21.4', async ({ page }) => {
   await page.goto('/us1');
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForTimeout(3000);
   await page.getByRole('button', { name: 'Sign Up' }).click();
   await page.getByPlaceholder('First name').fill('test');
   await page.getByPlaceholder('Last name').fill('test');
@@ -51,7 +52,7 @@ test('pbi21.4', async ({ page }) => {
     'Passwords do not match or fail to meet the requirements.'
   );
 });
-test('pbi22.3', async ({ page }) => {
+test('pbi21.5', async ({ page }) => {
   await page.goto('/us1');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('button', { name: 'Sign Up' }).click();
