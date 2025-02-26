@@ -6,61 +6,25 @@ import Edit from '~/components/icons/Edit.vue';
 // const video = ref<HTMLVideoElement | null>(null);
 // const scannedValue = ref<string | null>(null);
 
-const userProfile = useUserProfile();
-
-// const qrValue = ref('http://localhost:4040/api/v1/events/recommended');
-
-// const apiResponse = ref<string | null>(null);
-// let qrCodeReader: BrowserQRCodeReader;
 const selectedGender = ref<string | null>(null);
+interface ProfileEdit {
+  firstname: string;
+  lastname: string;
+  username: string;
+  password: string;
+  gender: string;
+  email: string;
+  phone: string;
+  image: string;
+  birthday: string;
+}
 
-// onMounted(async () => {
-//   qrCodeReader = new BrowserQRCodeReader();
-//   qrCodeReader.decodeFromVideoDevice(
-//     null,
-//     video.value,
-//     async (result, error) => {
-//       if (result) {
-//         scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
-//         if (scannedValue.value) {
-//           apiResponse.value = scannedValue.value;
-//           console.log(scannedValue.value);
+const userProfile = useCookie<ProfileEdit | null>('profileData');
 
-//           try {
-//             // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
-//             const response = await useFetchWithAuth(
-//               `check-in`,
-//               'PUT',
-//               scannedValue.value
-//             );
-//             // const response = await fetch(
-//             //   'http://localhost:4040/api/v1/check-in',
-//             //   {
-//             //     method: 'PUT',
-//             //     headers: {
-//             //       Authorization: `Bearer ${scannedValue.value}`, // แนบ token ใน header
-//             //     },
-//             //   }
-//             // );
-//             const data = await response.json();
-//             // apiResponse.value = JSON.stringify(data, null, 2); // แสดงผลลัพธ์
-//             apiResponse.value = response;
-//           } catch (err) {
-//             console.error('API call failed:', err);
-//             apiResponse.value = 'API call failed!';
-//           }
-//         } else {
-//           console.log('test');
-//         }
-//       }
-//       if (error) console.error(error);
-//     }
-//   );
-// });
 const selectedDay = ref<string | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
-const userProfileEdited = ref({
+const userProfileEdited = ref<ProfileEdit | null>({
   firstname: '',
   lastname: '',
   username: '',
@@ -71,22 +35,12 @@ const userProfileEdited = ref({
   image: '',
   birthday: '',
 });
-// const userProfileEdited = ref({
-//   firstname: userProfile.value.users_firstname,
-//   lastname: userProfile.value.users_lastname,
-//   username: userProfile.value.username,
-//   password: userProfile.value.password,
-//   gender: userProfile.value.users_gender,
-//   email: userProfile.value.users_email,
-//   phone: userProfile.value.users_phone,
-//   image: userProfile.value.users_image,
-//   birthday: userProfile,
-// });
+
 watch(
   userProfile,
   (newProfile) => {
     if (newProfile) {
-      console.log('userProfile ', userProfile.value);
+      // console.log('userProfile ', userProfile.value);
 
       userProfileEdited.value = {
         firstname: newProfile.users_firstname,
@@ -162,7 +116,7 @@ const years = Array.from(
   (_, i) => new Date().getFullYear() - i
 );
 
-const genders = ['Male', 'Female', 'Non-Binary', 'Prefer not to say'];
+const genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
 const formattedBirthday = computed(() => {
   if (selectedDay.value && selectedMonth.value && selectedYear.value) {
@@ -174,23 +128,63 @@ const formattedBirthday = computed(() => {
   }
   return 'Please select a valid date';
 });
+
+const config = useRuntimeConfig();
+
 const accessToken = useCookie('accessToken');
 // const refreshToken = useCookie('refreshToken');
 const editProfile = async () => {
   console.log('---------------------------------');
+  userProfileEdited.value.birthday = formattedBirthday.value;
+  const fileName = userProfileEdited.value.image.replace(
+    `${config.public.minioUrl}/profiles/`,
+    ''
+  );
+  userProfileEdited.value.image = fileName;
 
   console.log('userProfileEdited: ', userProfileEdited.value);
 
-  // const response = await useFetchWithAuth(
-  //   `profile`,
-  //   'PUT',
-  //   accessToken.value,
-  //   userProfileEdited.value
-  // );
+  const response = await useFetchWithAuth(
+    `v1/profile`,
+    'PUT',
+    accessToken.value,
+    userProfileEdited.value
+  );
+
+  if (response.status === 200) {
+    const userProfileData = await useFetchWithAuth(
+      'v1/profile',
+      'GET',
+      accessToken.value
+    );
+    userProfile.value = userProfileData.data;
+  }
 };
+// "http://cp24us1.sit.kmutt.ac.th:7070/profiles/http://cp24us1.sit.kmutt.ac.th:7070/profiles/00k.jpg"
 // onBeforeUnmount(() => {
 //   qrCodeReader.reset(); // ปิดกล้องเมื่อออกจากหน้า
 // });
+const socialUrl = ref('');
+const socialType = computed(() => {
+  if (!socialUrl.value) return '';
+
+  const patterns = {
+    facebook: /facebook\.com/i,
+    instagram: /instagram\.com/i,
+    x: /x\.com/i,
+    linkedin: /linkedin\.com/i,
+    tiktok: /tiktok\.com/i,
+    youtube: /youtube\.com/i,
+  };
+
+  for (const [platform, pattern] of Object.entries(patterns)) {
+    if (pattern.test(socialUrl.value)) {
+      return platform;
+    }
+  }
+
+  return 'unknown'; // ถ้าไม่ตรงกับ Social ไหนเลย
+});
 </script>
 
 <template>
@@ -198,13 +192,6 @@ const editProfile = async () => {
     <div class="bg- w-[280px] rounded-xl border border-black/70"></div>
     <div class="w-full">
       <p class="t3">My Profile</p>
-      <!-- <div>
-        <video ref="video" width="300" height="300"></video>
-        <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p>
-        <p v-if="apiResponse" class="mt-4 text-blue-600">
-          API Response: {{ apiResponse }}
-        </p>
-      </div> -->
       <div class="flex gap-20 rounded-xl border border-black/70 p-8 px-20">
         <div class="relative h-fit shrink-0">
           <img
@@ -334,7 +321,128 @@ const editProfile = async () => {
               Gender Result: <span class="font-mono">{{ selectedGender }}</span>
             </p>
           </div>
+          <div class="flex items-center gap-2">
+            <Instagram
+              v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
+              class="text-4xl"
+            />
+            <X
+              v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Facebook
+              v-else-if="socialType.toLowerCase() === 'Facebook'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Linkedin
+              v-else-if="socialType.toLowerCase() === 'Linkedin'.toLowerCase()"
+              class="text-4xl"
+            />
+            <LinkSocial v-else class="text-4xl" />
+            <input
+              v-model="socialUrl"
+              placeholder="ใส่ลิงก์โซเชียลมีเดีย"
+              class="w-full border p-2"
+            />
+
+            <!-- <p v-if="socialType">
+              ประเภทโซเชียล:
+              <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
+              <span v-else>ไม่สามารถระบุได้</span>
+            </p> -->
+          </div>
+          <div class="flex items-center gap-2">
+            <Instagram
+              v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
+              class="text-4xl"
+            />
+            <X
+              v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Facebook
+              v-else-if="socialType.toLowerCase() === 'Facebook'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Linkedin
+              v-else-if="socialType.toLowerCase() === 'Linkedin'.toLowerCase()"
+              class="text-4xl"
+            />
+            <LinkSocial v-else class="text-4xl" />
+            <input
+              v-model="socialUrl"
+              placeholder="ใส่ลิงก์โซเชียลมีเดีย"
+              class="w-full border p-2"
+            />
+
+            <!-- <p v-if="socialType">
+              ประเภทโซเชียล:
+              <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
+              <span v-else>ไม่สามารถระบุได้</span>
+            </p> -->
+          </div>
+          <div class="flex items-center gap-2">
+            <Instagram
+              v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
+              class="text-4xl"
+            />
+            <X
+              v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Facebook
+              v-else-if="socialType.toLowerCase() === 'Facebook'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Linkedin
+              v-else-if="socialType.toLowerCase() === 'Linkedin'.toLowerCase()"
+              class="text-4xl"
+            />
+            <LinkSocial v-else class="text-4xl" />
+            <input
+              v-model="socialUrl"
+              placeholder="ใส่ลิงก์โซเชียลมีเดีย"
+              class="w-full border p-2"
+            />
+
+            <p v-if="socialType">
+              ประเภทโซเชียล:
+              <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
+              <span v-else>ไม่สามารถระบุได้</span>
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <Instagram
+              v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
+              class="text-4xl"
+            />
+            <X
+              v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Facebook
+              v-else-if="socialType.toLowerCase() === 'Facebook'.toLowerCase()"
+              class="text-4xl"
+            />
+            <Linkedin
+              v-else-if="socialType.toLowerCase() === 'Linkedin'.toLowerCase()"
+              class="text-4xl"
+            />
+            <LinkSocial v-else class="text-4xl" />
+            <input
+              v-model="socialUrl"
+              placeholder="ใส่ลิงก์โซเชียลมีเดีย"
+              class="w-full border p-2"
+            />
+
+            <!-- <p v-if="socialType">
+              ประเภทโซเชียล:
+              <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
+              <span v-else>ไม่สามารถระบุได้</span>
+            </p> -->
+          </div>
         </div>
+
         <button class="" @click="editProfile">save</button>
       </div>
     </div>

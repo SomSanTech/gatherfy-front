@@ -113,7 +113,7 @@ const validateTagsInput = ref('');
 const validateFileInput = ref('');
 const profileData = useCookie<UserProfile>('profileData');
 const accessToken = useCookie('accessToken');
-const errorMsg = ref();
+
 async function fetchData() {
   const fetchedTags = await useFetchData(`v1/tags`, 'GET');
   if (fetchedTags.error) {
@@ -136,13 +136,11 @@ async function fetchEventCreate() {
       accessToken.value,
       event.value
     );
-
     let fetchedUpload;
-    if (fetchedData.errorData) {
-      errorMsg.value = fetchedData.errorData;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    console.log('fetchData status', fetchedData.status);
+
     if (fetchedData.status === 200) {
+      console.log('dai ja');
       fetchedUpload = await useFetchUpload(
         `v1/files/upload`,
         fileToUpload.value,
@@ -161,6 +159,8 @@ async function fetchEventCreate() {
 }
 
 function validateForm() {
+  console.log('event', event.value);
+
   const checkField = {
     name: event.value.event_name.trim(),
     nameLength: event.value.event_name.trim().length <= 255,
@@ -309,17 +309,6 @@ onMounted(async () => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Create Event</h1>
-        </div>
-        <div
-          v-if="errorMsg"
-          class="b2 flex w-full shrink-0 flex-col gap-2 pt-4"
-        >
-          <p
-            v-for="e in errorMsg.details"
-            class="flex items-center gap-2 rounded-md bg-red-200 px-3 py-1 text-red-600"
-          >
-            <Cancle />{{ e }}
-          </p>
         </div>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
