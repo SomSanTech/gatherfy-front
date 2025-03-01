@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import Nav from './components/Nav.vue';
 import { nextTick } from 'vue';
-
+useHead({
+  script: [
+    { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
+  ],
+});
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup');
 const route = useRoute();

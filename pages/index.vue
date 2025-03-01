@@ -467,6 +467,36 @@ watch(selectedEventTime, (newValue) => {
         ></div>
       </div>
     </div>
+
+    <div
+      class="group relative max-w-lg overflow-hidden rounded-3xl shadow-lg duration-700"
+    >
+      <!-- Background Image -->
+      <div class="group relative duration-700">
+        <img
+          src="../components/images/kornnaphat.png"
+          alt="Severance"
+          class="h-64 w-full object-cover"
+        />
+
+        <!-- Blurred Overlay (ต้องมาก่อน content เพื่อให้ blur อยู่ข้างล่าง) -->
+        <div class="mask-gradient"></div>
+
+        <!-- Content (วางให้อยู่ข้างหน้าสุด) -->
+        <div class="absolute bottom-4 left-4 z-50 text-white">
+          <h2 class="text-2xl font-bold">Severance</h2>
+          <p class="text-sm opacity-80">Season 2 streaming now</p>
+        </div>
+
+        <!-- Watch Now Button -->
+        <button
+          class="absolute bottom-4 right-4 z-50 rounded-lg bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-md backdrop-blur-md hover:bg-white"
+        >
+          Watch Now
+        </button>
+      </div>
+    </div>
+
     <!-- Tags section -->
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>

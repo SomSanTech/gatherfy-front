@@ -2,9 +2,23 @@
 import { useRuntimeConfig } from '#app';
 import { vOnClickOutside } from '@vueuse/components';
 import {
+  useCodeClient,
   GoogleSignInButton,
+  useOneTap,
+  useTokenClient,
   type CredentialResponse,
 } from 'vue3-google-signin';
+
+// import { useOneTap, type CredentialResponse } from "vue3-google-signin";
+
+// const { isReady, login } = useOneTap({
+//   disableAutomaticPrompt: true,
+//   onSuccess: (response: CredentialResponse) => {
+//     console.log("Success:", response);
+//   },
+//   onError: () => console.error("Error with One Tap Login"),
+//   // options
+// });
 const loginPopup = useState('loginPopup');
 const isHavePopupOpen = useState('isHavePopupOpen');
 const isSignup = useState('isSignup');
@@ -374,15 +388,62 @@ watch(
   { immediate: true }
 );
 
-// handle success event
+interface CredentialResponse {
+  credential: string;
+  select_by: string;
+}
+
+const googleClientId =
+  '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com'; // ใส่ Google Client ID ของคุณ
+const userCredential = ref<string | null>(null);
+
 const handleLoginSuccess = (response: CredentialResponse) => {
-  const { credential } = response;
+  userCredential.value = response.credential;
+  console.log('Google Sign-In Success:', response.credential);
 };
 
-// handle an error event
 const handleLoginError = () => {
-  console.error('Login failed');
+  console.error('Google Login Failed');
 };
+const isGoogleLoaded = ref(false);
+const initGoogleSignIn = () => {
+  if (window.google && window.google.accounts) {
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleLoginSuccess,
+    });
+    isGoogleLoaded.value = true;
+  } else {
+    console.error('Google API is not loaded yet');
+  }
+};
+
+onMounted(async () => {
+  await nextTick(); // รอให้ Vue โหลดเสร็จก่อน
+  const checkGoogleAPI = setInterval(() => {
+    if (window.google && window.google.accounts) {
+      clearInterval(checkGoogleAPI);
+      initGoogleSignIn();
+    }
+  }, 500);
+});
+// handle success event
+// const handleLoginSuccess = (response: CredentialResponse) => {
+//   const { credential } = response;
+//   console.log('gg signin', response);
+//   console.log('credential', credential);
+// };
+
+// // handle an error event
+// const handleLoginError = () => {
+//   console.error('Login failed');
+// };
+// const { isReady, login } = useOneTap({
+//   disableAutomaticPrompt: true,
+//   onSuccess: handleLoginError,
+//   onError: handleLoginError,
+//   // options
+// });
 </script>
 
 <template>
@@ -414,10 +475,6 @@ const handleLoginError = () => {
           <Cancle /> {{ er }}
         </p>
       </div>
-      <!-- <GoogleSignInButton
-        @success="handleLoginSuccess"
-        @error="handleLoginError"
-      ></GoogleSignInButton> -->
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
@@ -740,11 +797,62 @@ const handleLoginError = () => {
         <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
       </button>
 
-      <p class="b2 text-center">
-        {{ isSignup ? 'Already' : 'Don’t' }} have an account?
-        <button class="font-semibold" @click="changeToSignUp">
-          {{ isSignup ? 'Sign In' : 'Sign Up' }}
+      <!-- <div class="flex w-full justify-between gap-3">
+        <button
+          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
+        >
+          A
         </button>
+        <button
+          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
+        >
+          B
+        </button>
+        <button
+          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
+        >
+          C
+        </button>
+      </div>-->
+
+      <div class="flex w-full gap-2">
+        <div
+          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+        ></div>
+        <p class="b3 text-black/60">OR</p>
+        <div
+          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+        ></div>
+      </div>
+      <div class="relative h-full w-full">
+        <button class="absolute right-0 z-50 w-full bg-red-200/60">
+          Sign in with google
+        </button>
+        <GoogleSignInButton
+          width="340px"
+          ux_mode="redirect"
+          class="b3 opacity- absolute right-0 w-max"
+          @success="handleLoginSuccess"
+          @error="handleLoginError"
+        ></GoogleSignInButton>
+      </div>
+      <div>
+        <p class="b2 text-center">
+          {{ isSignup ? 'Already' : 'Don’t' }} have an account?
+          <button class="font-semibold" @click="changeToSignUp">
+            {{ isSignup ? 'Sign In' : 'Sign Up' }}
+          </button>
+        </p>
+      </div>
+      <button
+        @click="google.accounts.id.prompt()"
+        class="rounded-lg bg-blue-500 px-6 py-2 text-white shadow-md hover:bg-blue-700"
+      >
+        Sign in with Google
+      </button>
+
+      <p v-if="userCredential" class="mt-4 text-sm text-green-600">
+        Login Success! Token: {{ userCredential }}
       </p>
     </div>
   </div>
