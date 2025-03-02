@@ -72,13 +72,13 @@ const profileImage = ref('https://www.example.com/profile.jpg');
 const phone = ref('+123 456 7890');
 const email = ref('john.doe@example.com');
 
-const socialLinks = ref({
-  instagram: 'https://www.instagram.com/johndoe',
-  facebook: 'https://www.facebook.com/johndoe',
-  linkedin: 'https://www.linkedin.com/in/johndoe',
-  twitter: 'https://www.twitter.com/johndoe',
-  x: 'https://www.x.com/johndoe',
-});
+// const socialLinks = ref({
+//   instagram: 'https://www.instagram.com/johndoe',
+//   facebook: 'https://www.facebook.com/johndoe',
+//   linkedin: 'https://www.linkedin.com/in/johndoe',
+//   twitter: 'https://www.twitter.com/johndoe',
+//   x: 'https://www.x.com/johndoe',
+// });
 const isShareContact = ref(false);
 const shareProfile = () => {
   isShareContact.value = !isShareContact.value;
@@ -182,16 +182,27 @@ const editProfile = async () => {
     userProfile.value = userProfileData.data;
   }
 };
+interface SocialLink {
+  socialPlatform: string;
+  socialLink: string;
+}
+
+const socialLinks = ref([
+  { socialPlatform: '', socialLink: '' },
+  { socialPlatform: '', socialLink: '' },
+  { socialPlatform: '', socialLink: '' },
+  { socialPlatform: '', socialLink: '' },
+]);
 
 const socialUrl = ref('');
 const socialType = computed(() => {
   if (!socialUrl.value) return '';
 
   const patterns = {
-    facebook: /facebook\.com/i,
-    instagram: /instagram\.com/i,
-    x: /x\.com/i,
-    linkedin: /linkedin\.com/i,
+    Facebook: /facebook\.com/i,
+    Instagram: /instagram\.com/i,
+    X: /x\.com/i,
+    LinkIn: /linkedin\.com/i,
     tiktok: /tiktok\.com/i,
     youtube: /youtube\.com/i,
   };
@@ -202,7 +213,62 @@ const socialType = computed(() => {
     }
   }
 
-  return 'unknown'; // ถ้าไม่ตรงกับ Social ไหนเลย
+  return 'Website'; // ถ้าไม่ตรงกับ Social ไหนเลย
+});
+function detectType(url: string): string {
+  const patterns = {
+    Facebook: /facebook\.com/i,
+    Instagram: /instagram\.com/i,
+    X: /x\.com/i,
+    LinkedIn: /linkedin\.com/i,
+    TikTok: /tiktok\.com/i,
+    YouTube: /youtube\.com/i,
+  };
+  for (const [name, pattern] of Object.entries(patterns)) {
+    if (pattern.test(url)) return name;
+  }
+  return 'Website';
+}
+
+watch(
+  socialLinks,
+  (newLinks) => {
+    newLinks.forEach((link, index) => {
+      // อัปเดตเฉพาะช่องที่มีการกรอกข้อมูล
+      if (link.socialLink && link.socialLink !== '') {
+        socialLinks.value[index].socialPlatform = detectType(link.socialLink);
+      }
+    });
+  },
+  { deep: true }
+);
+const handleAddSocial = async () => {
+  console.log(socialLinks.value);
+  const filteredSocialLinks = socialLinks.value.filter((sc) => {
+    return sc.socialLink !== '';
+  });
+  console.log('filteredSocialLinks', { socialLinks: filteredSocialLinks });
+
+  const response = await useFetchWithAuth(
+    'v1/socials',
+    'POST',
+    accessToken.value,
+    { socialLinks: filteredSocialLinks }
+  );
+
+  console.log(response);
+};
+
+const fetchSocialLink = async () => {
+  const response = await useFetchWithAuth(
+    'v1/socials',
+    'GET',
+    accessToken.value
+  );
+  console.log(response.data);
+};
+onMounted(async () => {
+  await fetchSocialLink();
 });
 </script>
 
@@ -251,7 +317,7 @@ const socialType = computed(() => {
                   <p>{{ userProfile.users_email }}</p>
                 </div>
               </div>
-              <div class="mt-2 flex gap-4">
+              <!-- <div class="mt-2 flex gap-4">
                 <a
                   v-if="socialLinks.instagram"
                   :href="socialLinks.instagram"
@@ -276,7 +342,7 @@ const socialType = computed(() => {
                 <a v-if="socialLinks.x" :href="socialLinks.x" target="_blank">
                   <X class="text-2xl" />
                 </a>
-              </div>
+              </div> -->
 
               <!-- Share Button -->
               <div class="mt-3 w-full">
@@ -387,7 +453,7 @@ const socialType = computed(() => {
             <img
               :src="userProfile?.users_image"
               alt=""
-              class="relative h-40 w-40 rounded-full"
+              class="relative h-40 w-40 shrink-0 rounded-full object-cover"
             />
             <div
               class="absolute bottom-0 right-3 w-fit rounded-full bg-gray-200 p-2"
@@ -635,6 +701,55 @@ const socialType = computed(() => {
               />
             </div>
           </div>
+          <div v-if="socialLinks.length > 0">
+            <div
+              v-for="(item, index) in socialLinks"
+              :key="index"
+              class="flex items-center gap-2"
+            >
+              {{ item }}
+              <Instagram
+                v-if="
+                  item.socialPlatform.toLowerCase() ===
+                  'Instagram'.toLowerCase()
+                "
+                class="text-4xl"
+              />
+              <X
+                v-else-if="
+                  item.socialPlatform.toLowerCase() === 'X'.toLowerCase()
+                "
+                class="text-4xl"
+              />
+              <Facebook
+                v-else-if="
+                  item.socialPlatform.toLowerCase() === 'Facebook'.toLowerCase()
+                "
+                class="text-4xl"
+              />
+              <Linkedin
+                v-else-if="
+                  item.socialPlatform.toLowerCase() === 'Linkedin'.toLowerCase()
+                "
+                class="text-4xl"
+              />
+              <LinkSocial v-else class="text-4xl" />
+              <input
+                v-model="item.socialLink"
+                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
+                class="w-full border p-2"
+              />
+              <p v-if="item.socialPlatform">
+                ประเภทโซเชียล:
+                <span v-if="item.socialPlatform !== 'Website'">{{
+                  item.socialPlatform
+                }}</span>
+                <span v-else>Website</span>
+              </p>
+            </div>
+            <button @click="handleAddSocial">Save</button>
+          </div>
+
           <div
             class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
           >

@@ -1,13 +1,123 @@
 <script setup lang="ts">
 import { useRuntimeConfig } from '#app';
 import { vOnClickOutside } from '@vueuse/components';
+// import {
+//   useCodeClient,
+//   GoogleSignInButton,
+//   useOneTap,
+//   useTokenClient,
+//   type CredentialResponse,
+// } from 'vue3-google-signin';
 import {
-  useCodeClient,
   GoogleSignInButton,
-  useOneTap,
-  useTokenClient,
   type CredentialResponse,
 } from 'vue3-google-signin';
+// import type { CredentialResponse } from 'vue3-google-signin';
+
+const credentials = ref<string | null>(null);
+
+const handleLoginSuccesses = async (response: CredentialResponse) => {
+  const { credential } = response;
+  console.log('Access Token', credential);
+  credentials.value = credential;
+  await signInWithGoogle();
+};
+
+// handle an error event
+const handleLoginErrores = () => {
+  console.error('Login failed');
+};
+
+useHead({
+  script: [
+    {
+      async: true,
+      src: 'https://accounts.google.com/gsi/client',
+      defer: true,
+    },
+  ],
+});
+const isTokenExpired = (token: string) => {
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const exp = payload.exp * 1000; // milliseconds
+  console.log(Date.now());
+  console.log(exp);
+
+  return Date.now() > exp;
+};
+
+const CLIENT_ID =
+  '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com'; // ใช้ค่าจริงของคุณ
+
+const handleLoginSuccess = async (response: CredentialResponse) => {
+  credentials.value = response.credential;
+  console.log('JWT ID Token:', response.credential);
+  await signInWithGoogle(); // แสดง One Tap หรือ Popup
+};
+
+const handleLoginError = () => {
+  console.error('Login failed');
+};
+
+const initGoogleSignIn = () => {
+  if (window.google) {
+    window.google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: handleLoginSuccess,
+    });
+  }
+};
+const isSelectRolePopUp = ref(false);
+const handleSelectRole = async () => {
+  const response = await useFetchData('v1/signup/google', 'POST', {
+    token: credentials.value,
+    role: selectedRole.value,
+  });
+};
+const signInWithGoogle = async () => {
+  if (credentials.value && !isTokenExpired(credentials.value)) {
+    const response = await useFetchWithAuth(
+      'v1/login/google',
+      'POST',
+      credentials.value
+    );
+    console.log(response);
+
+    if (response.status !== 200) {
+      console.log('select role');
+      isSelectRolePopUp.value = !isSelectRolePopUp.value;
+    }
+    loginPopup.value = !loginPopup.value;
+  } else {
+    console.log('Token expired, need to re-login');
+    // signIn();
+  }
+};
+
+const signIn = () => {
+  if (window.google) {
+    window.google.accounts.id.prompt();
+  }
+};
+
+onMounted(() => {
+  initGoogleSignIn();
+});
+
+const loadGoogleSDK = () => {
+  if (!document.getElementById('google-sdk')) {
+    const script = document.createElement('script');
+    script.id = 'google-sdk';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+};
+
+onMounted(() => {
+  loadGoogleSDK();
+});
 
 // import { useOneTap, type CredentialResponse } from "vue3-google-signin";
 
@@ -396,54 +506,6 @@ interface CredentialResponse {
 const googleClientId =
   '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com'; // ใส่ Google Client ID ของคุณ
 const userCredential = ref<string | null>(null);
-
-const handleLoginSuccess = (response: CredentialResponse) => {
-  userCredential.value = response.credential;
-  console.log('Google Sign-In Success:', response.credential);
-};
-
-const handleLoginError = () => {
-  console.error('Google Login Failed');
-};
-const isGoogleLoaded = ref(false);
-const initGoogleSignIn = () => {
-  if (window.google && window.google.accounts) {
-    window.google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: handleLoginSuccess,
-    });
-    isGoogleLoaded.value = true;
-  } else {
-    console.error('Google API is not loaded yet');
-  }
-};
-
-onMounted(async () => {
-  await nextTick(); // รอให้ Vue โหลดเสร็จก่อน
-  const checkGoogleAPI = setInterval(() => {
-    if (window.google && window.google.accounts) {
-      clearInterval(checkGoogleAPI);
-      initGoogleSignIn();
-    }
-  }, 500);
-});
-// handle success event
-// const handleLoginSuccess = (response: CredentialResponse) => {
-//   const { credential } = response;
-//   console.log('gg signin', response);
-//   console.log('credential', credential);
-// };
-
-// // handle an error event
-// const handleLoginError = () => {
-//   console.error('Login failed');
-// };
-// const { isReady, login } = useOneTap({
-//   disableAutomaticPrompt: true,
-//   onSuccess: handleLoginError,
-//   onError: handleLoginError,
-//   // options
-// });
 </script>
 
 <template>
@@ -475,6 +537,11 @@ onMounted(async () => {
           <Cancle /> {{ er }}
         </p>
       </div>
+      <button @click="signIn" class="custom-google-btn">
+        Login with Google
+      </button>
+
+      <p v-if="credential">JWT Token: {{ credential }}</p>
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
@@ -825,15 +892,12 @@ onMounted(async () => {
         ></div>
       </div>
       <div class="relative h-full w-full">
-        <button class="absolute right-0 z-50 w-full bg-red-200/60">
-          Sign in with google
-        </button>
         <GoogleSignInButton
           width="340px"
           ux_mode="redirect"
           class="b3 opacity- absolute right-0 w-max"
-          @success="handleLoginSuccess"
-          @error="handleLoginError"
+          @success="handleLoginSuccesses"
+          @error="handleLoginErrores"
         ></GoogleSignInButton>
       </div>
       <div>
@@ -856,6 +920,73 @@ onMounted(async () => {
       </p>
     </div>
   </div>
+  <div v-if="isSelectRolePopUp" class="fixed z-50 h-screen w-full">
+    <div
+      class="b2 absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-10 shadow-lg"
+    >
+      <p class="b2 text-center">Please select your role before continue</p>
+      <p class="b2 pb-2 text-center">What would you like to do?</p>
+      {{ selectedRole }}
+      <div class="flex w-full justify-between gap-2">
+        <button
+          @click="selectRole('Attendee')"
+          class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+          :class="
+            selectedRole === 'Attendee'
+              ? 'border-[2px] border-burgundy'
+              : 'border-[1px] border-black/20'
+          "
+        >
+          <div
+            class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+          >
+            For users who want to explore and join existing events.
+          </div>
+          <p class="font-semibold">Join Event</p>
+        </button>
+        <button
+          @click="selectRole('Organization')"
+          class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+          :class="
+            selectedRole === 'Organization'
+              ? 'border-[2px] border-burgundy'
+              : 'border-[1px] border-black/20'
+          "
+        >
+          <div
+            class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+          >
+            For users who want to create and manage their own events.
+          </div>
+          <p class="font-semibold">Create event</p>
+        </button>
+      </div>
+      <button @click="handleSelectRole">Submit</button>
+      <p
+        v-if="!checkField['role'] && isClickSignBtn && isSignup"
+        class="b4 text-red-600"
+      >
+        {{ fieldErrorMessages['role'] }}
+      </p>
+    </div>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.custom-google-btn {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-google-btn:hover {
+  background-color: #357ae8;
+}
+</style>

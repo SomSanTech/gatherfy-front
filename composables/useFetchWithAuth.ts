@@ -22,7 +22,7 @@ export const useFetchWithAuth = async (
       const status = response.status;
 
       if (!response.ok) {
-        if (status === 401) {
+        if (status === 401 && !url.includes('login/google')) {
           isRetrying = true;
           const auth = useAuth();
           const refreshedToken = await auth.refresh();
