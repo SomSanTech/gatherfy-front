@@ -626,15 +626,14 @@ const userCredential = ref<string | null>(null);
           <Cancle /> {{ er }}
         </p>
       </div>
-      <button
+      <!-- <button
         @click="signInGG()"
         id="google-login-button"
         class="custom-google-btn"
       >
         Login with Google
-      </button>
-      <button @click="login">Login Using Google</button>
-      <p v-if="credential">JWT Token: {{ credential }}</p>
+      </button> -->
+
       <!-- <div class="flex w-full justify-between gap-3">
         <button
           class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
@@ -984,14 +983,20 @@ const userCredential = ref<string | null>(null);
           class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
         ></div>
       </div>
-      <div class="relative h-full w-full">
+      <div class="group relative h-full w-full">
         <GoogleSignInButton
           width="340px"
           ux_mode="redirect"
-          class="b3 opacity- absolute right-0 w-max"
+          class="b3 absolute right-0 w-max opacity-0"
           @success="handleLoginSuccesses"
           @error="handleLoginErrores"
         ></GoogleSignInButton>
+        <button
+          class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-blue-700"
+        >
+          <Google class="fill-white" />
+          Continue with Google
+        </button>
       </div>
       <div>
         <p class="b2 text-center">
@@ -1001,12 +1006,6 @@ const userCredential = ref<string | null>(null);
           </button>
         </p>
       </div>
-      <button
-        @click="google.accounts.id.prompt()"
-        class="rounded-lg bg-blue-500 px-6 py-2 text-white shadow-md hover:bg-blue-700"
-      >
-        Sign in with Google
-      </button>
 
       <p v-if="userCredential" class="mt-4 text-sm text-green-600">
         Login Success! Token: {{ userCredential }}
