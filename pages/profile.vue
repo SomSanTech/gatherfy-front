@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import Edit from '~/components/icons/Edit.vue';
-// import { BrowserQRCodeReader } from '@zxing/browser';
-// import QrcodeVue from 'qrcode.vue';
 
-// const video = ref<HTMLVideoElement | null>(null);
-// const scannedValue = ref<string | null>(null);
-
-const selectedGender = ref<string | null>(null);
 interface ProfileEdit {
   firstname: string;
   lastname: string;
@@ -19,18 +13,22 @@ interface ProfileEdit {
   birthday: string;
 }
 
-const userProfile = useCookie<ProfileEdit | null>('profileData');
+const selectedGender = ref<string | null>(null);
+// const userProfile = useCookie('profileData');
+
+const userProfile = useCookie('profileData', { default: () => ({}) });
 
 const selectedDay = ref<string | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
-const userProfileEdited = ref<ProfileEdit | null>({
+
+const userProfileEdited = ref({
   firstname: '',
   lastname: '',
   username: '',
-  password: 'Orm6+5=11',
+  password: '',
   gender: '',
-  email: 'orm.kornnaphat@gmail.com',
+  email: '',
   phone: '',
   image: '',
   birthday: '',
@@ -39,9 +37,7 @@ const userProfileEdited = ref<ProfileEdit | null>({
 watch(
   userProfile,
   (newProfile) => {
-    if (newProfile) {
-      // console.log('userProfile ', userProfile.value);
-
+    if (newProfile && Object.keys(newProfile).length) {
       userProfileEdited.value = {
         firstname: newProfile.users_firstname,
         lastname: newProfile.users_lastname,
@@ -53,24 +49,20 @@ watch(
         image: newProfile.users_image,
         birthday: newProfile.users_birthday,
       };
+      if (newProfile.users_birthday) {
+        const [year, month, day] = newProfile.users_birthday
+          .split('T')[0]
+          .split('-');
 
-      const [year, month, day] = newProfile.users_birthday
-        .split('T')[0]
-        .split('-');
-
-      selectedDay.value = day;
-      selectedMonth.value = parseInt(month);
-      selectedYear.value = year;
+        selectedDay.value = day;
+        selectedMonth.value = parseInt(month);
+        selectedYear.value = year;
+      }
       selectedGender.value = newProfile.users_gender;
     }
   },
   { immediate: true }
 );
-const userName = ref('John Doe');
-const userJob = ref('Software Developer');
-const profileImage = ref('https://www.example.com/profile.jpg');
-const phone = ref('+123 456 7890');
-const email = ref('john.doe@example.com');
 
 // const socialLinks = ref({
 //   instagram: 'https://www.instagram.com/johndoe',
@@ -89,35 +81,7 @@ const shareProfile = () => {
   // };
   // navigator.share && navigator.share(shareData);
 };
-onMounted(() => {
-  console.log('userProfile ', userProfile.value);
-  if (userProfile.value) {
-    userProfileEdited.value = {
-      firstname: userProfile.value.users_firstname,
-      lastname: userProfile.value.users_lastname,
-      username: userProfile.value.username,
-      gender: userProfile.value.users_gender,
-      email: userProfile.value.users_email,
-      phone: userProfile.value.users_phone,
-      image: userProfile.value.users_image,
-      birthday: '',
-    };
 
-    const [year, month, day] = userProfile.value.users_birthday
-      .split('T')[0]
-      .split('-');
-
-    selectedDay.value = day;
-    selectedMonth.value = parseInt(month);
-    selectedYear.value = year;
-
-    console.log(selectedDay.value);
-    console.log(selectedMonth.value);
-    console.log(selectedYear.value);
-
-    selectedGender.value = userProfile.value.users_gender;
-  }
-});
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   'January',
@@ -142,22 +106,22 @@ const genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
 const formattedBirthday = computed(() => {
   if (selectedDay.value && selectedMonth.value && selectedYear.value) {
-    const day = String(selectedDay.value).padStart(2, '0'); // เติมเลข 0 ข้างหน้า เช่น 01
-    const month = String(selectedMonth.value).padStart(2, '0'); // เติมเลข 0 ข้างหน้า เช่น 01
+    const day = String(selectedDay.value).padStart(2, '0');
+    const month = String(selectedMonth.value).padStart(2, '0');
     const year = selectedYear.value;
 
     return `${year}-${month}-${day}T00:00:00`;
+  } else {
+    return 'Please select a valid date';
   }
-  return 'Please select a valid date';
 });
 
 const config = useRuntimeConfig();
 
 const accessToken = useCookie('accessToken');
-// const refreshToken = useCookie('refreshToken');
 const editProfile = async () => {
-  console.log('---------------------------------');
   userProfileEdited.value.birthday = formattedBirthday.value;
+  userProfileEdited.value.gender = selectedGender.value;
   const fileName = userProfileEdited.value.image.replace(
     `${config.public.minioUrl}/profiles/`,
     ''
@@ -182,10 +146,6 @@ const editProfile = async () => {
     userProfile.value = userProfileData.data;
   }
 };
-interface SocialLink {
-  socialPlatform: string;
-  socialLink: string;
-}
 
 const socialLinks = ref([
   { socialPlatform: '', socialLink: '' },
@@ -268,7 +228,38 @@ const fetchSocialLink = async () => {
   console.log(response.data);
 };
 onMounted(async () => {
-  await fetchSocialLink();
+  console.log('userProfile ', userProfile.value);
+  if (userProfile.value) {
+    userProfileEdited.value = {
+      firstname: userProfile.value.users_firstname,
+      lastname: userProfile.value.users_lastname,
+      username: userProfile.value.username,
+      gender: userProfile.value.users_gender,
+      email: userProfile.value.users_email,
+      phone: userProfile.value.users_phone,
+      image: userProfile.value.users_image,
+      birthday: '',
+    };
+    if (userProfile.value.users_birthday !== null) {
+      const [year, month, day] = userProfile.value.users_birthday
+        .split('T')[0]
+        .split('-');
+
+      selectedDay.value = day;
+      selectedMonth.value = parseInt(month);
+      selectedYear.value = year;
+
+      console.log(selectedDay.value);
+      console.log(selectedMonth.value);
+      console.log(selectedYear.value);
+    }
+    if (userProfile.value.users_gender) {
+      selectedGender.value = userProfile.value.users_gender;
+    }
+    if (accessToken.value) {
+      await fetchSocialLink();
+    }
+  }
 });
 </script>
 
@@ -282,7 +273,6 @@ onMounted(async () => {
         <div
           class="group relative w-full max-w-lg overflow-hidden rounded-2xl shadow-lg duration-700"
         >
-          <!-- Background Image -->
           <div class="b3 group relative duration-700">
             <img
               :src="userProfile.users_image"
@@ -290,13 +280,11 @@ onMounted(async () => {
               class="h-[500px] w-full object-cover"
             />
 
-            <!-- Blurred Overlay (ต้องมาก่อน content เพื่อให้ blur อยู่ข้างล่าง) -->
             <div class="mask-gradient-profile"></div>
             <div class="mask-gradient-profile"></div>
             <div
               class="absolute bottom-0 right-0 z-50 h-4/5 w-full bg-gradient-to-t from-black/90"
             ></div>
-            <!-- Content (วางให้อยู่ข้างหน้าสุด) -->
             <div class="p absolute bottom-4 z-50 w-full px-4 text-white">
               <h2 class="mt-4 text-xl font-semibold">
                 {{ userProfile.username }}
@@ -344,7 +332,6 @@ onMounted(async () => {
                 </a>
               </div> -->
 
-              <!-- Share Button -->
               <div class="mt-3 w-full">
                 <button
                   @click="shareProfile"
@@ -354,13 +341,6 @@ onMounted(async () => {
                 </button>
               </div>
             </div>
-
-            <!-- Watch Now Button -->
-            <!-- <button
-              class="absolute bottom-4 right-4 z-50 rounded-lg bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-md backdrop-blur-md hover:bg-white"
-            >
-              Watch Now
-            </button> -->
           </div>
         </div>
         <div
@@ -369,7 +349,7 @@ onMounted(async () => {
         >
           this is qrcode
         </div>
-        <!-- <div
+        <div
           class="b3 flex w-full flex-col items-center gap-4 rounded-xl bg-white p-6 shadow-lg"
         >
           <div class="flex flex-col items-center">
@@ -432,7 +412,7 @@ onMounted(async () => {
               Share contact
             </button>
           </div>
-        </div> -->
+        </div>
       </div>
       <div
         class="g-[#E9E9E9]/40 flex h-full gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
@@ -822,7 +802,7 @@ onMounted(async () => {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 80%;
+  height: 50%;
   pointer-events: none;
 }
 

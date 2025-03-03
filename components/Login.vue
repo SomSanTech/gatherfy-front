@@ -13,7 +13,12 @@ import {
   type CredentialResponse,
 } from 'vue3-google-signin';
 // import type { CredentialResponse } from 'vue3-google-signin';
-
+import { googleTokenLogin } from 'vue3-google-login';
+const login = () => {
+  googleTokenLogin().then((response) => {
+    console.log('Handle the response', response);
+  });
+};
 const credentials = ref<string | null>(null);
 
 const handleLoginSuccesses = async (response: CredentialResponse) => {
@@ -28,15 +33,15 @@ const handleLoginErrores = () => {
   console.error('Login failed');
 };
 
-useHead({
-  script: [
-    {
-      async: true,
-      src: 'https://accounts.google.com/gsi/client',
-      defer: true,
-    },
-  ],
-});
+// useHead({
+//   script: [
+//     {
+//       async: true,
+//       src: 'https://accounts.google.com/gsi/client',
+//       defer: true,
+//     },
+//   ],
+// });
 const isTokenExpired = (token: string) => {
   const payload = JSON.parse(atob(token.split('.')[1]));
   const exp = payload.exp * 1000; // milliseconds
@@ -48,7 +53,7 @@ const isTokenExpired = (token: string) => {
 
 const CLIENT_ID =
   '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com'; // ใช้ค่าจริงของคุณ
-
+// const CLIENT_ID='791441779465-25p6jvgk58ldmlhge5g7ac2f5r0flot0.apps.googleusercontent.com'
 const handleLoginSuccess = async (response: CredentialResponse) => {
   credentials.value = response.credential;
   console.log('JWT ID Token:', response.credential);
@@ -64,15 +69,22 @@ const initGoogleSignIn = () => {
     window.google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: handleLoginSuccess,
+      // prompt_parent_id: "google-login-button"
     });
   }
 };
+
 const isSelectRolePopUp = ref(false);
 const handleSelectRole = async () => {
   const response = await useFetchData('v1/signup/google', 'POST', {
     token: credentials.value,
     role: selectedRole.value,
   });
+
+  if (response.status === 200) {
+    alert('signin success ja');
+    isSelectRolePopUp.value = !isSelectRolePopUp.value;
+  }
 };
 const signInWithGoogle = async () => {
   if (credentials.value && !isTokenExpired(credentials.value)) {
@@ -86,17 +98,70 @@ const signInWithGoogle = async () => {
     if (response.status !== 200) {
       console.log('select role');
       isSelectRolePopUp.value = !isSelectRolePopUp.value;
+    } else {
+      const accessToken = useCookie('accessToken', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+
+      accessToken.value = response.data.accessToken;
+
+      const refreshToken = useCookie('refreshToken', {
+        httpOnly: false,
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      refreshToken.value = response.data.refreshToken;
+
+      role.value = decodeToken(accessToken.value)?.role;
+      const roleCookie = useCookie('roleCookie', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+
+      roleCookie.value = decodeToken(accessToken.value)?.role;
+
+      const profileData = useCookie('profileData', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+      if (response.data.accessToken) {
+        const userProfileData = await useFetchWithAuth(
+          'v1/profile',
+          'GET',
+          response.data.accessToken
+        );
+        profileData.value = userProfileData.data;
+      }
+
+      if (roleCookie.value === 'Attendee') {
+        router.push('/');
+      } else {
+        router.push('/backoffice');
+      }
+
+      const regisData = await useFetchWithAuth(
+        'v1/tickets',
+        'GET',
+        accessToken.value
+      );
+      userRegisHistory.value = regisData.data;
+
+      alert('login gg leaw');
     }
     loginPopup.value = !loginPopup.value;
+    isHavePopupOpen.value = false;
   } else {
     console.log('Token expired, need to re-login');
     // signIn();
   }
 };
 
-const signIn = () => {
+const signInGG = () => {
   if (window.google) {
-    window.google.accounts.id.prompt();
+    window.google.accounts.id.prompt(); // Show the Google login prompt (redirect)
   }
 };
 
@@ -119,16 +184,6 @@ onMounted(() => {
   loadGoogleSDK();
 });
 
-// import { useOneTap, type CredentialResponse } from "vue3-google-signin";
-
-// const { isReady, login } = useOneTap({
-//   disableAutomaticPrompt: true,
-//   onSuccess: (response: CredentialResponse) => {
-//     console.log("Success:", response);
-//   },
-//   onError: () => console.error("Error with One Tap Login"),
-//   // options
-// });
 const loginPopup = useState('loginPopup');
 const isHavePopupOpen = useState('isHavePopupOpen');
 const isSignup = useState('isSignup');
@@ -319,7 +374,41 @@ const validateFields = () => {
 const isUserSignIn = useState('isUserSignIn');
 const isOTPPopup = useState('isOTPPopup');
 const isSignInCookie = useCookie('is_user_sign_in');
+const a = {
+  users_id: 30,
+  users_firstname: 'ชลธิชา',
+  users_lastname: 'หลี่',
+  username: 'ชลธิชา หลี่',
+  password: null,
+  users_gender: null,
+  users_email: 'chonticha.it@mail.kmutt.ac.th',
+  users_phone: null,
+  users_image: 'http://cp24us1.sit.kmutt.ac.th:7070/profiles/ชลธิชา หลี่.jpg',
+  users_role: 'Attendee',
+  users_age: null,
+  users_birthday: null,
+  otp: null,
+  is_verified: true,
+  otp_expires_at: null,
+};
 
+const b = {
+  users_id: 2,
+  users_firstname: 'Kornnaphat',
+  users_lastname: 'Sethratanapong',
+  username: 'ormorm',
+  password: '$2a$16$eGO6bjDBZee3PYEDg1NnM.VSXVdyqVvyBbghJUc3uS2xCG/Ek1xv6',
+  users_gender: 'Female',
+  users_email: 'onlygamesoon@gmail.com',
+  users_phone: '0987787765',
+  users_image: 'http://cp24us1.sit.kmutt.ac.th:7070/profiles/ormorm.jpg',
+  users_role: 'Attendee',
+  users_age: 22,
+  users_birthday: '2002-05-04T00:00:00',
+  otp: null,
+  is_verified: false,
+  otp_expires_at: null,
+};
 const handleAuthen = async () => {};
 const signUpErrorResponse = ref();
 const userRegisHistory = useState('userRegisHistory');
@@ -537,10 +626,14 @@ const userCredential = ref<string | null>(null);
           <Cancle /> {{ er }}
         </p>
       </div>
-      <button @click="signIn" class="custom-google-btn">
+      <button
+        @click="signInGG()"
+        id="google-login-button"
+        class="custom-google-btn"
+      >
         Login with Google
       </button>
-
+      <button @click="login">Login Using Google</button>
       <p v-if="credential">JWT Token: {{ credential }}</p>
       <!-- <div class="flex w-full justify-between gap-3">
         <button
