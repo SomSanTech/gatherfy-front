@@ -93,7 +93,7 @@ const signInWithGoogle = async () => {
       'POST',
       credentials.value
     );
-    console.log(response);
+    console.log('google', response);
 
     if (response.status !== 200) {
       console.log('select role');
@@ -374,41 +374,7 @@ const validateFields = () => {
 const isUserSignIn = useState('isUserSignIn');
 const isOTPPopup = useState('isOTPPopup');
 const isSignInCookie = useCookie('is_user_sign_in');
-const a = {
-  users_id: 30,
-  users_firstname: 'ชลธิชา',
-  users_lastname: 'หลี่',
-  username: 'ชลธิชา หลี่',
-  password: null,
-  users_gender: null,
-  users_email: 'chonticha.it@mail.kmutt.ac.th',
-  users_phone: null,
-  users_image: 'http://cp24us1.sit.kmutt.ac.th:7070/profiles/ชลธิชา หลี่.jpg',
-  users_role: 'Attendee',
-  users_age: null,
-  users_birthday: null,
-  otp: null,
-  is_verified: true,
-  otp_expires_at: null,
-};
 
-const b = {
-  users_id: 2,
-  users_firstname: 'Kornnaphat',
-  users_lastname: 'Sethratanapong',
-  username: 'ormorm',
-  password: '$2a$16$eGO6bjDBZee3PYEDg1NnM.VSXVdyqVvyBbghJUc3uS2xCG/Ek1xv6',
-  users_gender: 'Female',
-  users_email: 'onlygamesoon@gmail.com',
-  users_phone: '0987787765',
-  users_image: 'http://cp24us1.sit.kmutt.ac.th:7070/profiles/ormorm.jpg',
-  users_role: 'Attendee',
-  users_age: 22,
-  users_birthday: '2002-05-04T00:00:00',
-  otp: null,
-  is_verified: false,
-  otp_expires_at: null,
-};
 const handleAuthen = async () => {};
 const signUpErrorResponse = ref();
 const userRegisHistory = useState('userRegisHistory');

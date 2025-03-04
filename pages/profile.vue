@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Edit from '~/components/icons/Edit.vue';
 
+import ToggleSwitch from 'primevue/toggleswitch';
+
 interface ProfileEdit {
   firstname: string;
   lastname: string;
@@ -12,7 +14,7 @@ interface ProfileEdit {
   image: string;
   birthday: string;
 }
-
+const checked = ref(false);
 const selectedGender = ref<string | null>(null);
 // const userProfile = useCookie('profileData');
 
@@ -165,12 +167,35 @@ function triggerFileInput() {
 const editProfile = async () => {
   userProfileEdited.value.birthday = formattedBirthday.value;
   userProfileEdited.value.gender = selectedGender.value;
-  const fileName = userProfileEdited.value.image.replace(
+  // const fileName = userProfileEdited.value.image.replace(
+  //   `${config.public.minioUrl}/profiles/`,
+  //   ''
+  // );
+  // userProfileEdited.value.image = fileName;
+  const currentFileName = userProfile.value.users_image.replace(
     `${config.public.minioUrl}/profiles/`,
     ''
   );
-  userProfileEdited.value.image = fileName;
 
+  console.log('currentFileName', currentFileName);
+  console.log('uploadFileName', uploadFileName.value);
+
+  if (uploadFileName.value) {
+    await useFetchWithAuth(
+      `v1/files/delete/${currentFileName}?bucket=profiles`,
+      'DELETE',
+      accessToken.value
+    );
+    userProfileEdited.value.image = uploadFileName.value;
+    await useFetchUpload(
+      `v1/files/upload`,
+      fileToUpload.value,
+      'profiles',
+      accessToken.value
+    );
+  } else {
+    userProfileEdited.value.image = currentFileName;
+  }
   console.log('userProfileEdited: ', userProfileEdited.value);
 
   const response = await useFetchWithAuth(
@@ -392,7 +417,7 @@ onMounted(async () => {
         >
           this is qrcode
         </div>
-        <div
+        <!-- <div
           class="b3 flex w-full flex-col items-center gap-4 rounded-xl bg-white p-6 shadow-lg"
         >
           <div class="flex flex-col items-center">
@@ -455,7 +480,7 @@ onMounted(async () => {
               Share contact
             </button>
           </div>
-        </div>
+        </div> -->
       </div>
       <div
         class="g-[#E9E9E9]/40 flex h-full gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
@@ -472,10 +497,15 @@ onMounted(async () => {
         <div
           class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
         >
-          <div v-if="!previewImage" class="relative h-fit shrink-0">
+          <div class="relative h-fit shrink-0">
             <img
+              v-if="!previewImage"
               :src="userProfile?.users_image"
               alt=""
+              class="relative h-40 w-40 shrink-0 rounded-full object-cover"
+            /><img
+              v-if="previewImage"
+              :src="previewImage"
               class="relative h-40 w-40 shrink-0 rounded-full object-cover"
             />
             <div
@@ -485,11 +515,7 @@ onMounted(async () => {
               <Edit />
             </div>
           </div>
-          <img
-            v-if="previewImage"
-            :src="previewImage"
-            class="m-auto h-[400px] object-cover"
-          />
+
           <input
             type="file"
             id="upload"
@@ -816,10 +842,7 @@ onMounted(async () => {
               <p class="b3">Everything</p>
             </div>
             <!-- Rounded switch -->
-            <label class="switch">
-              <input type="checkbox" />
-              <span class="slider round"></span>
-            </label>
+            <UToggle color="gray" v-model="checked" />
           </div>
         </div>
         <div class="flex gap-2 self-end">
