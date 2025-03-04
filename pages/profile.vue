@@ -119,6 +119,49 @@ const formattedBirthday = computed(() => {
 const config = useRuntimeConfig();
 
 const accessToken = useCookie('accessToken');
+
+const fileToUpload = ref();
+const previewImage = ref('');
+const uploadFileName = ref();
+const changeProfileImg = async () => {
+  const currentFileName = userProfile.value.users_image.replace(
+    `${config.public.minioUrl}/thumbnails/`,
+    ''
+  );
+  if (uploadFileName.value) {
+    await useFetchWithAuth(
+      `v1/files/delete/${currentFileName}?bucket=profiles`,
+      'DELETE',
+      accessToken.value
+    );
+    userProfileEdited.image = uploadFileName.value;
+    await useFetchUpload(
+      `v1/files/upload`,
+      fileToUpload.value,
+      'profiles',
+      accessToken.value
+    );
+  } else {
+    userProfileEdited.image = currentFileName;
+  }
+};
+
+function handelFileUpload(file: any) {
+  console.log('file', file);
+
+  const target = file.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    previewImage.value = URL.createObjectURL(file);
+    uploadFileName.value = file.name;
+    fileToUpload.value = file;
+  }
+}
+const fileInput = ref<HTMLInputElement>();
+
+function triggerFileInput() {
+  fileInput.value?.click();
+}
 const editProfile = async () => {
   userProfileEdited.value.birthday = formattedBirthday.value;
   userProfileEdited.value.gender = selectedGender.value;
@@ -429,7 +472,7 @@ onMounted(async () => {
         <div
           class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
         >
-          <div class="relative h-fit shrink-0">
+          <div v-if="!previewImage" class="relative h-fit shrink-0">
             <img
               :src="userProfile?.users_image"
               alt=""
@@ -437,10 +480,24 @@ onMounted(async () => {
             />
             <div
               class="absolute bottom-0 right-3 w-fit rounded-full bg-gray-200 p-2"
+              @click="triggerFileInput"
             >
               <Edit />
             </div>
           </div>
+          <img
+            v-if="previewImage"
+            :src="previewImage"
+            class="m-auto h-[400px] object-cover"
+          />
+          <input
+            type="file"
+            id="upload"
+            ref="fileInput"
+            accept="image/*"
+            class="hidden"
+            @change="handelFileUpload($event)"
+          />
           <div class="flex w-full flex-col gap-2">
             <div>
               <p class="b2 font pb-1 font-semibold">Firstname</p>
