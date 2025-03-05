@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Edit from '~/components/icons/Edit.vue';
-
-import ToggleSwitch from 'primevue/toggleswitch';
-
+definePageMeta({
+  layout: 'profile',
+});
 interface ProfileEdit {
   firstname: string;
   lastname: string;
@@ -20,7 +20,7 @@ const selectedGender = ref<string | null>(null);
 
 const userProfile = useCookie('profileData', { default: () => ({}) });
 
-const selectedDay = ref<string | null>(null);
+const selectedDay = ref<number | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
 
@@ -28,7 +28,6 @@ const userProfileEdited = ref({
   firstname: '',
   lastname: '',
   username: '',
-  password: '',
   gender: '',
   email: '',
   phone: '',
@@ -44,7 +43,6 @@ watch(
         firstname: newProfile.users_firstname,
         lastname: newProfile.users_lastname,
         username: newProfile.username,
-        password: newProfile.password,
         gender: newProfile.users_gender,
         email: newProfile.users_email,
         phone: newProfile.users_phone,
@@ -56,7 +54,9 @@ watch(
           .split('T')[0]
           .split('-');
 
-        selectedDay.value = day;
+        selectedDay.value = parseInt(day);
+        console.log('day', selectedDay.value);
+
         selectedMonth.value = parseInt(month);
         selectedYear.value = year;
       }
@@ -243,6 +243,58 @@ const socialType = computed(() => {
 
   return 'Website'; // ถ้าไม่ตรงกับ Social ไหนเลย
 });
+
+const currentPassword = ref('');
+const newPassword = ref('');
+
+const changePassword = async () => {
+  const response = await useFetchWithAuth(
+    'v1/password',
+    'PUT',
+    accessToken.value,
+    {
+      currentPassword: currentPassword.value,
+      newPassword: newPassword.value,
+    }
+  );
+
+  if (response.status === 200) {
+    alert('change pass');
+  } else {
+    alert('failed');
+  }
+};
+
+const handleAddSocial = async () => {
+  console.log(socialLinkSet.value);
+  const filteredSocialLinks = socialLinkSet.value.filter((sc) => {
+    return sc.socialLink !== '';
+  });
+  console.log('filteredSocialLinks', { socialLinks: filteredSocialLinks });
+
+  const response = await useFetchWithAuth(
+    'v1/socials',
+    'PUT',
+    accessToken.value,
+    { socialLinks: filteredSocialLinks }
+  );
+
+  console.log(response);
+};
+const socialLinksData = ref();
+const socialLinkSet = ref();
+const fillSocialLinks = (socialLinks) => {
+  const MAX_LENGTH = 4;
+
+  while (socialLinks.length < MAX_LENGTH) {
+    socialLinks.push({
+      socialPlatform: '',
+      socialLink: '',
+    });
+  }
+
+  return socialLinks;
+};
 function detectType(url: string): string {
   const patterns = {
     Facebook: /facebook\.com/i,
@@ -259,33 +311,17 @@ function detectType(url: string): string {
 }
 
 watch(
-  socialLinks,
+  socialLinkSet,
   (newLinks) => {
     newLinks.forEach((link, index) => {
       // อัปเดตเฉพาะช่องที่มีการกรอกข้อมูล
       if (link.socialLink && link.socialLink !== '') {
-        socialLinks.value[index].socialPlatform = detectType(link.socialLink);
+        socialLinkSet.value[index].socialPlatform = detectType(link.socialLink);
       }
     });
   },
   { deep: true }
 );
-const handleAddSocial = async () => {
-  console.log(socialLinks.value);
-  const filteredSocialLinks = socialLinks.value.filter((sc) => {
-    return sc.socialLink !== '';
-  });
-  console.log('filteredSocialLinks', { socialLinks: filteredSocialLinks });
-
-  const response = await useFetchWithAuth(
-    'v1/socials',
-    'POST',
-    accessToken.value,
-    { socialLinks: filteredSocialLinks }
-  );
-
-  console.log(response);
-};
 
 const fetchSocialLink = async () => {
   const response = await useFetchWithAuth(
@@ -293,8 +329,12 @@ const fetchSocialLink = async () => {
     'GET',
     accessToken.value
   );
-  console.log(response.data);
+  if ('data' in response) {
+    socialLinksData.value = response.data;
+    console.log(response.data);
+  }
 };
+
 onMounted(async () => {
   console.log('userProfile ', userProfile.value);
   if (userProfile.value) {
@@ -313,7 +353,7 @@ onMounted(async () => {
         .split('T')[0]
         .split('-');
 
-      selectedDay.value = day;
+      selectedDay.value = parseInt(day);
       selectedMonth.value = parseInt(month);
       selectedYear.value = year;
 
@@ -326,451 +366,174 @@ onMounted(async () => {
     }
     if (accessToken.value) {
       await fetchSocialLink();
+      socialLinkSet.value = fillSocialLinks(socialLinksData.value);
+      console.log('socialLinkSet', socialLinkSet.value);
     }
   }
 });
 </script>
 
 <template>
-  <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9">
-    <div class="flex w-fit flex-col gap-5">
+  <!-- <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9"> -->
+
+  <div
+    class="w-full duration-300"
+    :class="isShareContact ? 'opacity-0' : 'opacity-100'"
+  >
+    <!-- <p class="t3">My Profile</p> -->
+    <div class="flex flex-col gap-5">
       <div
-        :class="isShareContact ? 'w-screen max-w-6xl flex-row' : 'flex-col'"
-        class="flex w-full gap-5 rounded-xl border border-zinc-500/10 bg-[#E9E9E9]/70 p-5 shadow-md shadow-zinc-300/30 duration-700"
+        class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
       >
-        <div
-          class="group relative w-full max-w-lg overflow-hidden rounded-2xl shadow-lg duration-700"
-        >
-          <div class="b3 group relative duration-700">
-            <img
-              :src="userProfile.users_image"
-              alt="Severance"
-              class="h-[500px] w-full object-cover"
-            />
-
-            <div class="mask-gradient-profile"></div>
-            <div class="mask-gradient-profile"></div>
-            <div
-              class="absolute bottom-0 right-0 z-50 h-4/5 w-full bg-gradient-to-t from-black/90"
-            ></div>
-            <div class="p absolute bottom-4 z-50 w-full px-4 text-white">
-              <h2 class="mt-4 text-xl font-semibold">
-                {{ userProfile.username }}
-              </h2>
-              <p class="text-white">
-                {{ userProfile.users_firstname }}
-                {{ userProfile.users_lastname }}
-              </p>
-              <div
-                class="mt-2 flex w-full flex-col gap-2 rounded-md border border-dashed p-2"
-              >
-                <div class="flex items-center gap-1">
-                  <Phone class="fill-white text-[15px]" />
-                  <p>{{ userProfile.users_phone }}</p>
-                </div>
-                <div class="flex items-center gap-1">
-                  <Gmail class="fill-white text-[15px]" />
-                  <p>{{ userProfile.users_email }}</p>
-                </div>
-              </div>
-              <!-- <div class="mt-2 flex gap-4">
-                <a
-                  v-if="socialLinks.instagram"
-                  :href="socialLinks.instagram"
-                  target="_blank"
-                >
-                  <Instagram class="text-2xl" />
-                </a>
-                <a
-                  v-if="socialLinks.facebook"
-                  :href="socialLinks.facebook"
-                  target="_blank"
-                >
-                  <Facebook class="text-2xl" />
-                </a>
-                <a
-                  v-if="socialLinks.linkedin"
-                  :href="socialLinks.linkedin"
-                  target="_blank"
-                >
-                  <Linkedin class="text-2xl" />
-                </a>
-                <a v-if="socialLinks.x" :href="socialLinks.x" target="_blank">
-                  <X class="text-2xl" />
-                </a>
-              </div> -->
-
-              <div class="mt-3 w-full">
-                <button
-                  @click="shareProfile"
-                  class="b3 w-full rounded-lg bg-white px-4 py-2 text-black hover:bg-blue-600"
-                >
-                  Share contact
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="isShareContact"
-          class="w-full rounded-xl border border-black/60 p-10 duration-500"
-        >
-          this is qrcode
-        </div>
-        <!-- <div
-          class="b3 flex w-full flex-col items-center gap-4 rounded-xl bg-white p-6 shadow-lg"
-        >
-          <div class="flex flex-col items-center">
-            <img
-              src="../components/images/kornnaphat.png"
-              alt="User Profile Image"
-              class="h-24 w-24 rounded-full object-cover"
-            />
-            <h2 class="mt-4 text-xl font-semibold">
-              {{ userProfile.username }}
-            </h2>
-            <p class="text-gray-500">
-              {{ userProfile.users_firstname }} {{ userProfile.users_lastname }}
-            </p>
-          </div>
-
-          <div class="mt-4 flex w-full flex-col gap-2">
-            <div class="flex items-center gap-2">
-              <i class="fas fa-phone-alt text-lg text-gray-600"></i>
-              <p>{{ userProfile.users_phone }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fas fa-envelope text-lg text-gray-600"></i>
-              <p>{{ userProfile.users_email }}</p>
-            </div>
-          </div>
-
-          <div class="mt-4 flex gap-4">
-            <a
-              v-if="socialLinks.instagram"
-              :href="socialLinks.instagram"
-              target="_blank"
-            >
-              <Instagram class="text-2xl text-pink-600" />
-            </a>
-            <a
-              v-if="socialLinks.facebook"
-              :href="socialLinks.facebook"
-              target="_blank"
-            >
-              <Facebook class="text-2xl text-blue-600" />
-            </a>
-            <a
-              v-if="socialLinks.linkedin"
-              :href="socialLinks.linkedin"
-              target="_blank"
-            >
-              <Linkedin class="text-2xl text-blue-700" />
-            </a>
-            <a v-if="socialLinks.x" :href="socialLinks.x" target="_blank">
-              <X class="text-2xl text-blue-500" />
-            </a>
-          </div>
-
-          <div class="mt-6 w-full">
-            <button
-              @click="shareProfile"
-              class="w-full rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-            >
-              Share contact
-            </button>
-          </div>
-        </div> -->
-      </div>
-      <div
-        class="g-[#E9E9E9]/40 flex h-full gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
-      >
-        <p>Account setting</p>
-      </div>
-    </div>
-    <div
-      class="w-full duration-300"
-      :class="isShareContact ? 'opacity-0' : 'opacity-100'"
-    >
-      <!-- <p class="t3">My Profile</p> -->
-      <div class="flex flex-col gap-5">
-        <div
-          class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
-        >
-          <div class="relative h-fit shrink-0">
-            <img
-              v-if="!previewImage"
-              :src="userProfile?.users_image"
-              alt=""
-              class="relative h-40 w-40 shrink-0 rounded-full object-cover"
-            /><img
-              v-if="previewImage"
-              :src="previewImage"
-              class="relative h-40 w-40 shrink-0 rounded-full object-cover"
-            />
-            <div
-              class="absolute bottom-0 right-3 w-fit rounded-full bg-gray-200 p-2"
-              @click="triggerFileInput"
-            >
-              <Edit />
-            </div>
-          </div>
-
-          <input
-            type="file"
-            id="upload"
-            ref="fileInput"
-            accept="image/*"
-            class="hidden"
-            @change="handelFileUpload($event)"
+        <div class="relative h-fit shrink-0">
+          <img
+            v-if="!previewImage"
+            :src="userProfile?.users_image"
+            alt=""
+            class="relative h-40 w-40 shrink-0 rounded-full object-cover"
+          /><img
+            v-if="previewImage"
+            :src="previewImage"
+            class="relative h-40 w-40 shrink-0 rounded-full object-cover"
           />
-          <div class="flex w-full flex-col gap-2">
-            <div>
-              <p class="b2 font pb-1 font-semibold">Firstname</p>
-              <input
-                type="text"
-                placeholder="Firstname"
-                v-model="userProfileEdited.firstname"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-              />
-            </div>
-            <div>
-              <p class="b2 font pb-1 font-semibold">Lastname</p>
-              <input
-                type="text"
-                placeholder="Lastname"
-                v-model="userProfileEdited.lastname"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-              />
-            </div>
-            <div>
-              <p class="b2 font pb-1 font-semibold">Username</p>
-              <input
-                type="text"
-                placeholder="Username"
-                v-model="userProfileEdited.username"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-              />
-            </div>
-            <div>
-              <p class="b2 font pb-1 font-semibold">Email</p>
-              <input
-                type="text"
-                placeholder="Email"
-                v-model="userProfileEdited.email"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-              />
-            </div>
+          <div
+            class="absolute bottom-0 right-3 w-fit rounded-full bg-gray-200 p-2"
+            @click="triggerFileInput"
+          >
+            <Edit />
+          </div>
+        </div>
 
-            <div>
-              <p class="b2 font pb-1 font-semibold">Phone</p>
-              <input
-                type="text"
-                placeholder="Phone"
-                v-model="userProfileEdited.phone"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-              />
-            </div>
-            <div>
-              <p class="b2 font pb-1 font-semibold">Birthday</p>
-              <div class="flex gap-4">
-                <!-- Dropdown สำหรับวัน -->
-                <select
-                  v-model="selectedDay"
-                  class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-                >
-                  <option disabled value="">Day</option>
-                  <option v-for="day in days" :key="day" :value="day">
-                    {{ day }}
-                  </option>
-                </select>
+        <input
+          type="file"
+          id="upload"
+          ref="fileInput"
+          accept="image/*"
+          class="hidden"
+          @change="handelFileUpload($event)"
+        />
+        <div class="flex w-full flex-col gap-2">
+          <div>
+            <p class="b2 font pb-1 font-semibold">Firstname</p>
+            <input
+              type="text"
+              placeholder="Firstname"
+              v-model="userProfileEdited.firstname"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Lastname</p>
+            <input
+              type="text"
+              placeholder="Lastname"
+              v-model="userProfileEdited.lastname"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Username</p>
+            <input
+              type="text"
+              placeholder="Username"
+              v-model="userProfileEdited.username"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Email</p>
+            <input
+              type="text"
+              placeholder="Email"
+              v-model="userProfileEdited.email"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
 
-                <!-- Dropdown สำหรับเดือน -->
-                <select
-                  v-model="selectedMonth"
-                  class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-                >
-                  <option disabled value="">Month</option>
-                  <option
-                    v-for="(month, index) in months"
-                    :key="index"
-                    :value="index + 1"
-                  >
-                    {{ month }}
-                  </option>
-                </select>
-
-                <!-- Dropdown สำหรับปี -->
-                <select
-                  v-model="selectedYear"
-                  class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-                >
-                  <option disabled value="">Year</option>
-                  <option v-for="year in years" :key="year" :value="year">
-                    {{ year }}
-                  </option>
-                </select>
-              </div>
-              {{ userProfileEdited.birthday }}
-              <p class="mt-4 text-gray-600">
-                Result: <span class="font-mono">{{ formattedBirthday }}</span>
-              </p>
-            </div>
-            <div>
-              <p class="b2 font pb-1 font-semibold">Gender</p>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Phone</p>
+            <input
+              type="text"
+              placeholder="Phone"
+              v-model="userProfileEdited.phone"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Birthday</p>
+            <div class="flex gap-4">
+              <!-- Dropdown สำหรับวัน -->
               <select
-                v-model="selectedGender"
+                v-model="selectedDay"
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               >
-                <option disabled value="">Select Gender</option>
-                <option v-for="gender in genders" :key="gender" :value="gender">
-                  {{ gender }}
+                <option disabled value="">Day</option>
+                <option v-for="day in days" :key="day" :value="day">
+                  {{ day }}
                 </option>
               </select>
 
-              <p class="mt-4 text-gray-600">
-                Gender Result:
-                <span class="font-mono">{{ selectedGender }}</span>
-              </p>
+              <!-- Dropdown สำหรับเดือน -->
+              <select
+                v-model="selectedMonth"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              >
+                <option disabled value="">Month</option>
+                <option
+                  v-for="(month, index) in months"
+                  :key="index"
+                  :value="index + 1"
+                >
+                  {{ month }}
+                </option>
+              </select>
+
+              <!-- Dropdown สำหรับปี -->
+              <select
+                v-model="selectedYear"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              >
+                <option disabled value="">Year</option>
+                <option v-for="year in years" :key="year" :value="year">
+                  {{ year }}
+                </option>
+              </select>
             </div>
+            {{ userProfileEdited.birthday }}
+            <p class="mt-4 text-gray-600">
+              Result: <span class="font-mono">{{ formattedBirthday }}</span>
+            </p>
+          </div>
+          <div>
+            <p class="b2 font pb-1 font-semibold">Gender</p>
+            <select
+              v-model="selectedGender"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            >
+              <option disabled value="">Select Gender</option>
+              <option v-for="gender in genders" :key="gender" :value="gender">
+                {{ gender }}
+              </option>
+            </select>
+
+            <p class="mt-4 text-gray-600">
+              Gender Result:
+              <span class="font-mono">{{ selectedGender }}</span>
+            </p>
           </div>
         </div>
-        <div class="flex w-full gap-3">
-          <div
-            class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
-          >
-            <div class="flex items-center gap-2">
-              <Instagram
-                v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
-                class="text-4xl"
-              />
-              <X
-                v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
-                class="text-4xl"
-              />
-              <Facebook
-                v-else-if="
-                  socialType.toLowerCase() === 'Facebook'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <Linkedin
-                v-else-if="
-                  socialType.toLowerCase() === 'Linkedin'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <LinkSocial v-else class="text-4xl" />
-              <input
-                v-model="socialUrl"
-                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
-                class="w-full border p-2"
-              />
-            </div>
-            <div class="flex items-center gap-2">
-              <Instagram
-                v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
-                class="text-4xl"
-              />
-              <X
-                v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
-                class="text-4xl"
-              />
-              <Facebook
-                v-else-if="
-                  socialType.toLowerCase() === 'Facebook'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <Linkedin
-                v-else-if="
-                  socialType.toLowerCase() === 'Linkedin'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <LinkSocial v-else class="text-4xl" />
-              <input
-                v-model="socialUrl"
-                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
-                class="w-full border p-2"
-              />
-
-              <!-- <p v-if="socialType">
-              ประเภทโซเชียล:
-              <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
-              <span v-else>ไม่สามารถระบุได้</span>
-            </p> -->
-            </div>
-            <div class="flex items-center gap-2">
-              <Instagram
-                v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
-                class="text-4xl"
-              />
-              <X
-                v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
-                class="text-4xl"
-              />
-              <Facebook
-                v-else-if="
-                  socialType.toLowerCase() === 'Facebook'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <Linkedin
-                v-else-if="
-                  socialType.toLowerCase() === 'Linkedin'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <LinkSocial v-else class="text-4xl" />
-              <input
-                v-model="socialUrl"
-                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
-                class="w-full border p-2"
-              />
-
-              <p v-if="socialType">
-                ประเภทโซเชียล:
-                <span v-if="socialType !== 'unknown'">{{ socialType }}</span>
-                <span v-else>ไม่สามารถระบุได้</span>
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <Instagram
-                v-if="socialType.toLowerCase() === 'Instagram'.toLowerCase()"
-                class="text-4xl"
-              />
-              <X
-                v-else-if="socialType.toLowerCase() === 'X'.toLowerCase()"
-                class="text-4xl"
-              />
-              <Facebook
-                v-else-if="
-                  socialType.toLowerCase() === 'Facebook'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <Linkedin
-                v-else-if="
-                  socialType.toLowerCase() === 'Linkedin'.toLowerCase()
-                "
-                class="text-4xl"
-              />
-              <LinkSocial v-else class="text-4xl" />
-              <input
-                v-model="socialUrl"
-                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
-                class="w-full border p-2"
-              />
-            </div>
-          </div>
-          <div v-if="socialLinks.length > 0">
+      </div>
+      <div class="flex w-full gap-3">
+        <div
+          class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+        >
+          <div v-if="socialLinkSet !== []" class="flex flex-col gap-2">
             <div
-              v-for="(item, index) in socialLinks"
+              v-for="(item, index) in socialLinkSet"
               :key="index"
-              class="flex items-center gap-2"
+              class="b2 flex items-center gap-2"
             >
-              {{ item }}
+              <!-- {{ item }} -->
               <Instagram
                 v-if="
                   item.socialPlatform.toLowerCase() ===
@@ -799,69 +562,83 @@ onMounted(async () => {
               <LinkSocial v-else class="text-4xl" />
               <input
                 v-model="item.socialLink"
-                placeholder="ใส่ลิงก์โซเชียลมีเดีย"
-                class="w-full border p-2"
-              />
-              <p v-if="item.socialPlatform">
-                ประเภทโซเชียล:
-                <span v-if="item.socialPlatform !== 'Website'">{{
-                  item.socialPlatform
-                }}</span>
-                <span v-else>Website</span>
-              </p>
-            </div>
-            <button @click="handleAddSocial">Save</button>
-          </div>
-
-          <div
-            class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
-          >
-            <div>
-              <p class="b2 font pb-1 font-semibold">Change pass</p>
-              <input
-                type="text"
-                placeholder="Password"
-                v-model="userProfileEdited.password"
-                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+                placeholder="Insert your link"
+                class="w-full rounded-lg border p-2"
               />
             </div>
+            <button
+              @click="handleAddSocial"
+              class="w-fit self-end rounded-md bg-dark-grey px-3 py-1 text-light-grey"
+            >
+              Save
+            </button>
+            {{ socialLinkSet }}
           </div>
         </div>
+
         <div
           class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
           <div>
-            <p class="b2 font pb-1 font-semibold">Noti setting ja</p>
-            <div class="flex items-center gap-1">
-              <input
-                type="checkbox"
-                placeholder="Password"
-                v-model="userProfileEdited.password"
-                class="b2 rounded-lg border-[1px] border-black/20 p-2"
-              />
-              <p class="b3">Everything</p>
-            </div>
-            <!-- Rounded switch -->
-            <UToggle color="gray" v-model="checked" />
+            <p class="b2 font pb-1 font-semibold">Change pass</p>
+            <input
+              type="password"
+              placeholder="current password"
+              v-model="currentPassword"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+            <input
+              type="password"
+              placeholder="new password"
+              v-model="newPassword"
+              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+            />
+            <button
+              @click="changePassword"
+              class="w-fit self-end rounded-md bg-dark-grey px-3 py-1 text-light-grey"
+            >
+              Save
+            </button>
+            {{ currentPassword }}
+            {{ newPassword }}
           </div>
         </div>
-        <div class="flex gap-2 self-end">
-          <button
-            class="b2 mt-10 w-fit self-end rounded-md border border-black/90 px-5 py-1 text-black"
-            @click="editProfile"
-          >
-            cancle
-          </button>
-          <button
-            class="b2 mt-10 w-fit self-end rounded-md bg-black/90 px-5 py-1 text-light-grey"
-            @click="editProfile"
-          >
-            save
-          </button>
+      </div>
+      <div
+        class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+      >
+        <div>
+          <p class="b2 font pb-1 font-semibold">Noti setting ja</p>
+          <div class="flex items-center gap-1">
+            <input
+              type="checkbox"
+              placeholder="Password"
+              v-model="userProfileEdited.password"
+              class="b2 rounded-lg border-[1px] border-black/20 p-2"
+            />
+            <p class="b3">Everything</p>
+          </div>
+          <!-- Rounded switch -->
+          <UToggle color="gray" v-model="checked" />
         </div>
+      </div>
+      <div class="flex gap-2 self-end">
+        <button
+          class="b2 mt-10 w-fit self-end rounded-md border border-black/90 px-5 py-1 text-black"
+          @click="editProfile"
+        >
+          cancle
+        </button>
+        <button
+          class="b2 mt-10 w-fit self-end rounded-md bg-black/90 px-5 py-1 text-light-grey"
+          @click="editProfile"
+        >
+          save
+        </button>
       </div>
     </div>
   </div>
+  <!-- </div> -->
 </template>
 
 <style scoped>

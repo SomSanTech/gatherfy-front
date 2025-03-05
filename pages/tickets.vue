@@ -6,7 +6,9 @@ import type {
   ExistingQuestion,
   FeedbackBody,
 } from '~/models/feedback';
-
+definePageMeta({
+  layout: 'profile',
+});
 const tickets = ref();
 const accessToken = useCookie('accessToken');
 const profileData = useCookie('profileData');
@@ -232,7 +234,7 @@ function formatTimeRange(start, end) {
 </script>
 
 <template>
-  <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9 px-8 lg:px-28">
+  <div class="flex w-full gap-9">
     <!-- <div
       class="flex w-[280px]  flex-col gap-2 rounded-xl border border-black/70 p-4 py-8"
     >
