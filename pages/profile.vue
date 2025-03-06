@@ -3,28 +3,39 @@ import Edit from '~/components/icons/Edit.vue';
 definePageMeta({
   layout: 'profile',
 });
+
 interface ProfileEdit {
   firstname: string;
   lastname: string;
   username: string;
-  password: string;
   gender: string;
   email: string;
   phone: string;
   image: string;
   birthday: string;
 }
-const checked = ref(false);
-const selectedGender = ref<string | null>(null);
-// const userProfile = useCookie('profileData');
 
-const userProfile = useCookie('profileData', { default: () => ({}) });
+interface UserProfile {
+  users_firstname: string;
+  users_lastname: string;
+  username: string;
+  users_gender: string;
+  users_email: string;
+  users_phone: string;
+  users_image: string;
+  users_birthday: string; // << เพิ่มตรงนี้
+}
+
+const checked = ref(false);
+const selectedGender = ref<string>('');
+
+const userProfile = useCookie<UserProfile>('profileData');
 
 const selectedDay = ref<number | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
 
-const userProfileEdited = ref({
+const userProfileEdited = ref<ProfileEdit>({
   firstname: '',
   lastname: '',
   username: '',
@@ -73,7 +84,7 @@ watch(
 //   twitter: 'https://www.twitter.com/johndoe',
 //   x: 'https://www.x.com/johndoe',
 // });
-const isShareContact = ref(false);
+const isShareContact = ref<boolean>(false);
 const shareProfile = () => {
   isShareContact.value = !isShareContact.value;
   // const shareData = {
@@ -120,33 +131,11 @@ const formattedBirthday = computed(() => {
 
 const config = useRuntimeConfig();
 
-const accessToken = useCookie('accessToken');
+const accessToken = useCookie<string>('accessToken');
 
 const fileToUpload = ref();
 const previewImage = ref('');
 const uploadFileName = ref();
-const changeProfileImg = async () => {
-  const currentFileName = userProfile.value.users_image.replace(
-    `${config.public.minioUrl}/thumbnails/`,
-    ''
-  );
-  if (uploadFileName.value) {
-    await useFetchWithAuth(
-      `v1/files/delete/${currentFileName}?bucket=profiles`,
-      'DELETE',
-      accessToken.value
-    );
-    userProfileEdited.image = uploadFileName.value;
-    await useFetchUpload(
-      `v1/files/upload`,
-      fileToUpload.value,
-      'profiles',
-      accessToken.value
-    );
-  } else {
-    userProfileEdited.image = currentFileName;
-  }
-};
 
 function handelFileUpload(file: any) {
   console.log('file', file);
@@ -211,7 +200,10 @@ const editProfile = async () => {
       'GET',
       accessToken.value
     );
-    userProfile.value = userProfileData.data;
+
+    if ('data' in userProfileData) {
+      userProfile.value = userProfileData.data;
+    }
   }
 };
 
@@ -267,7 +259,7 @@ const changePassword = async () => {
 
 const handleAddSocial = async () => {
   console.log(socialLinkSet.value);
-  const filteredSocialLinks = socialLinkSet.value.filter((sc) => {
+  const filteredSocialLinks = socialLinkSet.value.filter((sc: SocialLink) => {
     return sc.socialLink !== '';
   });
   console.log('filteredSocialLinks', { socialLinks: filteredSocialLinks });
@@ -283,7 +275,12 @@ const handleAddSocial = async () => {
 };
 const socialLinksData = ref();
 const socialLinkSet = ref();
-const fillSocialLinks = (socialLinks) => {
+type SocialLink = {
+  socialPlatform: string;
+  socialLink: string;
+};
+
+const fillSocialLinks = (socialLinks: SocialLink[]) => {
   const MAX_LENGTH = 4;
 
   while (socialLinks.length < MAX_LENGTH) {
@@ -295,7 +292,8 @@ const fillSocialLinks = (socialLinks) => {
 
   return socialLinks;
 };
-function detectType(url: string): string {
+
+const detectType = (url: string): string => {
   const patterns = {
     Facebook: /facebook\.com/i,
     Instagram: /instagram\.com/i,
@@ -308,12 +306,12 @@ function detectType(url: string): string {
     if (pattern.test(url)) return name;
   }
   return 'Website';
-}
+};
 
 watch(
   socialLinkSet,
   (newLinks) => {
-    newLinks.forEach((link, index) => {
+    newLinks.forEach((link: SocialLink, index: number) => {
       // อัปเดตเฉพาะช่องที่มีการกรอกข้อมูล
       if (link.socialLink && link.socialLink !== '') {
         socialLinkSet.value[index].socialPlatform = detectType(link.socialLink);
@@ -499,10 +497,10 @@ onMounted(async () => {
                 </option>
               </select>
             </div>
-            {{ userProfileEdited.birthday }}
-            <p class="mt-4 text-gray-600">
+            <!-- {{ userProfileEdited.birthday }} -->
+            <!-- <p class="mt-4 text-gray-600">
               Result: <span class="font-mono">{{ formattedBirthday }}</span>
-            </p>
+            </p> -->
           </div>
           <div>
             <p class="b2 font pb-1 font-semibold">Gender</p>
@@ -516,14 +514,28 @@ onMounted(async () => {
               </option>
             </select>
 
-            <p class="mt-4 text-gray-600">
+            <!-- <p class="mt-4 text-gray-600">
               Gender Result:
               <span class="font-mono">{{ selectedGender }}</span>
-            </p>
+            </p> -->
+          </div>
+          <div class="flex gap-2 self-end">
+            <button
+              class="b2 mt-10 w-fit self-end rounded-md border border-black/90 px-5 py-1 text-black"
+              @click="editProfile"
+            >
+              cancle
+            </button>
+            <button
+              class="b2 mt-10 w-fit self-end rounded-md bg-black/90 px-5 py-1 text-light-grey"
+              @click="editProfile"
+            >
+              save
+            </button>
           </div>
         </div>
       </div>
-      <div class="flex w-full gap-3">
+      <div class="grid w-full grid-cols-2 gap-3">
         <div
           class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
@@ -572,15 +584,13 @@ onMounted(async () => {
             >
               Save
             </button>
-            {{ socialLinkSet }}
           </div>
         </div>
-
         <div
-          class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+          class="g-[#E9E9E9]/40 flex w-full flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
-          <div>
-            <p class="b2 font pb-1 font-semibold">Change pass</p>
+          <p class="b2 font-semibold">Change password</p>
+          <div class="flex flex-col gap-2">
             <input
               type="password"
               placeholder="current password"
@@ -622,20 +632,6 @@ onMounted(async () => {
           <UToggle color="gray" v-model="checked" />
         </div>
       </div>
-      <div class="flex gap-2 self-end">
-        <button
-          class="b2 mt-10 w-fit self-end rounded-md border border-black/90 px-5 py-1 text-black"
-          @click="editProfile"
-        >
-          cancle
-        </button>
-        <button
-          class="b2 mt-10 w-fit self-end rounded-md bg-black/90 px-5 py-1 text-light-grey"
-          @click="editProfile"
-        >
-          save
-        </button>
-      </div>
     </div>
   </div>
   <!-- </div> -->
@@ -661,68 +657,5 @@ onMounted(async () => {
   width: 100%;
   height: 50%;
   pointer-events: none;
-}
-
-/* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 45px;
-  height: 25px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: '';
-  height: 19px;
-  width: 19px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #2f3131;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(10px);
-  -ms-transform: translateX(10px);
-  transform: translateX(19px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 22px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
 }
 </style>

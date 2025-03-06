@@ -6,6 +6,7 @@ import type {
   ExistingQuestion,
   FeedbackBody,
 } from '~/models/feedback';
+
 definePageMeta({
   layout: 'profile',
 });
@@ -235,16 +236,6 @@ function formatTimeRange(start, end) {
 
 <template>
   <div class="flex w-full gap-9">
-    <!-- <div
-      class="flex w-[280px]  flex-col gap-2 rounded-xl border border-black/70 p-4 py-8"
-    >
-      <button class="b2 w-full rounded-md bg-red-200 p-2 text-center">
-        My Profile
-      </button>
-      <button class="b2 w-full rounded-md bg-red-200 p-2 text-center">
-        My Ticket
-      </button>
-    </div> -->
     <div class="w-full">
       <p class="t3 pb-2">My Ticket</p>
       <ExploreBar

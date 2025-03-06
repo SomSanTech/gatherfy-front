@@ -23,7 +23,10 @@ const userProfile = useCookie('profileData', { default: () => ({}) });
 </script>
 
 <template>
-  <div class="flex w-fit flex-col gap-5">
+  <div
+    class="flex w-fit flex-col gap-5"
+    :class="isTicketPage ? 'shrink-0' : ''"
+  >
     <div
       v-if="!isTicketPage"
       :class="isShareContact ? 'w-screen max-w-6xl flex-row' : 'flex-col'"
@@ -174,9 +177,35 @@ const userProfile = useCookie('profileData', { default: () => ({}) });
         </div> -->
     </div>
     <div
-      class="g-[#E9E9E9]/40 flex h-full gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
+      class="g-[#E9E9E9]/40 b2 flex h-full w-full flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
     >
-      <p>Account setting</p>
+      <NuxtLink to="/profile" class="w-full">
+        <button
+          @click.stop
+          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+        >
+          <UserProfile class="h-5 w-5 text-gray-600" />
+          <span>My Profile</span>
+        </button>
+      </NuxtLink>
+      <NuxtLink to="/tickets" class="w-full">
+        <button
+          @click.stop
+          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+        >
+          <Ticket class="h-5 w-5 text-gray-600" />
+          <span>My Tickets</span>
+        </button>
+      </NuxtLink>
+      <NuxtLink to="/contact" class="w-full">
+        <button
+          @click.stop
+          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+        >
+          <Contact class="h-5 w-5 text-gray-600" />
+          <span>My Contact</span>
+        </button>
+      </NuxtLink>
     </div>
   </div>
 </template>
