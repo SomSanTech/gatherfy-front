@@ -279,7 +279,9 @@ type SocialLink = {
   socialPlatform: string;
   socialLink: string;
 };
-
+const trimTrailingSlash = (url: string) => {
+  return url.replace(/\/$/, ''); // ตัด `/` ตัวสุดท้ายออกถ้ามันอยู่ท้ายสุด
+};
 const fillSocialLinks = (socialLinks: SocialLink[]) => {
   const MAX_LENGTH = 4;
 
@@ -573,6 +575,7 @@ onMounted(async () => {
               />
               <LinkSocial v-else class="text-4xl" />
               <input
+                @blur="item.socialLink = trimTrailingSlash(item.socialLink)"
                 v-model="item.socialLink"
                 placeholder="Insert your link"
                 class="w-full rounded-lg border p-2"

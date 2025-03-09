@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const route = useRoute();
+const emit = defineEmits(['shareContact']);
 const isTicketPage = ref(route.fullPath.includes('tickets'));
 const contacts = [
   { id: 1, name: 'Alice Smith', phone: '+1 987 654 321' },
@@ -96,7 +97,7 @@ const userProfile = useCookie('profileData', { default: () => ({}) });
 
             <div class="mt-3 w-full">
               <button
-                @click="shareProfile"
+                @click="$emit('shareContact')"
                 class="b3 w-full rounded-lg bg-white px-4 py-2 text-black hover:bg-blue-600"
               >
                 Share contact
