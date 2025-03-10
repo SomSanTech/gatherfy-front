@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const emit = defineEmits(['shareContact']);
-const isTicketPage = ref(route.fullPath.includes('tickets'));
+const isTicketPage = ref<boolean>(route.fullPath.includes('tickets'));
 const contacts = [
   { id: 1, name: 'Alice Smith', phone: '+1 987 654 321' },
   { id: 2, name: 'Bob Johnson', phone: '+1 555 666 777' },
@@ -25,12 +25,11 @@ const userProfile = useCookie('profileData', { default: () => ({}) });
 
 <template>
   <div
-    class="flex w-fit flex-col gap-5"
+    class="flex h-[90vh] w-fit flex-col gap-5"
     :class="isTicketPage ? 'shrink-0' : ''"
   >
     <div
       v-if="!isTicketPage"
-      :class="isShareContact ? 'w-screen max-w-6xl flex-row' : 'flex-col'"
       class="flex w-full gap-5 rounded-xl border border-zinc-500/10 bg-[#E9E9E9]/70 p-5 shadow-md shadow-zinc-300/30 duration-700"
     >
       <div

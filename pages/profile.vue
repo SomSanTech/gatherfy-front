@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import BtnComp from '~/components/BtnComp.vue';
 import Edit from '~/components/icons/Edit.vue';
+import Ticket from '~/components/icons/Ticket.vue';
 definePageMeta({
   layout: 'profile',
 });
@@ -26,15 +28,17 @@ interface UserProfile {
   users_birthday: string; // << เพิ่มตรงนี้
 }
 
+type SocialLink = {
+  socialPlatform: string;
+  socialLink: string;
+};
+
 const checked = ref(false);
 const selectedGender = ref<string>('');
-
 const userProfile = useCookie<UserProfile>('profileData');
-
 const selectedDay = ref<number | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<string | null>(null);
-
 const userProfileEdited = ref<ProfileEdit>({
   firstname: '',
   lastname: '',
@@ -45,56 +49,6 @@ const userProfileEdited = ref<ProfileEdit>({
   image: '',
   birthday: '',
 });
-
-watch(
-  userProfile,
-  (newProfile) => {
-    if (newProfile && Object.keys(newProfile).length) {
-      userProfileEdited.value = {
-        firstname: newProfile.users_firstname,
-        lastname: newProfile.users_lastname,
-        username: newProfile.username,
-        gender: newProfile.users_gender,
-        email: newProfile.users_email,
-        phone: newProfile.users_phone,
-        image: newProfile.users_image,
-        birthday: newProfile.users_birthday,
-      };
-      if (newProfile.users_birthday) {
-        const [year, month, day] = newProfile.users_birthday
-          .split('T')[0]
-          .split('-');
-
-        selectedDay.value = parseInt(day);
-        console.log('day', selectedDay.value);
-
-        selectedMonth.value = parseInt(month);
-        selectedYear.value = year;
-      }
-      selectedGender.value = newProfile.users_gender;
-    }
-  },
-  { immediate: true }
-);
-
-// const socialLinks = ref({
-//   instagram: 'https://www.instagram.com/johndoe',
-//   facebook: 'https://www.facebook.com/johndoe',
-//   linkedin: 'https://www.linkedin.com/in/johndoe',
-//   twitter: 'https://www.twitter.com/johndoe',
-//   x: 'https://www.x.com/johndoe',
-// });
-const isShareContact = ref<boolean>(false);
-const shareProfile = () => {
-  isShareContact.value = !isShareContact.value;
-  // const shareData = {
-  //   title: `${userName.value}'s Profile`,
-  //   text: `Contact ${userName.value} for any inquiries!`,
-  //   url: window.location.href,
-  // };
-  // navigator.share && navigator.share(shareData);
-};
-
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   'January',
@@ -114,9 +68,28 @@ const years = Array.from(
   { length: 50 },
   (_, i) => new Date().getFullYear() - i
 );
-
 const genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
-
+const config = useRuntimeConfig();
+const accessToken = useCookie<string>('accessToken');
+const fileToUpload = ref();
+const previewImage = ref('');
+const uploadFileName = ref();
+const fileInput = ref<HTMLInputElement>();
+const isShowCompleteModal = ref<boolean>(false);
+const currentPassword = ref('');
+const newPassword = ref('');
+const socialLinksData = ref();
+const socialLinkSet = ref();
+const isShowConfirmSave = ref<boolean>(false);
+const errors = ref({
+  firstname: '',
+  lastname: '',
+  username: '',
+  email: '',
+  phone: '',
+  birthday: '',
+  gender: '',
+});
 const formattedBirthday = computed(() => {
   if (selectedDay.value && selectedMonth.value && selectedYear.value) {
     const day = String(selectedDay.value).padStart(2, '0');
@@ -128,18 +101,11 @@ const formattedBirthday = computed(() => {
     return 'Please select a valid date';
   }
 });
+const isFormValid = computed(() => {
+  return Object.values(errors.value).every((error) => error === '');
+});
 
-const config = useRuntimeConfig();
-
-const accessToken = useCookie<string>('accessToken');
-
-const fileToUpload = ref();
-const previewImage = ref('');
-const uploadFileName = ref();
-
-function handelFileUpload(file: any) {
-  console.log('file', file);
-
+const handelFileUpload = (file: any) => {
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
@@ -147,97 +113,64 @@ function handelFileUpload(file: any) {
     uploadFileName.value = file.name;
     fileToUpload.value = file;
   }
-}
-const fileInput = ref<HTMLInputElement>();
+};
 
-function triggerFileInput() {
+const triggerFileInput = () => {
   fileInput.value?.click();
-}
+};
+
 const editProfile = async () => {
   userProfileEdited.value.birthday = formattedBirthday.value;
   userProfileEdited.value.gender = selectedGender.value;
-  // const fileName = userProfileEdited.value.image.replace(
-  //   `${config.public.minioUrl}/profiles/`,
-  //   ''
-  // );
-  // userProfileEdited.value.image = fileName;
-  const currentFileName = userProfile.value.users_image.replace(
-    `${config.public.minioUrl}/profiles/`,
-    ''
-  );
-
-  console.log('currentFileName', currentFileName);
-  console.log('uploadFileName', uploadFileName.value);
-
-  if (uploadFileName.value) {
-    await useFetchWithAuth(
-      `v1/files/delete/${currentFileName}?bucket=profiles`,
-      'DELETE',
-      accessToken.value
-    );
-    userProfileEdited.value.image = uploadFileName.value;
-    await useFetchUpload(
-      `v1/files/upload`,
-      fileToUpload.value,
-      'profiles',
-      accessToken.value
-    );
-  } else {
-    userProfileEdited.value.image = currentFileName;
-  }
-  console.log('userProfileEdited: ', userProfileEdited.value);
-
-  const response = await useFetchWithAuth(
-    `v1/profile`,
-    'PUT',
-    accessToken.value,
-    userProfileEdited.value
-  );
-
-  if (response.status === 200) {
-    const userProfileData = await useFetchWithAuth(
-      'v1/profile',
-      'GET',
-      accessToken.value
+  validateForm();
+  if (isFormValid.value) {
+    const currentFileName = userProfile.value.users_image.replace(
+      `${config.public.minioUrl}/profiles/`,
+      ''
     );
 
-    if ('data' in userProfileData) {
-      userProfile.value = userProfileData.data;
+    if (uploadFileName.value) {
+      await useFetchWithAuth(
+        `v1/files/delete/${currentFileName}?bucket=profiles`,
+        'DELETE',
+        accessToken.value
+      );
+      userProfileEdited.value.image = uploadFileName.value;
+      await useFetchUpload(
+        `v1/files/upload`,
+        fileToUpload.value,
+        'profiles',
+        accessToken.value
+      );
+    } else {
+      userProfileEdited.value.image = currentFileName;
     }
+    console.log('userProfileEdited: ', userProfileEdited.value);
+
+    const response = await useFetchWithAuth(
+      `v1/profile`,
+      'PUT',
+      accessToken.value,
+      userProfileEdited.value
+    );
+
+    if (response.status === 200) {
+      const userProfileData = await useFetchWithAuth(
+        'v1/profile',
+        'GET',
+        accessToken.value
+      );
+
+      if ('data' in userProfileData) {
+        userProfile.value = userProfileData.data;
+      }
+      isShowConfirmSave.value = !isShowConfirmSave.value;
+      isShowCompleteModal.value = !isShowCompleteModal.value;
+    }
+  } else {
+    alert('wrong');
   }
 };
-
-const socialLinks = ref([
-  { socialPlatform: '', socialLink: '' },
-  { socialPlatform: '', socialLink: '' },
-  { socialPlatform: '', socialLink: '' },
-  { socialPlatform: '', socialLink: '' },
-]);
-
-const socialUrl = ref('');
-const socialType = computed(() => {
-  if (!socialUrl.value) return '';
-
-  const patterns = {
-    Facebook: /facebook\.com/i,
-    Instagram: /instagram\.com/i,
-    X: /x\.com/i,
-    LinkIn: /linkedin\.com/i,
-    tiktok: /tiktok\.com/i,
-    youtube: /youtube\.com/i,
-  };
-
-  for (const [platform, pattern] of Object.entries(patterns)) {
-    if (pattern.test(socialUrl.value)) {
-      return platform;
-    }
-  }
-
-  return 'Website'; // ถ้าไม่ตรงกับ Social ไหนเลย
-});
-
-const currentPassword = ref('');
-const newPassword = ref('');
 
 const changePassword = async () => {
   const response = await useFetchWithAuth(
@@ -273,15 +206,11 @@ const handleAddSocial = async () => {
 
   console.log(response);
 };
-const socialLinksData = ref();
-const socialLinkSet = ref();
-type SocialLink = {
-  socialPlatform: string;
-  socialLink: string;
-};
+
 const trimTrailingSlash = (url: string) => {
-  return url.replace(/\/$/, ''); // ตัด `/` ตัวสุดท้ายออกถ้ามันอยู่ท้ายสุด
+  return url.replace(/\/$/, '');
 };
+
 const fillSocialLinks = (socialLinks: SocialLink[]) => {
   const MAX_LENGTH = 4;
 
@@ -310,19 +239,6 @@ const detectType = (url: string): string => {
   return 'Website';
 };
 
-watch(
-  socialLinkSet,
-  (newLinks) => {
-    newLinks.forEach((link: SocialLink, index: number) => {
-      // อัปเดตเฉพาะช่องที่มีการกรอกข้อมูล
-      if (link.socialLink && link.socialLink !== '') {
-        socialLinkSet.value[index].socialPlatform = detectType(link.socialLink);
-      }
-    });
-  },
-  { deep: true }
-);
-
 const fetchSocialLink = async () => {
   const response = await useFetchWithAuth(
     'v1/socials',
@@ -334,6 +250,68 @@ const fetchSocialLink = async () => {
     console.log(response.data);
   }
 };
+
+const validateField = (field: keyof typeof errors.value, value: string) => {
+  errors.value[field] = value ? '' : 'This field is required.';
+};
+
+const validateForm = () => {
+  validateField('firstname', userProfileEdited.value.firstname);
+  validateField('lastname', userProfileEdited.value.lastname);
+  validateField('username', userProfileEdited.value.username);
+  validateField('email', userProfileEdited.value.email);
+  validateField('phone', userProfileEdited.value.phone);
+  validateField(
+    'birthday',
+    selectedDay.value && selectedMonth.value && selectedYear.value
+      ? 'valid'
+      : ''
+  );
+  validateField('gender', selectedGender.value);
+};
+
+watch(
+  userProfile,
+  (newProfile) => {
+    if (newProfile && Object.keys(newProfile).length) {
+      userProfileEdited.value = {
+        firstname: newProfile.users_firstname,
+        lastname: newProfile.users_lastname,
+        username: newProfile.username,
+        gender: newProfile.users_gender,
+        email: newProfile.users_email,
+        phone: newProfile.users_phone,
+        image: newProfile.users_image,
+        birthday: newProfile.users_birthday,
+      };
+      if (newProfile.users_birthday) {
+        const [year, month, day] = newProfile.users_birthday
+          .split('T')[0]
+          .split('-');
+
+        selectedDay.value = parseInt(day);
+        console.log('day', selectedDay.value);
+
+        selectedMonth.value = parseInt(month);
+        selectedYear.value = year;
+      }
+      selectedGender.value = newProfile.users_gender;
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  socialLinkSet,
+  (newLinks) => {
+    newLinks.forEach((link: SocialLink, index: number) => {
+      if (link.socialLink && link.socialLink !== '') {
+        socialLinkSet.value[index].socialPlatform = detectType(link.socialLink);
+      }
+    });
+  },
+  { deep: true }
+);
 
 onMounted(async () => {
   console.log('userProfile ', userProfile.value);
@@ -376,10 +354,19 @@ onMounted(async () => {
 <template>
   <!-- <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9"> -->
 
-  <div
-    class="w-full duration-300"
-    :class="isShareContact ? 'opacity-0' : 'opacity-100'"
-  >
+  <div class="relative w-full duration-300">
+    <ConfirmModal
+      title="Update profile?"
+      subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
+      :isShowConfirmModal="isShowConfirmSave"
+      @confirmAction="editProfile"
+      @cancleAction="isShowConfirmSave = !isShowConfirmSave"
+    />
+    <CompleteModal
+      title="Already Edit your profile"
+      :isShowCompleteModal="isShowCompleteModal"
+      @confirmAction="isShowCompleteModal = !isShowCompleteModal"
+    />
     <!-- <p class="t3">My Profile</p> -->
     <div class="flex flex-col gap-5">
       <div
@@ -413,6 +400,7 @@ onMounted(async () => {
           @change="handelFileUpload($event)"
         />
         <div class="flex w-full flex-col gap-2">
+          <!-- Firstname -->
           <div>
             <p class="b2 font pb-1 font-semibold">Firstname</p>
             <input
@@ -420,8 +408,14 @@ onMounted(async () => {
               placeholder="Firstname"
               v-model="userProfileEdited.firstname"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              @blur="validateField('firstname', userProfileEdited.firstname)"
             />
+            <p v-if="errors.firstname" class="mt-1 text-sm text-red-500">
+              {{ errors.firstname }}
+            </p>
           </div>
+
+          <!-- Lastname -->
           <div>
             <p class="b2 font pb-1 font-semibold">Lastname</p>
             <input
@@ -429,8 +423,14 @@ onMounted(async () => {
               placeholder="Lastname"
               v-model="userProfileEdited.lastname"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              @blur="validateField('lastname', userProfileEdited.lastname)"
             />
+            <p v-if="errors.lastname" class="mt-1 text-sm text-red-500">
+              {{ errors.lastname }}
+            </p>
           </div>
+
+          <!-- Username -->
           <div>
             <p class="b2 font pb-1 font-semibold">Username</p>
             <input
@@ -438,18 +438,29 @@ onMounted(async () => {
               placeholder="Username"
               v-model="userProfileEdited.username"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              @blur="validateField('username', userProfileEdited.username)"
             />
+            <p v-if="errors.username" class="mt-1 text-sm text-red-500">
+              {{ errors.username }}
+            </p>
           </div>
+
+          <!-- Email -->
           <div>
             <p class="b2 font pb-1 font-semibold">Email</p>
             <input
-              type="text"
+              type="email"
               placeholder="Email"
               v-model="userProfileEdited.email"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              @blur="validateField('email', userProfileEdited.email)"
             />
+            <p v-if="errors.email" class="mt-1 text-sm text-red-500">
+              {{ errors.email }}
+            </p>
           </div>
 
+          <!-- Phone -->
           <div>
             <p class="b2 font pb-1 font-semibold">Phone</p>
             <input
@@ -457,12 +468,17 @@ onMounted(async () => {
               placeholder="Phone"
               v-model="userProfileEdited.phone"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              @blur="validateField('phone', userProfileEdited.phone)"
             />
+            <p v-if="errors.phone" class="mt-1 text-sm text-red-500">
+              {{ errors.phone }}
+            </p>
           </div>
+
+          <!-- Birthday -->
           <div>
             <p class="b2 font pb-1 font-semibold">Birthday</p>
             <div class="flex gap-4">
-              <!-- Dropdown สำหรับวัน -->
               <select
                 v-model="selectedDay"
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
@@ -472,8 +488,6 @@ onMounted(async () => {
                   {{ day }}
                 </option>
               </select>
-
-              <!-- Dropdown สำหรับเดือน -->
               <select
                 v-model="selectedMonth"
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
@@ -487,8 +501,6 @@ onMounted(async () => {
                   {{ month }}
                 </option>
               </select>
-
-              <!-- Dropdown สำหรับปี -->
               <select
                 v-model="selectedYear"
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
@@ -499,11 +511,12 @@ onMounted(async () => {
                 </option>
               </select>
             </div>
-            <!-- {{ userProfileEdited.birthday }} -->
-            <!-- <p class="mt-4 text-gray-600">
-              Result: <span class="font-mono">{{ formattedBirthday }}</span>
-            </p> -->
+            <p v-if="errors.birthday" class="mt-1 text-sm text-red-500">
+              Please select a valid birthday.
+            </p>
           </div>
+
+          <!-- Gender -->
           <div>
             <p class="b2 font pb-1 font-semibold">Gender</p>
             <select
@@ -515,25 +528,19 @@ onMounted(async () => {
                 {{ gender }}
               </option>
             </select>
-
-            <!-- <p class="mt-4 text-gray-600">
-              Gender Result:
-              <span class="font-mono">{{ selectedGender }}</span>
-            </p> -->
+            <p v-if="errors.gender" class="mt-1 text-sm text-red-500">
+              {{ errors.gender }}
+            </p>
           </div>
+
+          <!-- Save Button -->
           <div class="flex gap-2 self-end">
-            <button
-              class="b2 mt-10 w-fit self-end rounded-md border border-black/90 px-5 py-1 text-black"
-              @click="editProfile"
-            >
-              cancle
-            </button>
-            <button
-              class="b2 mt-10 w-fit self-end rounded-md bg-black/90 px-5 py-1 text-light-grey"
-              @click="editProfile"
-            >
-              save
-            </button>
+            <BtnComp
+              text="Save"
+              color="black"
+              class="mt-8 h-fit"
+              @click="isShowConfirmSave = !isShowConfirmSave"
+            />
           </div>
         </div>
       </div>
@@ -581,58 +588,64 @@ onMounted(async () => {
                 class="w-full rounded-lg border p-2"
               />
             </div>
-            <button
+            <BtnComp
               @click="handleAddSocial"
-              class="w-fit self-end rounded-md bg-dark-grey px-3 py-1 text-light-grey"
-            >
-              Save
-            </button>
+              text="Save"
+              color="black"
+              class="mt-3 w-fit self-end"
+            />
           </div>
         </div>
         <div
-          class="g-[#E9E9E9]/40 flex w-full flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+          class="g-[#E9E9E9]/40 flex w-full flex-col justify-between gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
-          <p class="b2 font-semibold">Change password</p>
-          <div class="flex flex-col gap-2">
-            <input
-              type="password"
-              placeholder="current password"
-              v-model="currentPassword"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <input
-              type="password"
-              placeholder="new password"
-              v-model="newPassword"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <button
-              @click="changePassword"
-              class="w-fit self-end rounded-md bg-dark-grey px-3 py-1 text-light-grey"
-            >
-              Save
-            </button>
-            {{ currentPassword }}
-            {{ newPassword }}
+          <div>
+            <p class="b1 pb-5 font-semibold">Change password</p>
+            <div class="flex flex-col gap-2">
+              <input
+                type="password"
+                placeholder="current password"
+                v-model="currentPassword"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <input
+                type="password"
+                placeholder="new password"
+                v-model="newPassword"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+            </div>
           </div>
+          <BtnComp
+            @click="changePassword"
+            text="Save"
+            color="black"
+            class="mt-3 w-fit self-end"
+          />
         </div>
       </div>
       <div
         class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
       >
         <div>
-          <p class="b2 font pb-1 font-semibold">Noti setting ja</p>
-          <div class="flex items-center gap-1">
-            <input
-              type="checkbox"
-              placeholder="Password"
-              v-model="userProfileEdited.password"
-              class="b2 rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <p class="b3">Everything</p>
+          <p class="b1 font pb-5 font-semibold">Custom Notification</p>
+          <div class="flex flex-col gap-2">
+            <div
+              v-for="n in 7"
+              class="b3 flex items-center justify-between rounded-md border p-4"
+            >
+              <div class="flex items-center gap-3">
+                <Ticket class="text-2xl" />
+                <div>
+                  <p class="b2 font-semibold">All Event</p>
+                  <p>
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                  </p>
+                </div>
+              </div>
+              <UToggle color="gray" v-model="checked" class="just flex" />
+            </div>
           </div>
-          <!-- Rounded switch -->
-          <UToggle color="gray" v-model="checked" />
         </div>
       </div>
     </div>

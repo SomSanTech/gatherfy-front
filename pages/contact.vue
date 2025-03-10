@@ -1,11 +1,26 @@
 <script setup lang="ts">
+import { BrowserQRCodeReader } from '@zxing/browser';
 import Phone from '~/components/icons/Phone.vue';
 import Gmail from '~/components/icons/Gmail.vue';
-import { BrowserQRCodeReader } from '@zxing/browser';
 import QrcodeVue from 'qrcode.vue';
+
+let qrCodeReader: BrowserQRCodeReader;
 const qrValues = ref<string>('');
 const accessToken = useCookie('accessToken');
 const isShowQR = ref<boolean>(false);
+const video = ref<HTMLVideoElement | null>(null);
+const contactData = ref();
+const isClickShareContact = ref<boolean>(false);
+const scannedValue = ref<string | null>(null);
+const config = useRuntimeConfig();
+const contactDeletedId = ref<number>(0);
+const isShowConfirm = ref<boolean>(false);
+
+const handleClickDeleteContact = (contactId: number) => {
+  isShowConfirm.value = !isShowConfirm.value;
+  contactDeletedId.value = contactId;
+};
+
 const generateQRCode = async () => {
   const token = await useFetchWithAuth(
     `v1/shareContact`,
@@ -13,87 +28,49 @@ const generateQRCode = async () => {
     accessToken.value
   );
   if (token.status === 200) {
-    qrValues.value = await token.data;
-    console.log('qrValues.value', qrValues.value);
-    isShowQR.value = !isShowQR.value;
+    if ('data' in token) {
+      qrValues.value = await token.data;
+      console.log('qrValues.value', qrValues.value);
+      isShowQR.value = !isShowQR.value;
+    }
   } else {
     alert('wrong!!!');
   }
 };
 
-const saveContact = () => {};
-
-// function saveContact(contact) {
-//   if (contact) {
-//     alert(`Saving contact: ${contact.name}`);
-//   } else {
-//     alert('Saving your contact...');
-//   }
-// }
-
-const userProfile = useCookie('profileData', { default: () => ({}) });
-const isExploreContact = ref([]);
-
-// function toggleExploreContact(index) {
-//   if (isExploreContact.value.includes(index)) {
-//     isExploreContact.value = isExploreContact.value.filter((i) => i !== index);
-//   } else {
-//     isExploreContact.value.push(index);
-//   }
-// }
-// const video = ref<HTMLVideoElement | null>(null);
-// const video2 = ref<HTMLVideoElement | null>(null);
-const isLoading = ref(false);
-const apiResponse = ref<string | null>(null);
-let qrCodeReader: BrowserQRCodeReader;
-// onMounted(async () => {
-//   qrCodeReader = new BrowserQRCodeReader();
-//   qrCodeReader.decodeFromVideoDevice(
-//     null,
-//     video.value,
-//     async (result, error) => {
-//       if (result) {
-//       }
-//     }
-//   );
-// });
-
-const video = ref<HTMLVideoElement | null>(null);
-const video2 = ref<HTMLVideoElement | null>(null);
-
-const contactData = ref();
 const getContact = async () => {
   const response = await useFetchWithAuth(
     'v1/contacts',
     'GET',
     accessToken.value
   );
-  console.log(response.data);
-  contactData.value = response.data;
+  if ('data' in response) {
+    contactData.value = response.data;
+  }
 };
-const isClickShareContact = ref<boolean>(false);
+
 const handleShareContact = () => {
   isClickShareContact.value = !isClickShareContact.value;
 };
-const isShowMyQRCode = ref<boolean>(false);
-const scannedValue = ref<string | null>(null);
-const config = useRuntimeConfig();
 
-const deleteContact = async (contactId: number) => {
-  console.log(contactId);
+const deleteContact = async () => {
+  if (contactDeletedId.value) {
+    console.log(contactDeletedId.value);
 
-  const response = await useFetchWithAuth(
-    `v1/contact/${contactId}`,
-    'DELETE',
-    accessToken.value
-  );
-  if (response.status === 200) {
-    alert('delete');
-    await getContact();
-  } else {
-    alert('smth broke');
+    const response = await useFetchWithAuth(
+      `v1/contact/${contactDeletedId.value}`,
+      'DELETE',
+      accessToken.value
+    );
+    if (response.status === 200) {
+      alert('delete');
+      await getContact();
+    } else {
+      alert('smth broke');
+    }
   }
 };
+
 const checkInFetch = async (
   url: string,
   method: string,
@@ -122,6 +99,7 @@ const checkInFetch = async (
 
   return { status, data };
 };
+
 onMounted(async () => {
   await getContact();
   qrCodeReader = new BrowserQRCodeReader();
@@ -129,34 +107,30 @@ onMounted(async () => {
   if (video.value) {
     console.log('is video');
 
-    qrCodeReader.decodeFromVideoDevice(
-      null, // ใช้กล้องตัวแรกที่พบ
-      video.value,
-      (result, error) => {
-        if (result) {
-          scannedValue.value = result.getText();
-          console.log('scannedValue:', scannedValue.value);
+    qrCodeReader.decodeFromVideoDevice(null, video.value, (result, error) => {
+      if (result) {
+        scannedValue.value = result.getText();
+        console.log('scannedValue:', scannedValue.value);
 
-          const response = checkInFetch(
-            'v1/saveContact',
-            'POST',
-            accessToken.value,
-            {
-              qrToken: scannedValue.value,
-            }
-          ).then((response) => {
-            if (response.status === 401) {
-              alert('QRCODE time out');
-            } else {
-              alert('checked in');
-            }
-          });
-        }
-        if (error) {
-          console.error('QR Code scan error:', error);
-        }
+        const response = checkInFetch(
+          'v1/saveContact',
+          'POST',
+          accessToken.value,
+          {
+            qrToken: scannedValue.value,
+          }
+        ).then((response) => {
+          if (response.status === 401) {
+            alert('QRCODE time out');
+          } else {
+            alert('checked in');
+          }
+        });
       }
-    );
+      // if (error) {
+      //   console.error('QR Code scan error:', error);
+      // }
+    });
   } else {
     console.error('Video element is not available.');
   }
@@ -164,7 +138,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9">
+  <div class="relative mx-auto my-28 flex w-screen max-w-6xl gap-9">
+    <ConfirmModal
+      title="Delete this contact?"
+      subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
+      :isShowConfirmModal="isShowConfirm"
+      @confirmAction="deleteContact()"
+      @cancleAction="isShowConfirm = !isShowConfirm"
+    />
     <ProfileSidebar @shareContact="handleShareContact" />
     <div class="w-full">
       <div class="flex w-full flex-wrap gap-4">
@@ -174,7 +155,7 @@ onMounted(async () => {
           class="b2 w- relative flex h-fit flex-col gap-3 rounded-xl border border-zinc-500/10 p-5 shadow-md shadow-zinc-300/30"
         >
           <div class="absolute right-3 top-3">
-            <button @click="deleteContact(contact?.contactId)">
+            <button @click="handleClickDeleteContact(contact?.contactId)">
               <Trash />
             </button>
           </div>
@@ -293,8 +274,8 @@ onMounted(async () => {
           </button>
 
           <div
-            v-if="isShowQR"
-            class="rounded-g absolute left-1/2 top-8 z-50 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-xl bg-white p-2 pt-20 transition-transform duration-300 ease-in-out"
+            :class="isShowQR ? 'translate-y-12' : 'translate-y-[400px]'"
+            class="rounded-g absolute left-1/2 z-50 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-2xl bg-white p-2 pt-20 transition-transform duration-700 ease-in-out"
           >
             <qrcode-vue :size="200" :value="qrValues" />
             <p class="b3 max-w-[200px] pt-2 text-center text-black/70">

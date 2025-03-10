@@ -10,7 +10,7 @@ const btnColor = computed(() => {
   } else if (props.color === 'outline-red') {
     return ' border-2 border-burgundy hover:bg-burgundy text-burgundy hover:text-light-grey';
   } else if (props.color === 'black') {
-    return 'bg-black-1 hover:bg-dark-grey text-light-grey';
+    return 'bg-black/90 hover:bg-dark-grey text-light-grey';
   } else if (props.color === 'green') {
     return 'bg-[#16C098]/25 text-[#008767]';
   } else if (props.color === 'status-red') {

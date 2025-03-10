@@ -7,8 +7,6 @@
 </template>
 
 <script setup>
-import SideBar from '~/components/backoffice/SideBar.vue';
-
 const route = useRoute();
 const error = useError();
 
