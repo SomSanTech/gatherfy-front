@@ -79,6 +79,21 @@ const isShowMyQRCode = ref<boolean>(false);
 const scannedValue = ref<string | null>(null);
 const config = useRuntimeConfig();
 
+const deleteContact = async (contactId: number) => {
+  console.log(contactId);
+
+  const response = await useFetchWithAuth(
+    `v1/contact/${contactId}`,
+    'DELETE',
+    accessToken.value
+  );
+  if (response.status === 200) {
+    alert('delete');
+    await getContact();
+  } else {
+    alert('smth broke');
+  }
+};
 const checkInFetch = async (
   url: string,
   method: string,
@@ -156,8 +171,13 @@ onMounted(async () => {
         <div
           v-for="contact in contactData"
           :key="contact?.contactId"
-          class="b2 w- flex h-fit flex-col gap-3 rounded-xl border border-zinc-500/10 p-5 shadow-md shadow-zinc-300/30"
+          class="b2 w- relative flex h-fit flex-col gap-3 rounded-xl border border-zinc-500/10 p-5 shadow-md shadow-zinc-300/30"
         >
+          <div class="absolute right-3 top-3">
+            <button @click="deleteContact(contact?.contactId)">
+              <Trash />
+            </button>
+          </div>
           <div class="flex flex-col items-start gap-4">
             <div class="h-14 w-14 rounded-full bg-zinc-200">
               <img
