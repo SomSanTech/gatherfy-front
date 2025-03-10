@@ -77,6 +77,8 @@ const handleShareContact = () => {
 };
 const isShowMyQRCode = ref<boolean>(false);
 const scannedValue = ref<string | null>(null);
+const config = useRuntimeConfig();
+
 const checkInFetch = async (
   url: string,
   method: string,
@@ -108,36 +110,41 @@ const checkInFetch = async (
 onMounted(async () => {
   await getContact();
   qrCodeReader = new BrowserQRCodeReader();
-  qrCodeReader.decodeFromVideoDevice(
-    null,
-    video.value,
-    async (result, error) => {
-      if (result) {
-        scannedValue.value = result.getText();
-        if (scannedValue.value) {
-          // const decodedData = decodeToken(scannedValue.value);
-          // if (decodedData.eventId === selectedEventId.value) {
-          const response = await checkInFetch(
-            `v1/saveContact`,
-            'PUT',
+
+  if (video.value) {
+    console.log('is video');
+
+    qrCodeReader.decodeFromVideoDevice(
+      null, // ใช้กล้องตัวแรกที่พบ
+      video.value,
+      (result, error) => {
+        if (result) {
+          scannedValue.value = result.getText();
+          console.log('scannedValue:', scannedValue.value);
+
+          const response = checkInFetch(
+            'v1/saveContact',
+            'POST',
             accessToken.value,
             {
               qrToken: scannedValue.value,
             }
-          );
-
-          if (response.status === 401) {
-            alert('QRCODE time out');
-          } else {
-            alert('checked in');
-          }
-          // }
-        } else {
-          alert('cant read qr');
+          ).then((response) => {
+            if (response.status === 401) {
+              alert('QRCODE time out');
+            } else {
+              alert('checked in');
+            }
+          });
+        }
+        if (error) {
+          console.error('QR Code scan error:', error);
         }
       }
-    }
-  );
+    );
+  } else {
+    console.error('Video element is not available.');
+  }
 });
 </script>
 
@@ -253,11 +260,11 @@ onMounted(async () => {
             ref="video"
             width="400"
             height="400"
-            class="absolute left-1/2 top-1/2 aspect-square h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 object-cover"
+            class="absolute left-1/2 top-1/2 z-50 aspect-square h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 object-cover"
           ></video>
-          <div
+          <!-- <div
             class="absolute left-0 top-0 z-50 h-[400px] w-[400px] border-[90px] border-black/20"
-          ></div>
+          ></div> -->
           <button
             @click="generateQRCode"
             class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-black/70 px-3 py-1 text-light-grey"
@@ -269,7 +276,7 @@ onMounted(async () => {
             v-if="isShowQR"
             class="rounded-g absolute left-1/2 top-8 z-50 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-xl bg-white p-2 pt-20 transition-transform duration-300 ease-in-out"
           >
-            <qrcode-vue size="200" :value="qrValues" />
+            <qrcode-vue :size="200" :value="qrValues" />
             <p class="b3 max-w-[200px] pt-2 text-center text-black/70">
               Show this QR code to who you want to shre contact
             </p>
@@ -283,11 +290,11 @@ onMounted(async () => {
         </div>
 
         <!-- QrScanner อยู่ตรงกลาง -->
-        <div
+        <!-- <div
           class="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
           <QrScanner class="h-[200px] w-[200px] fill-white" />
-        </div>
+        </div> -->
       </div>
 
       <div
