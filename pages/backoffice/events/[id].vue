@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRuntimeConfig } from '#app';
+
 import Arrow from '~/components/icons/Arrow.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
@@ -8,6 +10,9 @@ import type { Tag } from '~/models/tag';
 definePageMeta({
   layout: 'backoffice',
 });
+
+const config = useRuntimeConfig();
+
 const originalEvent = ref<EventDto | null>(null);
 const originalDateInput = ref();
 const error = useError();
@@ -228,7 +233,7 @@ const fetchEventEdit = async () => {
       dataDTO.tags = formattedTags;
 
       const currentFileName = event.value.image.replace(
-        'https://capstone24.sit.kmutt.ac.th/us1/minio/thumbnails/',
+        `${config.public.minioUrl}/thumbnails/`,
         ''
       );
 

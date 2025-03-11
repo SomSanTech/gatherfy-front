@@ -95,7 +95,7 @@ const profileData = useCookie<UserProfile>('profileData');
             v-if="isOpenProfilePopup"
             v-on-click-outside="handleOpenProfilePopup"
             @click="isOpenProfilePopup = false"
-            class="b2 absolute right-0 top-12 flex w-40 flex-col items-start gap-1 rounded-xl bg-white p-2 shadow-lg"
+            class="b2 absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-xl bg-white p-2 shadow-lg"
           >
             <NuxtLink to="/profile" class="w-full">
               <button
@@ -115,7 +115,15 @@ const profileData = useCookie<UserProfile>('profileData');
                 <span>My Tickets</span>
               </button>
             </NuxtLink>
-
+            <NuxtLink to="/contact" class="w-full">
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <Contact class="h-5 w-5 text-gray-600" />
+                <span>My Contact</span>
+              </button>
+            </NuxtLink>
             <!-- Divider -->
             <div class="my-1 h-px w-full bg-gray-200"></div>
 

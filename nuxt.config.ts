@@ -1,6 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['nuxt-rating', 'nuxt-vue3-google-signin'],
+  modules: ['nuxt-rating', 'nuxt-vue3-google-signin', '@nuxt/ui'],
+  ui: {
+    global: true,
+  },
+  colorMode: {
+    preference: 'light',
+  },
   googleSignIn: {
     clientId:
       '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com',
@@ -32,6 +38,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       baseUrl: process.env.NUXT_PUBLIC_BASE_URL,
+      minioUrl: process.env.MINIO_URL,
     },
   },
   app: {
