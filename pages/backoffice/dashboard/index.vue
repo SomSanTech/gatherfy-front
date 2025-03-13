@@ -217,7 +217,43 @@ const options = {
     offsetX: -5,
   },
 };
+const donutChartRef = ref<HTMLCanvasElement | null>(null);
+const DATA_COUNT = 5;
+const NUMBER_CFG = { count: DATA_COUNT, min: 0, max: 100 };
 
+const data = {
+  labels: ['Other', 'Male', 'Female', 'Prefer not to say'],
+  datasets: [
+    {
+      label: 'Gender Count',
+      data: [2, 3, 3, 3],
+      backgroundColor: ['#cccccc', '#D71515', '#989898', '#f56042'],
+    },
+  ],
+};
+
+const initializeDonutChart = () => {
+  nextTick(() => {
+    if (donutChartRef.value) {
+      new Chart(donutChartRef.value, {
+        type: 'doughnut',
+        data: data,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Chart.js Doughnut Chart',
+            },
+          },
+        },
+      });
+    }
+  });
+};
 const initializeChart = () => {
   nextTick(() => {
     if (chartCanvasRef.value) {
@@ -352,6 +388,7 @@ onMounted(async () => {
     console.log(chartData.value);
     console.log(options.series);
     initializeChart();
+    initializeDonutChart();
   } finally {
     isLoading.value = false;
   }
@@ -360,6 +397,12 @@ onMounted(async () => {
 watch(chartCanvasRef, (newValue) => {
   if (newValue) {
     initializeChart();
+  }
+});
+
+watch(donutChartRef, (newValue) => {
+  if (newValue) {
+    initializeDonutChart();
   }
 });
 </script>
@@ -399,6 +442,7 @@ watch(chartCanvasRef, (newValue) => {
               Monthly Event View Counts (4 months)
             </p>
             {{ chartData }}
+            <canvas ref="donutChartRef" class=""></canvas>
             <canvas ref="chartCanvasRef" class=""></canvas>
             <client-only>
               <VueApexCharts

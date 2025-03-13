@@ -24,7 +24,7 @@
     "@vueuse/core": "^12.5.0",
     "@zxing/browser": "^0.1.5",
     "apexcharts": "^4.1.0",
-    "chart.js": "^4.4.6",
+    "chart.js": "^4.4.8",
     "click-outside-vue3": "^4.0.1",
     "d3": "^7.9.0",
     "jsonwebtoken": "^9.0.2",

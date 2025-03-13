@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
+import Chart from 'chart.js/auto';
+
 import Star from '~/components/icons/Star.vue';
 import Arrow from '~/components/icons/Arrow.vue';
 import Calendar from '~/components/icons/Calendar.vue';
@@ -44,6 +46,57 @@ const statusColor: any = {
   'Checked in': '#D71515',
   Unattended: '#cccccc',
 };
+
+const generateDonutChartData = (
+  registered: number,
+  goal: number,
+  colorRegistered: string,
+  colorGoal: string
+) => {
+  return {
+    labels: ['Registered', 'Goal'],
+    datasets: [
+      {
+        label: 'Registration Progress',
+        data: [registered, goal - registered], // จำนวนที่ลงทะเบียนแล้ว และจำนวนที่ยังขาด
+        backgroundColor: [colorRegistered, colorGoal], // สีสำหรับส่วนที่ลงทะเบียนแล้ว และส่วนที่ยังไม่ลงทะเบียน
+        borderWidth: 1, // กำหนดความหนาของเส้นขอบ
+      },
+    ],
+  };
+};
+
+const registered = 30; // จำนวนที่ลงทะเบียนแล้ว
+const goal = 200; // เป้าหมาย
+
+const colorRegistered = '#cccccc'; // สีของส่วนที่ลงทะเบียนแล้ว
+const colorGoal = '#D71515'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
+const donutChartRef = ref<HTMLCanvasElement | null>(null);
+
+const donutChartData = ref();
+console.log(donutChartData);
+const initializeDonutChart = () => {
+  nextTick(() => {
+    if (donutChartRef.value) {
+      new Chart(donutChartRef.value, {
+        type: 'doughnut',
+        data: donutChartData.value,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Chart.js Doughnut Chart',
+            },
+          },
+        },
+      });
+    }
+  });
+};
 function getAverage() {
   const total = feedbackData.value.reduce(
     (sum, curr) => sum + curr.feedbackRating,
@@ -77,7 +130,11 @@ const getLast7DaysData = (data: any) => {
   });
 };
 const token = useCookie('accessToken');
-
+watch(donutChartRef, (newValue) => {
+  if (newValue) {
+    initializeDonutChart();
+  }
+});
 const fetchViewsData = async () => {
   try {
     const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
@@ -178,6 +235,12 @@ onMounted(async () => {
     await fetchRegisData();
     await fetchViewsData();
     await fetchEventDetail();
+    donutChartData.value = generateDonutChartData(
+      registrationsData?.value.length,
+      eventDetail.value.registration_goal,
+      colorGoal,
+      colorRegistered
+    );
   } finally {
     isLoading.value = false;
   }
@@ -304,6 +367,8 @@ onMounted(async () => {
           <div
             class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] drop-shadow-md"
           >
+            <canvas ref="donutChartRef" class=""></canvas>
+
             <div class="relative flex w-full items-center justify-center">
               <div
                 class="aspect-square w-3/4 rounded-full drop-shadow-lg"
