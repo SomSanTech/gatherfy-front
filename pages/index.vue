@@ -501,16 +501,28 @@ watch(selectedEventTime, (newValue) => {
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
-        <div v-for="tag in tagsData" :key="tag.tag_id">
+        <div v-for="tag in tagsData" :key="tag.tag_id" class="group">
           <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
             <button
-              class="flex h-[40px] w-[110px] items-center gap-3 rounded-md bg-light-grey p-3 drop-shadow-md duration-200 hover:bg-grey lg:h-[60px] lg:w-[160px]"
+              class="group flex items-center gap-3 rounded-md bg-light-grey p-4 drop-shadow-md duration-200 hover:bg-grey"
             >
-              <div
+              <!-- <div
                 :style="{ backgroundColor: tag.tag_code }"
                 class="h-full w-[5px] rounded"
-              ></div>
-              <span class="b3 ml-2 font-semibold">{{ tag.tag_title }}</span>
+              ></div> -->
+              <Entertainment
+                v-if="tag.tag_title.includes('Entertainment')"
+                :class="`group-hover:stroke-[${tag.tag_code}] group-hover:text-[${tag.tag_code}]`"
+              />
+              <Music v-if="tag.tag_title === 'Music'" />
+              <Technology v-if="tag.tag_title === 'Technology'" />
+              <Sports v-if="tag.tag_title === 'Sports'" />
+              <Art
+                v-if="tag.tag_title === 'Art'"
+                :class="`group-hover:stroke-[${tag.tag_code}] group-hover:fill -[${tag.tag_code}]`"
+              />
+              <Workshop v-if="tag.tag_title === 'Workshop'" />
+              <span class="b3 font-semibold">{{ tag.tag_title }}</span>
             </button>
           </NuxtLink>
         </div>

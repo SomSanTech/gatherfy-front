@@ -105,6 +105,58 @@ const isFormValid = computed(() => {
   return Object.values(errors.value).every((error) => error === '');
 });
 
+const notiSetting = ref({
+  newEvents: false,
+  remindersDay: false,
+  remindersHour: false,
+  updatedEvents: false,
+});
+
+const notiSettingMsg = ref({
+  newEvents: {
+    title: 'Notify me when a new event is created',
+    desc: 'Get notified when a new event is created under the tags you follow.',
+  },
+  remindersDay: {
+    title: 'Reminder one day before the event',
+    desc: 'Receive a reminder one day before the event starts to help you prepare.',
+  },
+  remindersHour: {
+    title: 'Reminder one hour before the event',
+    desc: 'Get a last-minute reminder one hour before the event begins.',
+  },
+  updatedEvents: {
+    title: 'Notify me when an event is updated',
+    desc: 'Stay informed when an event you follow gets updated or modified.',
+  },
+});
+
+const handleNotiSetting = async () => {
+  console.log('notiSetting', notiSetting.value);
+
+  const response = await useFetchWithAuth(
+    `v1/profile`,
+    'PUT',
+    accessToken.value,
+    notiSetting.value
+  );
+
+  if (response.status === 200) {
+    alert('yesss');
+    const userProfileData = await useFetchWithAuth(
+      'v1/profile',
+      'GET',
+      accessToken.value
+    );
+
+    if ('data' in userProfileData) {
+      userProfile.value = userProfileData.data;
+    }
+  } else {
+    alert('wrong weii');
+  }
+};
+
 const handelFileUpload = (file: any) => {
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
@@ -347,6 +399,11 @@ onMounted(async () => {
       socialLinkSet.value = fillSocialLinks(socialLinksData.value);
       console.log('socialLinkSet', socialLinkSet.value);
     }
+
+    notiSetting.value.newEvents = userProfile.value.email_new_events;
+    notiSetting.value.remindersDay = userProfile.value.email_reminders_day;
+    notiSetting.value.remindersHour = userProfile.value.email_reminders_hour;
+    notiSetting.value.updatedEvents = userProfile.value.email_updated_events;
   }
 });
 </script>
@@ -625,27 +682,46 @@ onMounted(async () => {
         </div>
       </div>
       <div
-        class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+        class="g-[#E9E9E9]/40 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
       >
-        <div>
+        <div class="flex flex-col gap-5">
           <p class="b1 font pb-5 font-semibold">Custom Notification</p>
           <div class="flex flex-col gap-2">
             <div
-              v-for="n in 7"
+              v-for="noti in Object.keys(notiSetting)"
               class="b3 flex items-center justify-between rounded-md border p-4"
             >
               <div class="flex items-center gap-3">
                 <Ticket class="text-2xl" />
                 <div>
-                  <p class="b2 font-semibold">All Event</p>
+                  <p class="b2 font-semibold">
+                    {{ notiSettingMsg[noti]?.title }}
+                  </p>
                   <p>
-                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                    {{ notiSettingMsg[noti]?.desc }}
                   </p>
                 </div>
               </div>
-              <UToggle color="gray" v-model="checked" class="just flex" />
+              <label class="inline-flex cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  @change="console.log(notiSetting)"
+                  v-model="notiSetting[noti]"
+                  class="peer sr-only"
+                />
+
+                <div
+                  class="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-800"
+                ></div>
+              </label>
             </div>
           </div>
+          <BtnComp
+            @click="handleNotiSetting"
+            text="Save"
+            color="black"
+            class="mt-3 w-fit self-end"
+          />
         </div>
       </div>
     </div>

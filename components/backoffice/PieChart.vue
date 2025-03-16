@@ -28,6 +28,7 @@ const generateChartData = (
         label: 'Gender Distribution',
         data: Object.values(groupByGender),
         backgroundColor: Object.keys(groupByGender).map((key) => colors[key]),
+        borderRadius: 5,
       },
     ],
   };

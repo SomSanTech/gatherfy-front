@@ -60,7 +60,7 @@ const generateDonutChartData = (
         label: 'Registration Progress',
         data: [registered, goal - registered], // จำนวนที่ลงทะเบียนแล้ว และจำนวนที่ยังขาด
         backgroundColor: [colorRegistered, colorGoal], // สีสำหรับส่วนที่ลงทะเบียนแล้ว และส่วนที่ยังไม่ลงทะเบียน
-        borderWidth: 1, // กำหนดความหนาของเส้นขอบ
+        borderRadius: 5,
       },
     ],
   };

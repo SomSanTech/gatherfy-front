@@ -431,6 +431,43 @@ watchEffect(() => {
     fetchData();
   }
 });
+
+async function downloadReport() {
+  const response = await fetch(
+    `${config.public.baseUrl}/api/v1/report/${event.value.eventId}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to download report');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  // ตั้งชื่อไฟล์จาก header "Content-Disposition"
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = `${event.value.slug}-response.xlsx`;
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="(.+)"/);
+    if (match) {
+      filename = match[1];
+    }
+  }
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
 </script>
 
 <template>
@@ -448,15 +485,24 @@ watchEffect(() => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Event Detail</h1>
-          <NuxtLink
-            :to="{
-              name: `backoffice-feedback-id`,
-              params: { id: param },
-            }"
-            class="flex justify-end"
-          >
-            <BtnComp text="Manage Feedback" color="blue" />
-          </NuxtLink>
+          <div class="flex items-center justify-end gap-2">
+            <button
+              @click="downloadReport()"
+              class="b3 relative flex w-fit items-center gap-2 rounded-lg bg-[#16C098]/25 fill-[#008767] px-6 py-2 font-semibold text-[#008767] transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            >
+              <FileDownload class="h-5 w-5" />
+              Download Report
+            </button>
+            <NuxtLink
+              :to="{
+                name: `backoffice-feedback-id`,
+                params: { id: param },
+              }"
+              class="flex justify-end"
+            >
+              <BtnComp text="Manage Feedback" color="blue" />
+            </NuxtLink>
+          </div>
         </div>
         <div
           v-if="errorMsg"

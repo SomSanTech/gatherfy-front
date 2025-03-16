@@ -40,7 +40,7 @@ const profileData = useCookie<UserProfile>('profileData');
 </script>
 
 <template>
-  <div class="w-screen bg-white/20 py-4 backdrop-blur-sm lg:py-6">
+  <div class="z-50 w-screen bg-white/20 py-4 backdrop-blur-sm lg:py-6">
     <div
       class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
     >
@@ -172,3 +172,25 @@ const profileData = useCookie<UserProfile>('profileData');
     </div>
   </div>
 </template>
+<style scoped>
+.mask-gradient {
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0)
+  );
+  /* backdrop-filter: blur(20px); */
+  /* position: fixed; */
+  /* z-index: 1; */
+  /* top: 0;  */
+  /* width: 100%; */
+  /* height: 10%; */
+}
+</style>
