@@ -29,6 +29,7 @@ const generateChartData = (
         data: Object.values(groupByGender),
         backgroundColor: Object.keys(groupByGender).map((key) => colors[key]),
         borderRadius: 5,
+        hoverOffset: 20,
       },
     ],
   };

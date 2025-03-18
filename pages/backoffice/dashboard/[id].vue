@@ -139,6 +139,7 @@ const fetchViewsData = async () => {
   try {
     const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
     viewsData.value = fetchedData.data || [];
+    console.log('viewsData.value', viewsData.value);
 
     totalViewCount.value = viewsData.value[0].views.reduce(
       (sum: any, record: any) => sum + record.count,
@@ -222,6 +223,171 @@ const fetchEventDetail = async () => {
   );
   eventDetail.value = fetchedData.data || [];
 };
+function formatDate(date) {
+  return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+}
+
+function formatMonth(date) {
+  return date.toISOString().slice(0, 7); // 'YYYY-MM'
+}
+
+function getDateRange(period) {
+  const now = new Date();
+  let startDate = new Date(now);
+
+  if (period === '7 days') {
+    startDate.setDate(now.getDate() - 6);
+  } else if (period === '30 days') {
+    startDate.setDate(now.getDate() - 29);
+  } else if (period === '6 months') {
+    startDate.setMonth(now.getMonth() - 5); // 6 เดือนล่าสุดรวมเดือนปัจจุบัน
+    startDate.setDate(1); // เริ่มต้นที่วันที่ 1 ของเดือน
+  } else {
+    throw new Error('Invalid period');
+  }
+
+  const dates = [];
+  let currentDate = new Date(startDate);
+
+  if (period === '6 months') {
+    while (currentDate <= now) {
+      dates.push(formatMonth(currentDate)); // ดึงเฉพาะ 'YYYY-MM'
+      currentDate.setMonth(currentDate.getMonth() + 1); // เพิ่มทีละเดือน
+    }
+  } else {
+    while (currentDate <= now) {
+      dates.push(formatDate(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+
+  return dates;
+}
+
+function generateChartData(data, period = '7 days') {
+  const labels = getDateRange(period);
+  const dataMap = new Map();
+
+  if (period === '6 months') {
+    // สร้าง map สำหรับยอดรวมของแต่ละเดือน
+    data.forEach(({ date, count }) => {
+      const month = date.slice(0, 7); // 'YYYY-MM'
+      dataMap.set(month, (dataMap.get(month) || 0) + count);
+    });
+  } else {
+    // ใช้ map สำหรับรายวันปกติ
+    data.forEach(({ date, count }) => {
+      dataMap.set(date, count);
+    });
+  }
+
+  const datasetData = labels.map((label) => dataMap.get(label) || 0);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'My Dataset',
+        data: datasetData,
+        backgroundColor: 'red',
+        borderWidth: 1,
+        borderRadius: 5,
+        borderSkipped: false,
+      },
+    ],
+  };
+}
+const barChartRef = ref<HTMLCanvasElement | null>(null);
+const barData = ref();
+// const initializeBarChart = () => {
+//   nextTick(() => {
+//     if (barChartRef.value) {
+//       new Chart(barChartRef.value, {
+//         type: 'bar',
+//         data: barData.value,
+//         options: {
+//           responsive: true,
+//           plugins: {
+//             legend: {
+//               position: 'bottom',
+//               gap: 5,
+//             },
+//             title: {
+//               display: false,
+//               text: 'Chart.js Doughnut Chart',
+//             },
+//           },
+//         },
+//       });
+//     }
+//   });
+// };
+const initializeBarChart = () => {
+  nextTick(() => {
+    if (barChartRef.value) {
+      new Chart(barChartRef.value, {
+        type: 'bar',
+        data: barData.value,
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              grid: {
+                drawBorder: false,
+                drawOnChartArea: false,
+                display: false,
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                font: { size: 12, family: 'Poppins', weight: '' },
+                color: '#333',
+                align: 'center', // จัดให้อยู่ตรงกลาง
+                maxRotation: 90, // หมุน label เป็นแนวตั้ง
+                minRotation: 90, // บังคับให้เป็นแนวตั้ง
+              },
+            },
+            y: {
+              grid: {
+                drawBorder: false,
+                drawOnChartArea: false,
+                display: false,
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                display: false,
+              },
+            },
+          },
+          hover: {
+            mode: 'nearest',
+            intersect: true, // hover only when intersecting a bar
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            title: {
+              display: false,
+            },
+          },
+          layout: {
+            padding: { top: 10, bottom: 10 },
+          },
+        },
+      });
+    }
+  });
+};
+
+watch(barChartRef, (newValue) => {
+  if (newValue) {
+    initializeBarChart();
+  }
+});
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -241,10 +407,27 @@ onMounted(async () => {
       colorGoal,
       colorRegistered
     );
+
+    barData.value = generateChartData(viewsData.value[0]?.views, '6 months');
+    console.log('barData', barData.value);
+
+    initializeBarChart();
   } finally {
     isLoading.value = false;
   }
 });
+
+// 🛠 ตัวอย่างใช้งาน
+const rawData = [
+  { date: '2025-03-15', count: 3 },
+  { date: '2025-03-12', count: 14 },
+  { date: '2025-02-17', count: 2 },
+  { date: '2025-02-16', count: 1 },
+];
+
+console.log(generateChartData(rawData, '7 days'));
+console.log(generateChartData(rawData, '30 days'));
+console.log(generateChartData(rawData, '6 months'));
 </script>
 
 <template>
@@ -307,7 +490,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
+      <canvas ref="barChartRef" class=""></canvas>
       <div class="grid h-full grid-cols-10 gap-3">
         <div
           class="col-span-5 flex flex-col gap-5 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
