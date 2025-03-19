@@ -371,6 +371,7 @@ const fetchAllViewData = async () => {
         borderColor: `hsl(0, 50%, ${70 - index * 10}%)`,
         backgroundColor: `hsla(0, 50%, ${70 - index * 10}%, 0.2)`,
         fill: false,
+        tension: 0.4,
       });
     });
   }
@@ -441,17 +442,8 @@ watch(donutChartRef, (newValue) => {
             <p class="b1 pb-5 font-semibold">
               Monthly Event View Counts (4 months)
             </p>
-            {{ chartData }}
-            <canvas ref="donutChartRef" class=""></canvas>
+
             <canvas ref="chartCanvasRef" class=""></canvas>
-            <client-only>
-              <VueApexCharts
-                width="100%"
-                height="350"
-                :options="options"
-                :series="options.series"
-              />
-            </client-only>
           </div>
           <div
             class="view-by-gender col-span-4 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"

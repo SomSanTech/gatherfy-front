@@ -34,7 +34,6 @@ const last7DayData = ref();
 const maxForLast7Day = ref(0);
 const viewsData = ref();
 const totalViewCount = ref(0);
-const goals = 150;
 const colors = {
   Female: '#989898',
   Male: '#D71515',
@@ -58,23 +57,20 @@ const generateDonutChartData = (
     datasets: [
       {
         label: 'Registration Progress',
-        data: [registered, goal - registered], // จำนวนที่ลงทะเบียนแล้ว และจำนวนที่ยังขาด
-        backgroundColor: [colorRegistered, colorGoal], // สีสำหรับส่วนที่ลงทะเบียนแล้ว และส่วนที่ยังไม่ลงทะเบียน
+        data: [registered, goal - registered],
+        backgroundColor: [colorRegistered, colorGoal],
         borderRadius: 5,
+        hoverOffset: 10,
       },
     ],
   };
 };
-
-const registered = 30; // จำนวนที่ลงทะเบียนแล้ว
-const goal = 200; // เป้าหมาย
 
 const colorRegistered = '#cccccc'; // สีของส่วนที่ลงทะเบียนแล้ว
 const colorGoal = '#D71515'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
 const donutChartRef = ref<HTMLCanvasElement | null>(null);
 
 const donutChartData = ref();
-console.log(donutChartData);
 const initializeDonutChart = () => {
   nextTick(() => {
     if (donutChartRef.value) {
@@ -85,10 +81,11 @@ const initializeDonutChart = () => {
           responsive: true,
           plugins: {
             legend: {
-              position: 'top',
+              display: false,
+              position: 'bottom',
             },
             title: {
-              display: true,
+              display: false,
               text: 'Chart.js Doughnut Chart',
             },
           },
@@ -103,7 +100,6 @@ function getAverage() {
     0
   );
   const avg = total / feedbackData.value.length;
-  // nuxtRating.value = Math.round(avg * 10) / 10;
   averageRating.value =
     total === 0 ? 0 : (Math.round(avg * 10) / 10).toFixed(1);
 }
@@ -298,6 +294,7 @@ function generateChartData(data, period = '7 days') {
   };
 }
 const barChartRef = ref<HTMLCanvasElement | null>(null);
+const chartInstance = ref(null);
 const barData = ref();
 // const initializeBarChart = () => {
 //   nextTick(() => {
@@ -322,10 +319,76 @@ const barData = ref();
 //     }
 //   });
 // };
+// const initializeBarChart = () => {
+//   nextTick(() => {
+//     if (barChartRef.value) {
+//       new Chart(barChartRef.value, {
+//         type: 'bar',
+//         data: barData.value,
+//         options: {
+//           responsive: true,
+//           scales: {
+//             x: {
+//               grid: {
+//                 drawBorder: false,
+//                 drawOnChartArea: false,
+//                 display: false,
+//               },
+//               border: {
+//                 display: false,
+//               },
+//               ticks: {
+//                 font: { size: 12, family: 'Poppins', weight: '' },
+//                 color: '#333',
+//                 align: 'center', // จัดให้อยู่ตรงกลาง
+//                 maxRotation: 90, // หมุน label เป็นแนวตั้ง
+//                 minRotation: 90, // บังคับให้เป็นแนวตั้ง
+//               },
+//             },
+//             y: {
+//               grid: {
+//                 drawBorder: false,
+//                 drawOnChartArea: false,
+//                 display: false,
+//               },
+//               border: {
+//                 display: false,
+//               },
+//               ticks: {
+//                 display: false,
+//               },
+//             },
+//           },
+//           hover: {
+//             mode: 'nearest',
+//             intersect: true, // hover only when intersecting a bar
+//           },
+//           plugins: {
+//             legend: {
+//               display: false,
+//             },
+//             title: {
+//               display: false,
+//             },
+//           },
+//           layout: {
+//             padding: { top: 10, bottom: 10 },
+//           },
+//         },
+//       });
+//     }
+//   });
+// };
 const initializeBarChart = () => {
   nextTick(() => {
     if (barChartRef.value) {
-      new Chart(barChartRef.value, {
+      // ทำลายแผนภูมิเก่าถ้ามีอยู่
+      if (chartInstance.value) {
+        chartInstance.value.destroy();
+      }
+
+      // สร้างแผนภูมิใหม่และเก็บอ้างอิง
+      chartInstance.value = new Chart(barChartRef.value, {
         type: 'bar',
         data: barData.value,
         options: {
@@ -337,15 +400,13 @@ const initializeBarChart = () => {
                 drawOnChartArea: false,
                 display: false,
               },
-              border: {
-                display: false,
-              },
+              border: { display: false },
               ticks: {
                 font: { size: 12, family: 'Poppins', weight: '' },
                 color: '#333',
-                align: 'center', // จัดให้อยู่ตรงกลาง
-                maxRotation: 90, // หมุน label เป็นแนวตั้ง
-                minRotation: 90, // บังคับให้เป็นแนวตั้ง
+                align: 'center',
+                maxRotation: 90,
+                minRotation: 90,
               },
             },
             y: {
@@ -354,35 +415,21 @@ const initializeBarChart = () => {
                 drawOnChartArea: false,
                 display: false,
               },
-              border: {
-                display: false,
-              },
-              ticks: {
-                display: false,
-              },
+              border: { display: false },
+              ticks: { display: false },
             },
           },
-          hover: {
-            mode: 'nearest',
-            intersect: true, // hover only when intersecting a bar
-          },
+          hover: { mode: 'nearest', intersect: true },
           plugins: {
-            legend: {
-              display: false,
-            },
-            title: {
-              display: false,
-            },
+            legend: { display: false },
+            title: { display: false },
           },
-          layout: {
-            padding: { top: 10, bottom: 10 },
-          },
+          layout: { padding: { top: 10, bottom: 10 } },
         },
       });
     }
   });
 };
-
 watch(barChartRef, (newValue) => {
   if (newValue) {
     initializeBarChart();
@@ -408,7 +455,10 @@ onMounted(async () => {
       colorRegistered
     );
 
-    barData.value = generateChartData(viewsData.value[0]?.views, '6 months');
+    barData.value = generateChartData(
+      viewsData.value[0]?.views,
+      selectedViewOption.value
+    );
     console.log('barData', barData.value);
 
     initializeBarChart();
@@ -417,6 +467,21 @@ onMounted(async () => {
   }
 });
 
+onUnmounted(() => {
+  if (chartInstance.value) {
+    chartInstance.value.destroy();
+  }
+});
+const selectedViewOption = ref('7 days');
+watch(selectedViewOption, (newValue) => {
+  // if (newValue) {
+  barData.value = generateChartData(
+    viewsData.value[0]?.views,
+    selectedViewOption.value
+  );
+  initializeBarChart();
+  // }
+});
 // 🛠 ตัวอย่างใช้งาน
 const rawData = [
   { date: '2025-03-15', count: 3 },
@@ -490,15 +555,29 @@ console.log(generateChartData(rawData, '6 months'));
           </div>
         </div>
       </div>
-      <canvas ref="barChartRef" class=""></canvas>
+
       <div class="grid h-full grid-cols-10 gap-3">
         <div
           class="col-span-5 flex flex-col gap-5 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
         >
           <h1 class="b1 font-semibold">Engagement last 7 days</h1>
-          <div class="view-by-7day flex h-full flex-col justify-center">
+          <select
+            v-model="selectedViewOption"
+            class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+          >
+            <option disabled value="">Select option</option>
+            <option value="7 days">views last 7 days</option>
+            <option value="30 days">views last 30 days</option>
+            <option value="6 months">views last 6 months</option>
+          </select>
+          <canvas
+            ref="barChartRef"
+            class="h-full"
+            style="height: 100%"
+          ></canvas>
+          <!-- <div class="view-by-7day flex h-full flex-col justify-center">
             <div class="flex justify-center gap-5">
-              <!-- <div v-if="last7DayData.length>0"
+              <div v-if="last7DayData.length>0"
                 class="b4 flex flex-col items-end justify-between text-dark-grey/60"
               >
                 <p>{{ Math.round(maxForLast7Day * 1.25) }}</p>
@@ -506,7 +585,7 @@ console.log(generateChartData(rawData, '6 months'));
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.5) }}</p>
                 <p>{{ Math.round(maxForLast7Day * 1.25 * 0.25) }}</p>
                 <p>{{ 0 }}</p>
-              </div> -->
+              </div>
 
               <div
                 v-if="last7DayData.length > 0"
@@ -541,17 +620,17 @@ console.log(generateChartData(rawData, '6 months'));
               </div>
               <div v-else class="b2">No View Data</div>
             </div>
-          </div>
+          </div> -->
         </div>
         <div
           class="col-span-3 mx-auto w-full gap-2 rounded-[20px] bg-white p-5 px-8 py-5 drop-shadow-md"
         >
           <p class="b1 self-start font-semibold">Registration</p>
           <div
-            class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] drop-shadow-md"
+            class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px]"
           >
             <canvas ref="donutChartRef" class=""></canvas>
-
+            <!-- 
             <div class="relative flex w-full items-center justify-center">
               <div
                 class="aspect-square w-3/4 rounded-full drop-shadow-lg"
@@ -561,7 +640,8 @@ console.log(generateChartData(rawData, '6 months'));
               ></div>
               <div
                 class="absolute left-1/2 top-1/2 aspect-square w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"
-              >
+              > 
+
                 <div
                   class="flex h-full w-full flex-col items-center justify-center text-center"
                 >
@@ -577,7 +657,7 @@ console.log(generateChartData(rawData, '6 months'));
                   <p class="b3">of Goals</p>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <p class="b1 text-center font-semibold">
               <span class="text-burgundy">{{ registrationsData?.length }}</span>
