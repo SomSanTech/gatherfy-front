@@ -68,13 +68,13 @@ const generateDonutChartData = (
 
 const colorRegistered = '#cccccc'; // สีของส่วนที่ลงทะเบียนแล้ว
 const colorGoal = '#D71515'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
-const donutChartRef = ref<HTMLCanvasElement | null>(null);
+const registrationGoalChartRef = ref<HTMLCanvasElement | null>(null);
 
 const donutChartData = ref();
 const initializeDonutChart = () => {
   nextTick(() => {
-    if (donutChartRef.value) {
-      new Chart(donutChartRef.value, {
+    if (registrationGoalChartRef.value) {
+      new Chart(registrationGoalChartRef.value, {
         type: 'doughnut',
         data: donutChartData.value,
         options: {
@@ -126,7 +126,7 @@ const getLast7DaysData = (data: any) => {
   });
 };
 const token = useCookie('accessToken');
-watch(donutChartRef, (newValue) => {
+watch(registrationGoalChartRef, (newValue) => {
   if (newValue) {
     initializeDonutChart();
   }
@@ -152,6 +152,17 @@ const fetchViewsData = async () => {
   }
 };
 
+// ฟังก์ชันกำหนดสี
+function getColor(category: any) {
+  const colors = {
+    Female: '#989898',
+    Male: '#D71515',
+    Other: '#cccccc',
+    'Prefer not to say': '#f56042',
+  };
+  return colors[category] || 'black';
+}
+const labels = ref();
 const fetchRegisData = async () => {
   const fetchedData = await useFetchWithAuth(
     `v2/registrations/event/${param}`,
@@ -208,6 +219,164 @@ const fetchRegisData = async () => {
       Object.fromEntries(genderMap),
     ])
   );
+
+  if (Object.keys(groupedByAgeRangeAndGender.value).length > 0) {
+    labels.value = Object.keys(groupedByAgeRangeAndGender.value);
+
+    const categories = [
+      ...new Set(
+        labels.value.flatMap(
+          (age) => Object.keys(groupedByAgeRangeAndGender.value[age]) || []
+        )
+      ),
+    ];
+
+    stackChartData.value = categories.map((category) => ({
+      label: category,
+      data: labels.value.map(
+        (age) => groupedByAgeRangeAndGender.value[age]?.[category] || 0
+      ),
+      backgroundColor: getColor(category),
+      stack: 'Stack 0',
+      borderRadius: 5,
+      width: 5,
+    }));
+
+    initializestackChart();
+  }
+};
+// const initializestackChart = () => {
+//   nextTick(() => {
+//     if (stackChartRef.value) {
+//       new Chart(stackChartRef.value, {
+//         type: 'bar',
+//         data: {
+//           labels: labels.value,
+//           datasets: stackChartData.value,
+//         },
+//         options: {
+//           responsive: true,
+//           scales: {
+//             x: {
+//               stacked: true,
+//               // barPercentage: 0.4, // ปรับความกว้างของแท่ง (ค่าเริ่มต้นคือ 0.9)
+//               // categoryPercentage: 0.5, // ปรับพื้นที่ที่แต่ละหมวดหมู่ใช้
+//               barThickness: 20, // กำหนดความกว้างคงที่ (เช่น 20px)
+//               maxBarThickness: 30, // ความกว้างสูงสุดของแท่ง
+//               grid: {
+//                 drawBorder: false,
+//                 drawOnChartArea: false,
+//                 display: true,
+//               },
+//               border: { display: true },
+//               ticks: {
+//                 font: { size: 12, family: 'Poppins', weight: '' },
+//                 color: '#333',
+//                 align: 'center',
+//                 // maxRotation: 90,
+//                 // minRotation: 90,
+//               },
+//             },
+//             y: {
+//               stacked: true,
+//               grid: {
+//                 drawBorder: true,
+//                 drawOnChartArea: true,
+//                 display: true,
+//               },
+//               border: { display: false },
+//               ticks: { display: true },
+//             },
+//           },
+//           hover: { mode: 'nearest', intersect: true },
+//           plugins: {
+//             legend: { display: true },
+//             title: { display: false },
+//           },
+//           layout: { padding: { top: 10, bottom: 10 } },
+//         },
+//       });
+//     }
+//   });
+// };
+const initializestackChart = () => {
+  nextTick(() => {
+    if (stackChartRef.value) {
+      new Chart(stackChartRef.value, {
+        type: 'bar',
+        data: {
+          labels: labels.value,
+          datasets: stackChartData.value,
+        },
+        options: {
+          indexAxis: 'y', // ✅ ทำให้กราฟเป็นแนวนอน
+          responsive: true,
+          scales: {
+            y: {
+              stacked: true,
+              barPercentage: 0.3, // ✅ ลดความกว้างของแท่ง (ค่าเริ่มต้น 0.9)
+              categoryPercentage: 0.5, // ✅ ลดพื้นที่ที่แต่ละหมวดหมู่ใช้
+              grid: {
+                drawBorder: false,
+                drawOnChartArea: false,
+                display: true,
+              },
+              border: { display: true },
+              ticks: {
+                font: { size: 12, family: 'Poppins' },
+                color: '#333',
+                align: 'center',
+              },
+            },
+            x: {
+              stacked: true,
+              grid: {
+                drawBorder: true,
+                drawOnChartArea: true,
+                display: true,
+              },
+              border: { display: false },
+              ticks: { display: true },
+            },
+          },
+          hover: { mode: 'nearest', intersect: true },
+          plugins: {
+            legend: { display: true },
+            title: { display: false },
+            tooltip: {
+              callbacks: {
+                footer: (tooltipItems) => {
+                  if (!tooltipItems.length) return;
+
+                  let index = tooltipItems[0].dataIndex; // ✅ index ของ bar ที่ hover อยู่
+                  let genderSums = {};
+                  let totalSum = 0;
+
+                  stackChartData.value.forEach((dataset) => {
+                    let label = dataset.label; // เช่น "Male", "Female"
+                    let value = dataset.data[index]; // ✅ ดึงค่าของ bar ที่ hover
+
+                    if (value > 0) {
+                      genderSums[label] = value;
+                      totalSum += value;
+                    }
+                  });
+
+                  // ✅ แปลงเป็นข้อความ tooltip
+                  let genderList = Object.entries(genderSums)
+                    .map(([gender, count]) => `${gender}: ${count}`)
+                    .join('\n');
+
+                  return `${genderList}\nรวมทั้งหมด: ${totalSum}`;
+                },
+              },
+            },
+          },
+          layout: { padding: { top: 10, bottom: 10 } },
+        },
+      });
+    }
+  });
 };
 
 const eventDetail = ref();
@@ -293,13 +462,16 @@ function generateChartData(data, period = '7 days') {
     ],
   };
 }
-const barChartRef = ref<HTMLCanvasElement | null>(null);
+
+const viewsChartRef = ref<HTMLCanvasElement | null>(null);
+const stackChartRef = ref<HTMLCanvasElement | null>(null);
+const stackChartData = ref();
 const chartInstance = ref(null);
 const barData = ref();
 // const initializeBarChart = () => {
 //   nextTick(() => {
-//     if (barChartRef.value) {
-//       new Chart(barChartRef.value, {
+//     if (viewsChartRef.value) {
+//       new Chart(viewsChartRef.value, {
 //         type: 'bar',
 //         data: barData.value,
 //         options: {
@@ -321,8 +493,8 @@ const barData = ref();
 // };
 // const initializeBarChart = () => {
 //   nextTick(() => {
-//     if (barChartRef.value) {
-//       new Chart(barChartRef.value, {
+//     if (viewsChartRef.value) {
+//       new Chart(viewsChartRef.value, {
 //         type: 'bar',
 //         data: barData.value,
 //         options: {
@@ -381,14 +553,14 @@ const barData = ref();
 // };
 const initializeBarChart = () => {
   nextTick(() => {
-    if (barChartRef.value) {
+    if (viewsChartRef.value) {
       // ทำลายแผนภูมิเก่าถ้ามีอยู่
       if (chartInstance.value) {
         chartInstance.value.destroy();
       }
 
       // สร้างแผนภูมิใหม่และเก็บอ้างอิง
-      chartInstance.value = new Chart(barChartRef.value, {
+      chartInstance.value = new Chart(viewsChartRef.value, {
         type: 'bar',
         data: barData.value,
         options: {
@@ -430,9 +602,15 @@ const initializeBarChart = () => {
     }
   });
 };
-watch(barChartRef, (newValue) => {
+watch(viewsChartRef, (newValue) => {
   if (newValue) {
     initializeBarChart();
+  }
+});
+
+watch(stackChartRef, (newValue) => {
+  if (newValue) {
+    initializestackChart();
   }
 });
 onMounted(async () => {
@@ -482,17 +660,6 @@ watch(selectedViewOption, (newValue) => {
   initializeBarChart();
   // }
 });
-// 🛠 ตัวอย่างใช้งาน
-const rawData = [
-  { date: '2025-03-15', count: 3 },
-  { date: '2025-03-12', count: 14 },
-  { date: '2025-02-17', count: 2 },
-  { date: '2025-02-16', count: 1 },
-];
-
-console.log(generateChartData(rawData, '7 days'));
-console.log(generateChartData(rawData, '30 days'));
-console.log(generateChartData(rawData, '6 months'));
 </script>
 
 <template>
@@ -561,6 +728,7 @@ console.log(generateChartData(rawData, '6 months'));
           class="col-span-5 flex flex-col gap-5 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
         >
           <h1 class="b1 font-semibold">Engagement last 7 days</h1>
+
           <select
             v-model="selectedViewOption"
             class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
@@ -571,10 +739,11 @@ console.log(generateChartData(rawData, '6 months'));
             <option value="6 months">views last 6 months</option>
           </select>
           <canvas
-            ref="barChartRef"
+            ref="viewsChartRef"
             class="h-full"
             style="height: 100%"
           ></canvas>
+
           <!-- <div class="view-by-7day flex h-full flex-col justify-center">
             <div class="flex justify-center gap-5">
               <div v-if="last7DayData.length>0"
@@ -629,7 +798,7 @@ console.log(generateChartData(rawData, '6 months'));
           <div
             class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px]"
           >
-            <canvas ref="donutChartRef" class=""></canvas>
+            <canvas ref="registrationGoalChartRef" class=""></canvas>
             <!-- 
             <div class="relative flex w-full items-center justify-center">
               <div
@@ -678,16 +847,24 @@ console.log(generateChartData(rawData, '6 months'));
       <div class="grid grid-cols-12 gap-3">
         <div class="col-span-7 flex flex-col gap-3">
           <div
-            class="view-by-gender-age rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender-age rounded-[20px] bg-white p-12 drop-shadow-md"
             v-if="groupedByAgeRangeAndGender"
           >
-            <StackBarChart
+            <h1 class="b1 font-semibold">
+              Age and Gender Breakdown of Event Registrants
+            </h1>
+            <canvas
+              ref="stackChartRef"
+              class="h-full"
+              style="height: 100%"
+            ></canvas>
+            <!-- <StackBarChart
               :groupedByAgeRangeAndGender="groupedByAgeRangeAndGender"
               :colors="colors"
-            />
+            /> -->
           </div>
           <div
-            class="view-by-checkin flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
+            class="view-by-checkin flex flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -749,12 +926,12 @@ console.log(generateChartData(rawData, '6 months'));
 
         <div class="col-span-5 flex flex-col gap-3">
           <div
-            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
           <div
-            class="view-by-feedback flex flex-col gap-2 rounded-[20px] bg-white p-6 px-8 py-5 drop-shadow-md"
+            class="view-by-feedback flex flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div

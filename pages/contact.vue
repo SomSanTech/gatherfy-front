@@ -253,16 +253,72 @@ onMounted(async () => {
       </div>
       <div
         v-show="isClickShareContact"
-        class="absolute left-1/2 top-5 -translate-x-1/2"
+        class="fixed inset-0 flex items-center justify-center bg-black/50"
       >
+        <!-- Mask -->
+        <div class="relative h-full w-full">
+          <!-- ทำให้พื้นหลังรอบๆ เบลอ -->
+          <div class="absolute inset-0 backdrop-blur-md" />
+
+          <!-- ช่องว่างโปร่งแสงที่มีขอบมน -->
+          <div
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          >
+            <button
+              @click="isClickShareContact = !isClickShareContact"
+              class="absolute right-4 top-4 z-50 text-2xl text-black"
+            >
+              <Cancle />
+            </button>
+            <video
+              ref="video"
+              width="400"
+              height="400"
+              autoplay
+              playsinline
+              class="absolute left-1/2 top-1/2 z-40 aspect-square h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] object-cover"
+            ></video>
+            <div
+              class="relative h-[400px] w-[400px] overflow-hidden rounded-3xl border-4 border-white/50"
+            >
+              <!-- วิดีโอซ้อนทับ -->
+
+              <button
+                @click="generateQRCode"
+                class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-black/70 px-3 py-1 text-light-grey"
+              >
+                My QR code
+              </button>
+
+              <!-- QR Code Panel -->
+              <div
+                :class="isShowQR ? 'translate-y-12' : 'translate-y-[400px]'"
+                class="absolute left-1/2 z-50 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-2xl bg-white p-2 pt-20 transition-transform duration-700 ease-in-out"
+              >
+                <qrcode-vue :size="200" :value="qrValues" />
+                <p class="b3 max-w-[200px] pt-2 text-center text-black/70">
+                  Show this QR code to who you want to share contact
+                </p>
+                <button
+                  @click="isShowQR = !isShowQR"
+                  class="absolute right-4 top-4 text-2xl text-black"
+                >
+                  <Cancle />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-show="false" class="absolute left-1/2 top-5 -translate-x-1/2">
         <!-- วิดีโอซ้อนทับ -->
         <div class="relative h-[400px] w-[400px] overflow-hidden">
-          <video
+          <!-- <video
             ref="video"
             width="400"
             height="400"
             class="absolute left-1/2 top-1/2 z-50 aspect-square h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 object-cover"
-          ></video>
+          ></video> -->
           <!-- <div
             class="absolute left-0 top-0 z-50 h-[400px] w-[400px] border-[90px] border-black/20"
           ></div> -->

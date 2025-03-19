@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useRuntimeConfig } from '#app';
 import { vOnClickOutside } from '@vueuse/components';
 // import {
 //   useCodeClient,
@@ -74,6 +73,11 @@ const initGoogleSignIn = () => {
   }
 };
 
+const { state, showPopup } = usePopup();
+const handleCompleteGGSignUp = () => {
+  state.isVisible = false;
+  loginPopup.value = !loginPopup.value;
+};
 const isSelectRolePopUp = ref(false);
 const handleSelectRole = async () => {
   const response = await useFetchData('v1/signup/google', 'POST', {
@@ -82,8 +86,11 @@ const handleSelectRole = async () => {
   });
 
   if (response.status === 200) {
-    alert('signin success ja');
     isSelectRolePopUp.value = !isSelectRolePopUp.value;
+    showPopup('Sign up with Google success please go Sing in', 'complete');
+    // console.log('isvisible,', state.isVisible);
+
+    // alert('signin success ja');
   }
 };
 const signInWithGoogle = async () => {
@@ -557,13 +564,15 @@ interface CredentialResponse {
   credential: string;
   select_by: string;
 }
-
-const googleClientId =
-  '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com'; // ใส่ Google Client ID ของคุณ
 const userCredential = ref<string | null>(null);
 </script>
 
 <template>
+  <CompleteModal
+    :isShowCompleteModal="state.isVisible"
+    :title="state.text"
+    @complete-action="handleCompleteGGSignUp"
+  />
   <div v-if="loginPopup" class="fixed z-50 h-screen w-full">
     <div
       v-on-click-outside="handleLoginPopup"
@@ -980,11 +989,10 @@ const userCredential = ref<string | null>(null);
   </div>
   <div v-if="isSelectRolePopUp" class="fixed z-50 h-screen w-full">
     <div
-      class="b2 absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-10 shadow-lg"
+      class="b2 absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col items-center justify-center gap-4 rounded-xl bg-white p-10 shadow-lg"
     >
       <p class="b2 text-center">Please select your role before continue</p>
       <p class="b2 pb-2 text-center">What would you like to do?</p>
-      {{ selectedRole }}
       <div class="flex w-full justify-between gap-2">
         <button
           @click="selectRole('Attendee')"
@@ -996,7 +1004,7 @@ const userCredential = ref<string | null>(null);
           "
         >
           <div
-            class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+            class="b3 absolute bg-white p-2 text-center opacity-0 duration-500 group-hover:opacity-100"
           >
             For users who want to explore and join existing events.
           </div>
@@ -1012,14 +1020,14 @@ const userCredential = ref<string | null>(null);
           "
         >
           <div
-            class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+            class="b3 absolute bg-white p-2 text-center opacity-0 duration-500 group-hover:opacity-100"
           >
             For users who want to create and manage their own events.
           </div>
           <p class="font-semibold">Create event</p>
         </button>
       </div>
-      <button @click="handleSelectRole">Submit</button>
+      <BtnComp color="black" @click="handleSelectRole" text="submit" />
       <p
         v-if="!checkField['role'] && isClickSignBtn && isSignup"
         class="b4 text-red-600"

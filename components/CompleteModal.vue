@@ -5,7 +5,9 @@ const props = defineProps<{
   isShowCompleteModal?: boolean;
 }>();
 
-const emits = defineEmits(['confirmAction', 'cancleAction']);
+const { state, hidePopup } = usePopup();
+
+const emits = defineEmits(['completeAction', 'cancleAction']);
 </script>
 
 <template>
@@ -29,7 +31,7 @@ const emits = defineEmits(['confirmAction', 'cancleAction']);
           {{ subTitle }}
         </div>
         <div class="flex w-fit gap-2 pt-4">
-          <BtnComp text="Ok" @click="$emit('confirmAction')" />
+          <BtnComp text="Ok" @click="$emit('completeAction')" />
           <!-- <BtnComp text="Cancle" @click="$emit('cancleAction')" /> -->
         </div>
       </div>
