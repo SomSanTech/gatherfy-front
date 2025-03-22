@@ -25,8 +25,8 @@ jobs:
         run: |
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
-          echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
-          echo ${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}
+          # echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
+          # echo ${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}
           echo ${{ secrets.NUXT_BASE_URL_QA }}
 
       - name: Build project
@@ -102,4 +102,5 @@ jobs:
             # docker rm gatherfy-web || true
             # docker build -t gatherfront:latest .
             # docker run -d --name gatherfy-web --network gatherfy_gatherfy-net --ip 192.162.100.154 -p 3000:3000 gatherfront:latest
-            docker compose -f compose.staging.yml -p staging restart qafront
+            docker compose -f compose.staging.yml -p staging stop qafront
+            docker compose -f compose.staging.yml -p staging up --build -d
