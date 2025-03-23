@@ -2,11 +2,22 @@
 import type { UserProfile } from '~/models/userProfile';
 const signOut = useAuth().logout;
 const profileData = useCookie<UserProfile>('profileData');
+const route = useRoute();
+const isBackoffice = ref(route.fullPath.includes('backoffice'));
+defineProps<{ isOpen: boolean }>(); // รับค่าเปิด-ปิด Sidebar
+const emit = defineEmits(['close']); // ใช้ส่ง event กลับไปปิด Sidebar
 </script>
 <template>
   <div
+    :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
     class="fixed flex h-full w-80 flex-col justify-between bg-white px-8 py-16 drop-shadow-lg"
   >
+    <button
+      @click="$emit('close')"
+      class="absolute right-4 top-4 z-50 text-gray-600 md:hidden"
+    >
+      <XIcon />
+    </button>
     <div>
       <div class="oooh-baby-regular mb-10 px-14 text-center text-5xl">
         <NuxtLink to="/backoffice">Gatherfy</NuxtLink>
@@ -15,6 +26,11 @@ const profileData = useCookie<UserProfile>('profileData');
         <div class="b3">Main menu</div>
         <NuxtLink to="/backoffice/dashboard">
           <div
+            :class="
+              route.fullPath.includes('dashboard')
+                ? 'bg-burgundy text-white'
+                : ''
+            "
             class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
           >
             <Dashboard class="t3" />
@@ -23,6 +39,9 @@ const profileData = useCookie<UserProfile>('profileData');
         </NuxtLink>
         <NuxtLink to="/backoffice/events">
           <div
+            :class="
+              route.fullPath.includes('events') ? 'bg-burgundy text-white' : ''
+            "
             class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
           >
             <Calendar class="t3" />
@@ -78,6 +97,11 @@ const profileData = useCookie<UserProfile>('profileData');
             <div class="ps-2 pt-2">
               <NuxtLink to="/backoffice/registrations/event">
                 <div
+                  :class="
+                    route.fullPath === '/backoffice/registrations/event'
+                      ? 'bg-burgundy text-white'
+                      : ''
+                  "
                   class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
                 >
                   <EventRegis class="t3" />
@@ -86,6 +110,11 @@ const profileData = useCookie<UserProfile>('profileData');
               </NuxtLink>
               <NuxtLink to="/backoffice/registrations">
                 <div
+                  :class="
+                    route.fullPath === '/backoffice/registrations'
+                      ? 'bg-burgundy text-white'
+                      : ''
+                  "
                   class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
                 >
                   <User class="t3" />
@@ -97,6 +126,11 @@ const profileData = useCookie<UserProfile>('profileData');
         </div>
         <NuxtLink to="/backoffice/feedback">
           <div
+            :class="
+              route.fullPath.includes('feedback')
+                ? 'bg-burgundy text-white'
+                : ''
+            "
             class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
           >
             <Feedback class="t3" />
@@ -105,6 +139,9 @@ const profileData = useCookie<UserProfile>('profileData');
         </NuxtLink>
         <NuxtLink to="/backoffice/qrscan">
           <div
+            :class="
+              route.fullPath.includes('qrscan') ? 'bg-burgundy text-white' : ''
+            "
             class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
           >
             <QrcodeScan class="t3" />
@@ -149,3 +186,9 @@ const profileData = useCookie<UserProfile>('profileData');
     </div>
   </div>
 </template>
+
+<style scoped>
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
+}
+</style>

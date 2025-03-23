@@ -23,7 +23,6 @@ const route = useRoute();
 const param = route.params.id;
 const feedbackData = ref<Feedback[]>([]);
 const averageRating = ref();
-
 const registrationsData = ref<Registration[]>([]);
 const isLoading = ref(true);
 const sumOfGender: any = ref(0);
@@ -34,19 +33,20 @@ const last7DayData = ref();
 const maxForLast7Day = ref(0);
 const viewsData = ref();
 const totalViewCount = ref(0);
+
 const colors = {
-  Female: '#989898',
-  Male: '#D71515',
-  Other: '#cccccc',
-  'Prefer not to say': '#f56042',
+  Female: '#D2FF52 ',
+  Male: '#deddd7',
+  Other: '#1C46F5 ',
+  'Prefer not to say': '#131313 ',
 };
 const statusColor: any = {
-  'Awaiting Check-in': '#989898',
-  'Checked in': '#D71515',
-  Unattended: '#cccccc',
+  'Awaiting Check-in': '#131313',
+  'Checked in': '#1C46F5',
+  Unattended: '#deddd7',
 };
 
-const generateDonutChartData = (
+const generateregistrationGoalChartData = (
   registered: number,
   goal: number,
   colorRegistered: string,
@@ -66,17 +66,17 @@ const generateDonutChartData = (
   };
 };
 
-const colorRegistered = '#cccccc'; // สีของส่วนที่ลงทะเบียนแล้ว
-const colorGoal = '#D71515'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
+const colorRegistered = '#D2FF52'; // สีของส่วนที่ลงทะเบียนแล้ว
+const colorGoal = '#1C46F5'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
 const registrationGoalChartRef = ref<HTMLCanvasElement | null>(null);
+const registrationGoalChartData = ref();
 
-const donutChartData = ref();
-const initializeDonutChart = () => {
+const initializeRegistrationGoalChart = () => {
   nextTick(() => {
     if (registrationGoalChartRef.value) {
       new Chart(registrationGoalChartRef.value, {
         type: 'doughnut',
-        data: donutChartData.value,
+        data: registrationGoalChartData.value,
         options: {
           responsive: true,
           plugins: {
@@ -86,7 +86,7 @@ const initializeDonutChart = () => {
             },
             title: {
               display: false,
-              text: 'Chart.js Doughnut Chart',
+              text: 'Registration Goal',
             },
           },
         },
@@ -94,6 +94,7 @@ const initializeDonutChart = () => {
     }
   });
 };
+
 function getAverage() {
   const total = feedbackData.value.reduce(
     (sum, curr) => sum + curr.feedbackRating,
@@ -103,34 +104,15 @@ function getAverage() {
   averageRating.value =
     total === 0 ? 0 : (Math.round(avg * 10) / 10).toFixed(1);
 }
-const getLast7DaysData = (data: any) => {
-  const sortedData = data.sort(
-    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  const last7Days = sortedData.slice(0, 7);
-  const finalData = last7Days.sort(
-    (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
 
-  return finalData.map((item: any) => {
-    const dateObj = new Date(item.date);
-    return {
-      day: dateObj.toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        timeZone: 'Asia/Bangkok',
-      }),
-      count: item.count,
-      date: dateObj.toLocaleDateString('en-US', { timeZone: 'Asia/Bangkok' }),
-    };
-  });
-};
 const token = useCookie('accessToken');
+
 watch(registrationGoalChartRef, (newValue) => {
   if (newValue) {
-    initializeDonutChart();
+    initializeRegistrationGoalChart();
   }
 });
+
 const fetchViewsData = async () => {
   try {
     const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
@@ -141,28 +123,22 @@ const fetchViewsData = async () => {
       (sum: any, record: any) => sum + record.count,
       0
     );
-
-    last7DayData.value = getLast7DaysData(viewsData.value[0].views);
-
-    maxForLast7Day.value = Math.max(
-      ...last7DayData.value.map((item: any) => item.count)
-    );
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 };
 
-// ฟังก์ชันกำหนดสี
 function getColor(category: any) {
   const colors = {
-    Female: '#989898',
-    Male: '#D71515',
-    Other: '#cccccc',
-    'Prefer not to say': '#f56042',
+    Female: '#D2FF52 ',
+    Male: '#deddd7',
+    Other: '#1C46F5 ',
+    'Prefer not to say': '#131313 ',
   };
   return colors[category] || 'black';
 }
-const labels = ref();
+const ageGenderLabels = ref();
+
 const fetchRegisData = async () => {
   const fetchedData = await useFetchWithAuth(
     `v2/registrations/event/${param}`,
@@ -221,19 +197,19 @@ const fetchRegisData = async () => {
   );
 
   if (Object.keys(groupedByAgeRangeAndGender.value).length > 0) {
-    labels.value = Object.keys(groupedByAgeRangeAndGender.value);
+    ageGenderLabels.value = Object.keys(groupedByAgeRangeAndGender.value);
 
     const categories = [
       ...new Set(
-        labels.value.flatMap(
+        ageGenderLabels.value.flatMap(
           (age) => Object.keys(groupedByAgeRangeAndGender.value[age]) || []
         )
       ),
     ];
 
-    stackChartData.value = categories.map((category) => ({
+    ageGenderChartData.value = categories.map((category) => ({
       label: category,
-      data: labels.value.map(
+      data: ageGenderLabels.value.map(
         (age) => groupedByAgeRangeAndGender.value[age]?.[category] || 0
       ),
       backgroundColor: getColor(category),
@@ -242,71 +218,18 @@ const fetchRegisData = async () => {
       width: 5,
     }));
 
-    initializestackChart();
+    initializeAgeGenderChart();
   }
 };
-// const initializestackChart = () => {
-//   nextTick(() => {
-//     if (stackChartRef.value) {
-//       new Chart(stackChartRef.value, {
-//         type: 'bar',
-//         data: {
-//           labels: labels.value,
-//           datasets: stackChartData.value,
-//         },
-//         options: {
-//           responsive: true,
-//           scales: {
-//             x: {
-//               stacked: true,
-//               // barPercentage: 0.4, // ปรับความกว้างของแท่ง (ค่าเริ่มต้นคือ 0.9)
-//               // categoryPercentage: 0.5, // ปรับพื้นที่ที่แต่ละหมวดหมู่ใช้
-//               barThickness: 20, // กำหนดความกว้างคงที่ (เช่น 20px)
-//               maxBarThickness: 30, // ความกว้างสูงสุดของแท่ง
-//               grid: {
-//                 drawBorder: false,
-//                 drawOnChartArea: false,
-//                 display: true,
-//               },
-//               border: { display: true },
-//               ticks: {
-//                 font: { size: 12, family: 'Poppins', weight: '' },
-//                 color: '#333',
-//                 align: 'center',
-//                 // maxRotation: 90,
-//                 // minRotation: 90,
-//               },
-//             },
-//             y: {
-//               stacked: true,
-//               grid: {
-//                 drawBorder: true,
-//                 drawOnChartArea: true,
-//                 display: true,
-//               },
-//               border: { display: false },
-//               ticks: { display: true },
-//             },
-//           },
-//           hover: { mode: 'nearest', intersect: true },
-//           plugins: {
-//             legend: { display: true },
-//             title: { display: false },
-//           },
-//           layout: { padding: { top: 10, bottom: 10 } },
-//         },
-//       });
-//     }
-//   });
-// };
-const initializestackChart = () => {
+
+const initializeAgeGenderChart = () => {
   nextTick(() => {
-    if (stackChartRef.value) {
-      new Chart(stackChartRef.value, {
+    if (ageGenderChartRef.value) {
+      new Chart(ageGenderChartRef.value, {
         type: 'bar',
         data: {
-          labels: labels.value,
-          datasets: stackChartData.value,
+          labels: ageGenderLabels.value,
+          datasets: ageGenderChartData.value,
         },
         options: {
           indexAxis: 'y', // ✅ ทำให้กราฟเป็นแนวนอน
@@ -352,7 +275,7 @@ const initializestackChart = () => {
                   let genderSums = {};
                   let totalSum = 0;
 
-                  stackChartData.value.forEach((dataset) => {
+                  ageGenderChartData.value.forEach((dataset) => {
                     let label = dataset.label; // เช่น "Male", "Female"
                     let value = dataset.data[index]; // ✅ ดึงค่าของ bar ที่ hover
 
@@ -386,14 +309,20 @@ const fetchEventDetail = async () => {
     'GET',
     token.value
   );
-  eventDetail.value = fetchedData.data || [];
+  if ('data' in fetchedData) {
+    eventDetail.value = fetchedData.data || [];
+  }
 };
+
 function formatDate(date) {
-  return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  }).format(date); // '2 Mar'
 }
 
 function formatMonth(date) {
-  return date.toISOString().slice(0, 7); // 'YYYY-MM'
+  return new Intl.DateTimeFormat('en-GB', { month: 'short' }).format(date); // 'Mar'
 }
 
 function getDateRange(period) {
@@ -405,8 +334,8 @@ function getDateRange(period) {
   } else if (period === '30 days') {
     startDate.setDate(now.getDate() - 29);
   } else if (period === '6 months') {
-    startDate.setMonth(now.getMonth() - 5); // 6 เดือนล่าสุดรวมเดือนปัจจุบัน
-    startDate.setDate(1); // เริ่มต้นที่วันที่ 1 ของเดือน
+    startDate.setMonth(now.getMonth() - 5);
+    startDate.setDate(1);
   } else {
     throw new Error('Invalid period');
   }
@@ -416,12 +345,12 @@ function getDateRange(period) {
 
   if (period === '6 months') {
     while (currentDate <= now) {
-      dates.push(formatMonth(currentDate)); // ดึงเฉพาะ 'YYYY-MM'
-      currentDate.setMonth(currentDate.getMonth() + 1); // เพิ่มทีละเดือน
+      dates.push(formatMonth(currentDate)); // 'Mar', 'Apr', 'May'
+      currentDate.setMonth(currentDate.getMonth() + 1);
     }
   } else {
     while (currentDate <= now) {
-      dates.push(formatDate(currentDate));
+      dates.push(formatDate(currentDate)); // '2 Mar', '3 Mar'
       currentDate.setDate(currentDate.getDate() + 1);
     }
   }
@@ -434,15 +363,14 @@ function generateChartData(data, period = '7 days') {
   const dataMap = new Map();
 
   if (period === '6 months') {
-    // สร้าง map สำหรับยอดรวมของแต่ละเดือน
     data.forEach(({ date, count }) => {
-      const month = date.slice(0, 7); // 'YYYY-MM'
+      const month = formatMonth(new Date(date)); // 'Mar', 'Apr'
       dataMap.set(month, (dataMap.get(month) || 0) + count);
     });
   } else {
-    // ใช้ map สำหรับรายวันปกติ
     data.forEach(({ date, count }) => {
-      dataMap.set(date, count);
+      const formattedDate = formatDate(new Date(date)); // '2 Mar', '3 Mar'
+      dataMap.set(formattedDate, count);
     });
   }
 
@@ -452,11 +380,10 @@ function generateChartData(data, period = '7 days') {
     labels,
     datasets: [
       {
-        label: 'My Dataset',
+        label: 'views',
         data: datasetData,
-        backgroundColor: 'red',
-        borderWidth: 1,
-        borderRadius: 5,
+        backgroundColor: '#1C46F5',
+        borderRadius: 18,
         borderSkipped: false,
       },
     ],
@@ -464,9 +391,9 @@ function generateChartData(data, period = '7 days') {
 }
 
 const viewsChartRef = ref<HTMLCanvasElement | null>(null);
-const stackChartRef = ref<HTMLCanvasElement | null>(null);
-const stackChartData = ref();
-const chartInstance = ref(null);
+const ageGenderChartRef = ref<HTMLCanvasElement | null>(null);
+const ageGenderChartData = ref();
+const chartInstance = ref<Chart | null>(null);
 const barData = ref();
 // const initializeBarChart = () => {
 //   nextTick(() => {
@@ -577,18 +504,18 @@ const initializeBarChart = () => {
                 font: { size: 12, family: 'Poppins', weight: '' },
                 color: '#333',
                 align: 'center',
-                maxRotation: 90,
-                minRotation: 90,
+                // maxRotation: 90,
+                // minRotation: 90,
               },
             },
             y: {
               grid: {
                 drawBorder: false,
-                drawOnChartArea: false,
-                display: false,
+                drawOnChartArea: true,
+                display: true,
               },
               border: { display: false },
-              ticks: { display: false },
+              ticks: { display: true },
             },
           },
           hover: { mode: 'nearest', intersect: true },
@@ -608,9 +535,9 @@ watch(viewsChartRef, (newValue) => {
   }
 });
 
-watch(stackChartRef, (newValue) => {
+watch(ageGenderChartRef, (newValue) => {
   if (newValue) {
-    initializestackChart();
+    initializeAgeGenderChart();
   }
 });
 onMounted(async () => {
@@ -626,7 +553,7 @@ onMounted(async () => {
     await fetchRegisData();
     await fetchViewsData();
     await fetchEventDetail();
-    donutChartData.value = generateDonutChartData(
+    registrationGoalChartData.value = generateregistrationGoalChartData(
       registrationsData?.value.length,
       eventDetail.value.registration_goal,
       colorGoal,
@@ -663,7 +590,7 @@ watch(selectedViewOption, (newValue) => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <div class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"
@@ -723,116 +650,44 @@ watch(selectedViewOption, (newValue) => {
         </div>
       </div>
 
-      <div class="grid h-full grid-cols-10 gap-3">
+      <div class="grid h-full max-h-[] grid-cols-10 gap-3">
         <div
-          class="col-span-5 flex flex-col gap-5 rounded-[20px] bg-white px-8 py-5 drop-shadow-md"
+          class="jus col-span-5 flex flex-col gap-5 rounded-[20px] border border-white/90 bg-white/70 px-8 py-5 drop-shadow-md backdrop-blur-xl"
         >
-          <h1 class="b1 font-semibold">Engagement last 7 days</h1>
+          <div class="flex items-center justify-between">
+            <h1 class="b1 font-semibold">
+              Engagement last {{ selectedViewOption }}
+            </h1>
 
-          <select
-            v-model="selectedViewOption"
-            class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-          >
-            <option disabled value="">Select option</option>
-            <option value="7 days">views last 7 days</option>
-            <option value="30 days">views last 30 days</option>
-            <option value="6 months">views last 6 months</option>
-          </select>
+            <select
+              v-model="selectedViewOption"
+              class="b3 w-fit self-end rounded-lg border-[1px] border-black/20 p-1"
+            >
+              <option disabled value="">Select option</option>
+              <option value="7 days">views last 7 days</option>
+              <option value="30 days">views last 30 days</option>
+              <option value="6 months">views last 6 months</option>
+            </select>
+          </div>
           <canvas
             ref="viewsChartRef"
-            class="h-full"
+            class="h-fit"
             style="height: 100%"
           ></canvas>
-
-          <!-- <div class="view-by-7day flex h-full flex-col justify-center">
-            <div class="flex justify-center gap-5">
-              <div v-if="last7DayData.length>0"
-                class="b4 flex flex-col items-end justify-between text-dark-grey/60"
-              >
-                <p>{{ Math.round(maxForLast7Day * 1.25) }}</p>
-                <p>{{ Math.round(maxForLast7Day * 1.25 * 0.75) }}</p>
-                <p>{{ Math.round(maxForLast7Day * 1.25 * 0.5) }}</p>
-                <p>{{ Math.round(maxForLast7Day * 1.25 * 0.25) }}</p>
-                <p>{{ 0 }}</p>
-              </div>
-
-              <div
-                v-if="last7DayData.length > 0"
-                class="b3 flex w-full items-end justify-between self-end"
-              >
-                <div
-                  v-for="data in last7DayData"
-                  class="group relative flex cursor-pointer flex-col items-center"
-                >
-                  <div
-                    class="flex h-52 w-[40px] items-end justify-end rounded-lg bg-gray-200 duration-300 group-hover:scale-105"
-                  >
-                    <div
-                      class="flex w-full items-end justify-end rounded-b-lg bg-black-1 duration-300 group-hover:bg-burgundy"
-                      :style="{
-                        height: `${calculateWidth(last7DayData, data.count)}%`,
-                      }"
-                    ></div>
-                  </div>
-                  <div
-                    class="absolute -top-16 w-max rounded-md border bg-white px-4 py-1 opacity-0 duration-300 group-hover:opacity-100"
-                  >
-                    {{ data.day }} <br />
-                    {{ data.count }} views
-                  </div>
-                  <p
-                    class="b4 absolute -bottom-7 w-max shrink-0 text-dark-grey/60"
-                  >
-                    {{ data.day }}
-                  </p>
-                </div>
-              </div>
-              <div v-else class="b2">No View Data</div>
-            </div>
-          </div> -->
         </div>
         <div
-          class="col-span-3 mx-auto w-full gap-2 rounded-[20px] bg-white p-5 px-8 py-5 drop-shadow-md"
+          class="col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-8 drop-shadow-md backdrop-blur-xl"
         >
-          <p class="b1 self-start font-semibold">Registration</p>
+          <p class="b1 self-start font-semibold">Registration Goal</p>
           <div
-            class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px]"
+            class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] p-8"
           >
             <canvas ref="registrationGoalChartRef" class=""></canvas>
-            <!-- 
-            <div class="relative flex w-full items-center justify-center">
-              <div
-                class="aspect-square w-3/4 rounded-full drop-shadow-lg"
-                :style="{
-                  background: `conic-gradient(#D71515 0% ${(registrationsData?.length / goals) * 100}%, #e0e0e0 ${(registrationsData?.length / goals) * 100}%)`,
-                }"
-              ></div>
-              <div
-                class="absolute left-1/2 top-1/2 aspect-square w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"
-              > 
-
-                <div
-                  class="flex h-full w-full flex-col items-center justify-center text-center"
-                >
-                  <p class="t3">
-                    {{
-                      Math.floor(
-                        (registrationsData?.length /
-                          eventDetail.registration_goal) *
-                          100
-                      )
-                    }}%
-                  </p>
-                  <p class="b3">of Goals</p>
-                </div>
-              </div>
-            </div> -->
-
-            <p class="b1 text-center font-semibold">
-              <span class="text-burgundy">{{ registrationsData?.length }}</span>
-              from {{ eventDetail.registration_goal }} Registration
-            </p>
           </div>
+          <p class="b1 text-center font-semibold">
+            <span class="text-[#1C46F5]">{{ registrationsData?.length }}</span>
+            from {{ eventDetail.registration_goal }} Registration
+          </p>
         </div>
         <div class="col-span-2 flex h-full">
           <SumaryOfView
@@ -847,14 +702,14 @@ watch(selectedViewOption, (newValue) => {
       <div class="grid grid-cols-12 gap-3">
         <div class="col-span-7 flex flex-col gap-3">
           <div
-            class="view-by-gender-age rounded-[20px] bg-white p-12 drop-shadow-md"
+            class="view-by-gender-age rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
               Age and Gender Breakdown of Event Registrants
             </h1>
             <canvas
-              ref="stackChartRef"
+              ref="ageGenderChartRef"
               class="h-full"
               style="height: 100%"
             ></canvas>
@@ -864,7 +719,7 @@ watch(selectedViewOption, (newValue) => {
             /> -->
           </div>
           <div
-            class="view-by-checkin flex flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
+            class="view-by-checkin flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -926,12 +781,12 @@ watch(selectedViewOption, (newValue) => {
 
         <div class="col-span-5 flex flex-col gap-3">
           <div
-            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
+            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
           <div
-            class="view-by-feedback flex flex-col gap-2 rounded-[20px] bg-white p-12 drop-shadow-md"
+            class="view-by-feedback flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div
@@ -943,7 +798,7 @@ watch(selectedViewOption, (newValue) => {
             <div v-else class="flex flex-col justify-center gap-2">
               <div class="text-center">
                 <div class="flex items-center justify-center gap-1">
-                  <Star class="t3 fill-burgundy" />
+                  <Star class="t3 fill-[#1C46F5]" />
                   <p class="t3 font-semibold">{{ averageRating }}</p>
                 </div>
 

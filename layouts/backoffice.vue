@@ -1,7 +1,23 @@
 <!-- layouts/backoffice.vue -->
 <template>
-  <div class="backoffice-layout">
+  <!-- <div class="backoffice-layout">
+    
     <SideBar />
+    <slot />
+  </div> -->
+  <div class="relative flex">
+    <!-- Burger Button -->
+    <button
+      @click="isSidebarOpen = !isSidebarOpen"
+      class="fixed left-4 top-4 z-50 rounded-lg bg-gray-200 p-2 shadow-lg md:hidden"
+    >
+      <MenuIcon v-if="!isSidebarOpen" />
+      <XIcon v-else />
+    </button>
+
+    <!-- Sidebar (แสดงซ่อนตาม isSidebarOpen) -->
+    <SideBar :is-open="isSidebarOpen" @close="isSidebarOpen = false" />
+
     <slot />
   </div>
 </template>
@@ -15,6 +31,8 @@ const error = useError();
 const isErrorPage = computed(() => {
   return error.value !== null || route.path.includes('error');
 });
+
+const isSidebarOpen = ref(false); // ค่าดีฟอลต์ปิดอยู่
 </script>
 
 <style scoped>

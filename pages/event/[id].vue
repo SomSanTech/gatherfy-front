@@ -357,6 +357,11 @@ watchEffect(() => {
       </div>
     </div>
     <!-- pop up -->
+    <!-- <CompleteModal
+      :isShowCompleteModal="state.isVisible"
+      :title="state.text"
+      @complete-action="handleCompleteGGSignUp"
+    /> -->
     <BasicPopup
       :showPopup="plsLoginPopUp"
       text="Please Sign in before Registor event"

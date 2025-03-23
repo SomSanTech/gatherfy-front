@@ -154,9 +154,11 @@ const signInWithGoogle = async () => {
         'GET',
         accessToken.value
       );
-      userRegisHistory.value = regisData.data;
+      if ('data' in regisData) {
+        userRegisHistory.value = regisData.data;
+      }
 
-      alert('login gg leaw');
+      // alert('login gg leaw');
     }
     loginPopup.value = !loginPopup.value;
     isHavePopupOpen.value = false;

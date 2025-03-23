@@ -17,6 +17,7 @@ watch(
   { immediate: true }
 );
 const chartData = ref();
+const donutChartInstance = ref<Chart | null>(null);
 const generateChartData = (
   groupByGender: Record<string, number>,
   colors: any
@@ -40,6 +41,9 @@ const donutChartRef = ref<HTMLCanvasElement | null>(null);
 const initializeDonutChart = () => {
   nextTick(() => {
     if (donutChartRef.value) {
+      if (donutChartInstance.value) {
+        donutChartInstance.value.destroy();
+      }
       new Chart(donutChartRef.value, {
         type: 'doughnut',
         data: chartData.value,
@@ -48,7 +52,7 @@ const initializeDonutChart = () => {
           plugins: {
             legend: {
               position: 'bottom',
-              gap: 5,
+              // gap: 5,
             },
             title: {
               display: false,
