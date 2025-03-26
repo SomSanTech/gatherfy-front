@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
 import Chart from 'chart.js/auto';
-import EventList from '~/components/backoffice/EventList.vue';
 import type { Registration } from '~/models/registration';
 import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
-import StackBarChart from '~/components/backoffice/StackBarChart.vue';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import type { UserProfile } from '~/models/userProfile';
 
@@ -17,23 +15,36 @@ const eventsData = ref<Event[]>([]);
 const adminData: any = ref<User | null>(null);
 const isLoading = ref(true);
 const registrationsData = ref<Registration[]>([]);
-const colors: Record<string, string> = {
-  Female: '#989898',
-  Male: '#D71515',
-  Other: '#cccccc',
-};
+const accessToken = useCookie('accessToken');
+const profileData = useCookie<UserProfile>('profileData');
 const sumOfGender: any = ref(0);
 const groupedByGender = ref();
 const groupedByAgeRangeAndGender = ref();
 const sumOfViews: any = ref(0);
-const chartCanvasRef = ref<HTMLCanvasElement | null>(null);
-const chartData: any = ref({
+const viewLineChartRef = ref<HTMLCanvasElement | null>(null);
+const viewLineChartData: any = ref({
   labels: [],
   datasets: [] as Array<any>,
 });
 const viewsData = ref();
 const ageGenderChartRef = ref<HTMLCanvasElement | null>(null);
 const ageGenderChartData = ref();
+const ageGenderLabels = ref();
+const pieOfRegisChartRef = ref<HTMLCanvasElement | null>(null);
+const pieOfRegisChartData = ref();
+const lineChartColorSet = [
+  '#D2FF52',
+  '#DEDDD7',
+  '#1C46F5',
+  '#131313',
+  '#FFD700',
+  '#FF82A9',
+  '#B4B4B4',
+  '#9A55FF',
+  '#52FFA8',
+  '#FF8C00',
+];
+
 const sumAllViews = (data: any) => {
   return data.reduce(
     (acc: { totalViews: number; totalEntries: number }, event: any) => {
@@ -112,262 +123,7 @@ const prepareViewsData = (views: any, type: string) => {
   }
   return { labels, data };
 };
-// const options = {
-//   series: [
-//     {
-//       name: "High - 2013",
-//       data: [28, 29, 33, 36, 32, 32, 33]
-//     },
-//     {
-//       name: "Low - 2013",
-//       data: [12, 11, 14, 18, 17, 13, 13]
-//     }
-//   ],
-//   chart: {
-//     height: 350,
-//     type: "line",
-//     dropShadow: {
-//       enabled: true,
-//       color: "#000",
-//       top: 18,
-//       left: 7,
-//       blur: 10,
-//       opacity: 0.5
-//     },
-//     zoom: {
-//       enabled: false
-//     },
-//     toolbar: {
-//       show: false
-//     }
-//   },
-//   colors: ["#77B6EA", "#545454"],
-//   dataLabels: {
-//     enabled: false
-//   },
-//   stroke: {
-//     curve: "smooth"
-//   },
-//   title: {
-//     text: "Average High & Low Temperature",
-//     align: "left"
-//   },
-//   grid: {
-//     borderColor: "#e7e7e7",
-//     row: {
-//       colors: ["#f3f3f3", "transparent"],
-//       opacity: 0.5
-//     }
-//   },
-//   markers: {
-//     size: 1
-//   },
-//   xaxis: {
-//     categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-//     title: {
-//       text: "Month"
-//     }
-//   },
-//   yaxis: {
-//     title: {
-//       text: "Temperature"
-//     },
-//     min: 5,
-//     max: 40
-//   },
-//   legend: {
-//     position: "top",
-//     horizontalAlign: "right",
-//     floating: true,
-//     offsetY: -25,
-//     offsetX: -5
-//   }
-// };
 
-const options = {
-  series: chartData.value.datasets.map((item) => ({
-    name: item.label,
-    data: item.data,
-  })),
-  chart: {
-    height: 320,
-    type: 'line',
-    zoom: { enabled: false },
-    toolbar: { show: false },
-  },
-  colors: chartData.value.datasets.map((item) => item.borderColor),
-  dataLabels: { enabled: false },
-  stroke: { curve: 'smooth', width: 2 },
-  title: {
-    text: 'Event Participation',
-    align: 'center',
-    style: { fontSize: '16px', fontWeight: '500', color: '#444' },
-  },
-  xaxis: {
-    categories: chartData.value.labels,
-    title: { text: 'Month', style: { color: '#666' } },
-    axisBorder: { show: false },
-    labels: { style: { colors: '#777' } },
-  },
-  yaxis: {
-    title: { text: 'Participants', style: { color: '#666' } },
-    min: 0,
-    labels: { style: { colors: '#777' } },
-  },
-  grid: {
-    borderColor: '#ddd',
-    strokeDashArray: 5,
-  },
-  legend: {
-    position: 'bottom', // ⬇️ ย้ายมาไว้ข้างล่าง
-    horizontalAlign: 'center', // จัดให้อยู่ตรงกลาง
-    fontSize: '13px',
-    labels: { colors: '#444' }, // เปลี่ยนสีตัวหนังสือให้ดูอ่านง่าย
-    markers: {
-      width: 10, // ปรับขนาด marker ให้เล็กลง
-      height: 10,
-      radius: 4, // ทำให้มุมมน
-    },
-    itemMargin: {
-      horizontal: 10, // เพิ่มระยะห่างระหว่าง legend
-      vertical: 5,
-    },
-  },
-};
-
-// const options = {
-//   series: chartData.value.datasets.map((item) => ({
-//     name: item.label,
-//     data: item.data,
-//   })),
-//   chart: {
-//     height: 350,
-//     type: 'line',
-//     zoom: { enabled: false },
-//     toolbar: { show: false },
-//   },
-//   colors: chartData.value.datasets.map((item) => item.borderColor),
-//   dataLabels: { enabled: false },
-//   stroke: { curve: 'smooth' },
-//   title: {
-//     text: 'Event Participation',
-//     align: 'left',
-//   },
-//   xaxis: {
-//     categories: chartData.value.labels,
-//     title: { text: 'Month' },
-//   },
-//   yaxis: {
-//     title: { text: 'Participants' },
-//     min: 0,
-//   },
-//   legend: {
-//     position: 'top',
-//     horizontalAlign: 'right',
-//     floating: true,
-//     offsetY: -25,
-//     offsetX: -5,
-//   },
-// };
-const donutChartRef = ref<HTMLCanvasElement | null>(null);
-const DATA_COUNT = 5;
-const NUMBER_CFG = { count: DATA_COUNT, min: 0, max: 100 };
-
-const data = {
-  labels: ['Other', 'Male', 'Female', 'Prefer not to say'],
-  datasets: [
-    {
-      label: 'Gender Count',
-      data: [2, 3, 3, 3],
-      backgroundColor: ['#cccccc', '#D71515', '#989898', '#f56042'],
-    },
-  ],
-};
-
-const initializeDonutChart = () => {
-  nextTick(() => {
-    if (donutChartRef.value) {
-      new Chart(donutChartRef.value, {
-        type: 'doughnut',
-        data: data,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'Chart.js Doughnut Chart',
-            },
-          },
-        },
-      });
-    }
-  });
-};
-const initializeChart = () => {
-  nextTick(() => {
-    if (chartCanvasRef.value) {
-      new Chart(chartCanvasRef.value, {
-        type: 'line',
-        data: chartData.value,
-        options: {
-          responsive: true,
-          interaction: {
-            mode: 'index',
-            intersect: false,
-          },
-          plugins: {
-            legend: {
-              display: true,
-              position: 'right', // ⬇️ ย้าย Legend ไปข้างล่าง
-              labels: {
-                font: { size: 12, family: 'Poppins' },
-                color: '#444', // เปลี่ยนสีให้ซอฟต์ขึ้น
-                boxWidth: 12, // ลดขนาดสี่เหลี่ยมสีของ legend
-                padding: 15, // เพิ่มระยะห่างให้ดูเป็นระเบียบ
-              },
-            },
-            tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)', // พื้นหลังโปร่งใสเล็กน้อย
-              titleFont: { size: 13, weight: '500' }, // ปรับฟอนต์หัวข้อให้ดูอ่านง่าย
-              bodyFont: { size: 12 },
-              cornerRadius: 4, // ทำให้ขอบมน
-            },
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false, // ซ่อนเส้น grid แนวนอน
-              },
-              ticks: {
-                font: { size: 12, family: 'Poppins' },
-                color: '#666',
-              },
-            },
-            y: {
-              type: 'linear',
-              display: true,
-              position: 'left',
-              grid: {
-                color: 'rgba(200, 200, 200, 0.3)', // ลดความเข้มของเส้น grid
-                borderDash: [5, 5], // ทำให้เป็นเส้นประดูสบายตา
-              },
-              ticks: {
-                font: { size: 12, family: 'Poppins' },
-                color: '#666',
-                padding: 5, // เพิ่มระยะห่างจากแกน
-              },
-            },
-          },
-        },
-      });
-    } else {
-      console.log('Chart canvas not found');
-    }
-  });
-};
 function getColor(category: any) {
   const colors = {
     Female: '#D2FF52 ',
@@ -377,7 +133,28 @@ function getColor(category: any) {
   };
   return colors[category] || 'black';
 }
-const ageGenderLabels = ref();
+
+const transformData = (registrations: Registration[]) => {
+  const total = registrations.length;
+  const checkedIn = registrations.filter(
+    (r) => r.status === 'Checked in'
+  ).length;
+  const unattended = registrations.filter(
+    (r) => r.status === 'Unattended'
+  ).length;
+  const awaitingCheckIn = total - checkedIn - unattended; // คำนวณจากที่เหลือ
+
+  return {
+    labels: ['Checked in', 'Awaiting Check-in', 'Unattended'],
+    datasets: [
+      {
+        data: [checkedIn, awaitingCheckIn, unattended],
+        backgroundColor: ['#1C46F5', '#D2FF52', '#131313'],
+      },
+    ],
+  };
+};
+
 const fetchAllRegisData = async () => {
   const fetchedData = await useFetchWithAuth(
     `v2/registrations`,
@@ -447,9 +224,9 @@ const fetchAllRegisData = async () => {
 
     initializeAgeGenderChart();
   }
-};
 
-const accessToken = useCookie('accessToken');
+  pieOfRegisChartData.value = transformData(registrationsData.value);
+};
 
 const fetchAllEventData = async () => {
   const fetchedData = await useFetchWithAuth(
@@ -460,19 +237,6 @@ const fetchAllEventData = async () => {
   eventsData.value = fetchedData.data || [];
   // eventsData.value =  [];
 };
-
-const pastelColors = [
-  '#D2FF52', // ฟ้าพาสเทล
-  '#DEDDD7', // ม่วงพาสเทล
-  '#1C46F5', // เขียวพาสเทล
-  '#131313', // ส้มพาสเทล
-  '#FFD700', // แดงพาสเทล
-  '#FF82A9', // แดงพาสเทล
-  '#B4B4B4', // แดงพาสเทล
-  '#9A55FF', // แดงพาสเทล
-  '#52FFA8', // แดงพาสเทล
-  '#FF8C00', // แดงพาสเทล
-];
 
 const fetchAllViewData = async () => {
   if (eventsData.value) {
@@ -489,17 +253,17 @@ const fetchAllViewData = async () => {
       const { labels, data } = prepareViewsData(eventViews, 'monthly');
 
       if (index === 0) {
-        chartData.value.labels = labels;
+        viewLineChartData.value.labels = labels;
       }
       const eventData: any = eventsData.value.find(
         (e) => e.eventId === event.event_id
       );
 
-      chartData.value.datasets.push({
+      viewLineChartData.value.datasets.push({
         label: eventData ? `${eventData.eventName}` : 'Unknown event',
         data: data,
-        borderColor: pastelColors[index % pastelColors.length], // เลือกสีวนไป
-        backgroundColor: pastelColors[index % pastelColors.length]
+        borderColor: lineChartColorSet[index % lineChartColorSet.length], // เลือกสีวนไป
+        backgroundColor: lineChartColorSet[index % lineChartColorSet.length]
           .replace('hsl', 'hsla')
           .replace(')', ', 0.2)'), // เพิ่ม transparency
         fill: false,
@@ -508,36 +272,70 @@ const fetchAllViewData = async () => {
     });
   }
 };
-const profileData = useCookie<UserProfile>('profileData');
-onMounted(async () => {
-  try {
-    isLoading.value = true;
-    const storedUser = localStorage.getItem('admin');
-    adminData.value = storedUser ? JSON.parse(storedUser) : {};
 
-    await fetchAllRegisData();
-    await fetchAllEventData();
-    await fetchAllViewData();
-    console.log(chartData.value);
-    console.log(options.series);
-    initializeChart();
-    initializeDonutChart();
-  } finally {
-    isLoading.value = false;
-  }
-});
+const initializeViewLineChart = () => {
+  nextTick(() => {
+    if (viewLineChartRef.value) {
+      new Chart(viewLineChartRef.value, {
+        type: 'line',
+        data: viewLineChartData.value,
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right', // ⬇️ ย้าย Legend ไปข้างล่าง
+              labels: {
+                font: { size: 12, family: 'Poppins' },
+                color: '#444', // เปลี่ยนสีให้ซอฟต์ขึ้น
+                boxWidth: 12, // ลดขนาดสี่เหลี่ยมสีของ legend
+                padding: 15, // เพิ่มระยะห่างให้ดูเป็นระเบียบ
+              },
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)', // พื้นหลังโปร่งใสเล็กน้อย
+              titleFont: { size: 13, weight: '500' }, // ปรับฟอนต์หัวข้อให้ดูอ่านง่าย
+              bodyFont: { size: 12 },
+              cornerRadius: 4, // ทำให้ขอบมน
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false, // ซ่อนเส้น grid แนวนอน
+              },
+              ticks: {
+                font: { size: 12, family: 'Poppins' },
+                color: '#666',
+              },
+            },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              grid: {
+                color: 'rgba(200, 200, 200, 0.3)', // ลดความเข้มของเส้น grid
+                borderDash: [5, 5], // ทำให้เป็นเส้นประดูสบายตา
+              },
+              ticks: {
+                font: { size: 12, family: 'Poppins' },
+                color: '#666',
+                padding: 5, // เพิ่มระยะห่างจากแกน
+              },
+            },
+          },
+        },
+      });
+    } else {
+      console.log('Chart canvas not found');
+    }
+  });
+};
 
-watch(chartCanvasRef, (newValue) => {
-  if (newValue) {
-    initializeChart();
-  }
-});
-
-watch(donutChartRef, (newValue) => {
-  if (newValue) {
-    initializeDonutChart();
-  }
-});
 const initializeAgeGenderChart = () => {
   nextTick(() => {
     if (ageGenderChartRef.value) {
@@ -630,15 +428,64 @@ const initializeAgeGenderChart = () => {
   });
 };
 
+const initializePieRegisChart = () => {
+  nextTick(() => {
+    if (pieOfRegisChartRef.value) {
+      new Chart(pieOfRegisChartRef.value, {
+        type: 'doughnut',
+        data: pieOfRegisChartData.value,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+              // gap: 5,
+            },
+            title: {
+              display: false,
+              text: 'Chart.js Doughnut Chart',
+            },
+          },
+        },
+      });
+    }
+  });
+};
+
+onMounted(async () => {
+  try {
+    isLoading.value = true;
+    const storedUser = localStorage.getItem('admin');
+    adminData.value = storedUser ? JSON.parse(storedUser) : {};
+    await fetchAllRegisData();
+    await fetchAllEventData();
+    await fetchAllViewData();
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+watch(viewLineChartRef, (newValue) => {
+  if (newValue) {
+    initializeViewLineChart();
+  }
+});
+
 watch(ageGenderChartRef, (newValue) => {
   if (newValue) {
     initializeAgeGenderChart();
   }
 });
+
+watch(pieOfRegisChartRef, (newValue) => {
+  if (newValue) {
+    initializePieRegisChart();
+  }
+});
 </script>
 
 <template>
-  <div class="mb-44 w-full bg-[#EEEEEE]">
+  <div class="w-full bg-[#EEEEEE] pb-24">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"
@@ -672,7 +519,7 @@ watch(ageGenderChartRef, (newValue) => {
               Monthly Event View Counts (4 months)
             </p>
 
-            <canvas ref="chartCanvasRef" class=""></canvas>
+            <canvas ref="viewLineChartRef" class=""></canvas>
           </div>
           <div
             class="view-by-gender col-span-3 flex h-full flex-col gap-3 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
@@ -688,72 +535,109 @@ watch(ageGenderChartRef, (newValue) => {
             ></canvas>
           </div>
         </div>
-        <div class="event-list-div grid h-[350px] grid-cols-10 gap-3">
+        <div class="grid grid-cols-10 gap-4">
           <div
-            class="col-span-10 flex flex-col gap-2 rounded-[20px] pb-10 drop-shadow-md"
+            class="col-span-3 grid h-full grid-rows-2 gap-4 md:max-h-[600px]"
+          >
+            <div
+              v-if="eventsData"
+              class="flex flex-col gap-5 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            >
+              <h1 class="b1 font-semibold">Your Event</h1>
+              <p class="b1">
+                <span class="text-[100px]"> {{ eventsData.length }}</span> Event
+              </p>
+            </div>
+            <div
+              class="rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            >
+              <h1 class="b1 font-semibold">
+                Registration and Check-in Proportion
+              </h1>
+              <canvas
+                ref="pieOfRegisChartRef"
+                class="h-full w-full"
+                style="height: 100%"
+              ></canvas>
+            </div>
+          </div>
+          <div
+            class="col-span-7 flex grid-cols-10 flex-col gap-2 rounded-[20px] drop-shadow-md md:max-h-[600px]"
           >
             <div>
               <p class="b1 font-semibold">Events</p>
             </div>
             <div class="w-full table-auto caption-top text-sm">
               <div
-                class="border-default-300 grid grid-cols-12 border-b transition-colors"
+                class="b3 border-default-300 grid grid-cols-12 border-b !text-sm transition-colors"
               >
                 <p
-                  class="col-span-4 px-4 text-base font-semibold text-lavender-gray"
+                  class="col-span-4 px-4 text-base font-semibold text-black/40"
                 >
                   Event Name
                 </p>
                 <p
-                  class="col-span-4 px-4 text-base font-semibold text-lavender-gray"
+                  class="col-span-4 px-4 text-base font-semibold text-black/40"
                 >
                   Location
                 </p>
                 <p
-                  class="col-span-1 px-4 text-center text-base font-semibold text-lavender-gray"
+                  class="col-span-1 px-4 text-center text-base font-semibold text-black/40"
                 >
                   Status
                 </p>
                 <p
-                  class="col-span-3 px-4 text-center text-base font-semibold text-lavender-gray"
+                  class="col-span-3 px-4 text-center text-base font-semibold text-black/40"
                 >
                   Action
                 </p>
               </div>
-              <div class="flex w-full flex-col gap-2 overflow-y-auto">
-                <div v-if="eventsData.length === 0" class="text-center">
-                  <p colspan="3" class="b1 py-20">No Event</p>
-                </div>
+              <div class="relative">
                 <div
-                  v-else
-                  v-for="event in eventsData"
-                  class="b3 grid h-fit w-full grid-cols-12 content-center gap-6 rounded-md border border-white/90 bg-white/70 p-3 drop-shadow-md backdrop-blur-xl"
+                  class="absolute left-0 top-0 z-40 h-8 w-full bg-gradient-to-b from-[#EEEEEE]"
+                ></div>
+                <div
+                  class="flex w-full flex-col gap-2 overflow-y-auto md:max-h-[550px]"
                 >
-                  <p class="col-span-4">{{ event?.eventName }}</p>
-                  <p class="col-span-4">{{ event?.eventLocation }}</p>
-                  <p
-                    class="col-span-1 place-self-center rounded-md bg-blue-300 px-2 py-1"
+                  <div v-if="eventsData.length === 0" class="text-center">
+                    <p colspan="3" class="b1 py-20">No Event</p>
+                  </div>
+                  <div
+                    v-else
+                    v-for="event in eventsData"
+                    class="b3 grid h-fit w-full grid-cols-12 content-center gap-6 rounded-md border border-white/90 bg-white/70 p-3 drop-shadow-md backdrop-blur-xl"
                   >
-                    {{
-                      new Date(event?.eventEndDate).getTime() <
-                      new Date().getTime()
-                        ? 'ended'
-                        : 'active'
-                    }}
-                  </p>
-                  <NuxtLink
-                    class="go-to-dashboard col-span-3"
-                    :to="{
-                      path: `/backoffice/dashboard/${event?.eventId}`,
-                    }"
-                  >
-                    <div class="flex items-center justify-center gap-2 p-4">
-                      <Dashboard class="t3" />
-                      <p class="b3">View dashboard</p>
-                    </div>
-                  </NuxtLink>
-                </div>
-                <!-- <tr
+                    <p class="col-span-4">{{ event?.eventName }}</p>
+                    <p class="col-span-4">{{ event?.eventLocation }}</p>
+                    <p
+                      :class="
+                        new Date(event?.eventEndDate).getTime() <
+                        new Date().getTime()
+                          ? 'bg-red-300'
+                          : 'bg-blue-300'
+                      "
+                      class="col-span-1 place-self-center rounded-md px-2 py-1"
+                    >
+                      {{
+                        new Date(event?.eventEndDate).getTime() <
+                        new Date().getTime()
+                          ? 'ended'
+                          : 'active'
+                      }}
+                    </p>
+                    <NuxtLink
+                      class="go-to-dashboard col-span-3"
+                      :to="{
+                        path: `/backoffice/dashboard/${event?.eventId}`,
+                      }"
+                    >
+                      <div class="flex items-center justify-center gap-2 p-4">
+                        <Dashboard class="t3" />
+                        <p class="b3">View dashboard</p>
+                      </div>
+                    </NuxtLink>
+                  </div>
+                  <!-- <tr
                   v-else
                   v-for="event in eventsData"
                   class="event-list border-default-300 cursor-default border-b transition-colors"
@@ -761,6 +645,10 @@ watch(ageGenderChartRef, (newValue) => {
                   <EventList :event="event" :type="'dashboard'" />
                   
                 </tr> -->
+                </div>
+                <div
+                  class="absolute bottom-0 left-0 z-40 h-8 w-full bg-gradient-to-t from-[#EEEEEE]"
+                ></div>
               </div>
             </div>
           </div>

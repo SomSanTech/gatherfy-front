@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/models/userProfile';
+import Cancle from '../icons/Cancle.vue';
 const signOut = useAuth().logout;
 const profileData = useCookie<UserProfile>('profileData');
 const route = useRoute();
@@ -16,7 +17,7 @@ const emit = defineEmits(['close']); // ใช้ส่ง event กลับไ
       @click="$emit('close')"
       class="absolute right-4 top-4 z-50 text-gray-600 md:hidden"
     >
-      <XIcon />
+      <Cancle />
     </button>
     <div>
       <div class="oooh-baby-regular mb-10 px-14 text-center text-5xl">

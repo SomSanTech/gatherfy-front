@@ -3,9 +3,8 @@ const props = defineProps<{
   title?: string;
   subTitle?: string;
   isShowCompleteModal?: boolean;
+  status?: string;
 }>();
-
-const { state, hidePopup } = usePopup();
 
 const emits = defineEmits(['completeAction', 'cancleAction']);
 </script>
@@ -15,25 +14,33 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
     :class="
       isShowCompleteModal ? 'opacity-100' : 'pointer-events-none opacity-0'
     "
-    class="fixed left-1/2 top-0 z-50 flex h-screen w-full -translate-x-1/2 items-center justify-center bg-black/40 duration-200"
+    class="fixed left-0 top-0 z-50 flex h-screen w-full items-center justify-center bg-black/40 duration-200"
   >
     <div
-      class="flex w-fit gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md"
+      class="absolute flex w-1/4 max-w-3xl flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md"
     >
-      <div
-        class="flex h-fit w-fit shrink-0 items-center justify-center rounded-full border-[1px] border-black/60"
-      >
-        <Check class="text-2xl" />
+      <div class="flex items-center gap-4">
+        <div
+          class="flex h-fit w-fit shrink-0 items-center justify-center rounded-full border-[1px] border-black/60 p-2"
+        >
+          <Trash v-if="status === 'confirm'" class="text-lg" />
+          <Cancle v-else-if="status === 'error'" class="text-xl" />
+          <Check v-else class="text-2xl" />
+        </div>
+        <div class="w-full">
+          <div class="b2 break-words font-semibold">{{ title }}</div>
+          <!-- <p class="b3 break-words">
+            {{ subTitle }}
+          </p> -->
+        </div>
       </div>
-      <div class="">
-        <p class="b2 font-semibold">{{ title }}</p>
-        <div class="b3 w-fit whitespace-pre-wrap text-wrap break-words">
-          {{ subTitle }}
-        </div>
-        <div class="flex w-fit gap-2 pt-4">
-          <BtnComp text="Ok" @click="$emit('completeAction')" />
-          <!-- <BtnComp text="Cancle" @click="$emit('cancleAction')" /> -->
-        </div>
+      <div class="flex w-fit gap-2 pt-4">
+        <BtnComp text="OK" @click="$emit('completeAction')" />
+        <BtnComp
+          v-if="status === 'confirm'"
+          text="Cancle"
+          @click="$emit('cancleAction')"
+        />
       </div>
     </div>
   </div>

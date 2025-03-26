@@ -22,12 +22,17 @@ const token = useCookie('accessToken');
 const checkIsAlreadyRegis = ref(false);
 const userSubscribeTagData = ref([]);
 const isHavePopupOpen = useState('isHavePopupOpen');
+const userRegisHistory = useState('userRegisHistory');
+const isShowSuccessRegisPopup = ref(false);
+const subAction = ref('');
+const isShowSubTagPopup = ref(false);
+const accessToken = useCookie('accessToken');
+
 const handleGoSignIn = () => {
   loginPopup.value = true;
   isHavePopupOpen.value = true;
   plsLoginPopUp.value = false;
 };
-const userRegisHistory = useState('userRegisHistory');
 
 const regis = async () => {
   if (event.value) {
@@ -46,11 +51,12 @@ const regis = async () => {
         'GET',
         accessToken.value
       );
-
-      userRegisHistory.value = regisData.data;
+      if ('data' in regisData) {
+        userRegisHistory.value = regisData.data;
+      }
       isShowSuccessRegisPopup.value = true;
     }
-    if (regsitered.error) {
+    if ('error' in regsitered) {
       alert('Already Registered for the Event');
     }
     isOpenPopup.value = false;
@@ -65,7 +71,7 @@ const fetchData = async () => {
     event.value = (await fetchedData.data) || [];
   }
 };
-const isShowSuccessRegisPopup = ref(false);
+
 const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
   const isEndSaleTicket =
     new Date(ticketEndDate).getTime() < new Date().getTime();
@@ -76,17 +82,15 @@ const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
     plsLoginPopUp.value = true;
   }
 };
-const accessToken = useCookie('accessToken');
 
 const checkIsAlreadySubTag = (tagId: number) => {
   let compareResult = false;
   if (accessToken.value) {
-    compareResult = userSubscribeTagData.value.tagId.includes(tagId);
+    compareResult = userSubscribeTagData.value?.tagId.includes(tagId);
   }
   return compareResult;
 };
-const subAction = ref('');
-const isShowSubTagPopup = ref(false);
+
 const handleSubscribeTag = async (tagId: number) => {
   if (!userProfile.value) {
     alert('Please login first');
@@ -142,6 +146,7 @@ const handleSubscribeTag = async (tagId: number) => {
     }
   }
 };
+
 onMounted(async () => {
   try {
     isLoading.value = true;

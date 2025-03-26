@@ -14,10 +14,16 @@ const isClickShareContact = ref<boolean>(false);
 const scannedValue = ref<string | null>(null);
 const config = useRuntimeConfig();
 const contactDeletedId = ref<number>(0);
-const isShowConfirm = ref<boolean>(false);
-
+// const isShowConfirm = ref<boolean>(false);
+const handleConfirmPopup = () => {
+  if (state.status === 'confirm') {
+    deleteContact();
+  } else {
+    state.isVisible = false;
+  }
+};
 const handleClickDeleteContact = (contactId: number) => {
-  isShowConfirm.value = !isShowConfirm.value;
+  showPopup('Delete this contact?', 'confirm');
   contactDeletedId.value = contactId;
 };
 
@@ -34,7 +40,7 @@ const generateQRCode = async () => {
       isShowQR.value = !isShowQR.value;
     }
   } else {
-    alert('wrong!!!');
+    console.log('wrong!!!');
   }
 };
 
@@ -52,7 +58,7 @@ const getContact = async () => {
 const handleShareContact = () => {
   isClickShareContact.value = !isClickShareContact.value;
 };
-
+const { state, showPopup } = usePopup();
 const deleteContact = async () => {
   if (contactDeletedId.value) {
     console.log(contactDeletedId.value);
@@ -63,10 +69,13 @@ const deleteContact = async () => {
       accessToken.value
     );
     if (response.status === 200) {
-      alert('delete');
+      showPopup('Delete contact succeessful', 'complete');
+      // isShowConfirm.value = false;
+      // alert('delete');
+
       await getContact();
     } else {
-      alert('smth broke');
+      showPopup('Cannot delete contact', 'error');
     }
   }
 };
@@ -121,9 +130,11 @@ onMounted(async () => {
           }
         ).then((response) => {
           if (response.status === 401) {
-            alert('QRCODE time out');
+            showPopup('QRCODE time out', 'error');
+            // alert('QRCODE time out');
           } else {
-            alert('checked in');
+            showPopup('Add contact successful', 'complete');
+            // alert('checked in');
           }
         });
       }
@@ -139,13 +150,20 @@ onMounted(async () => {
 
 <template>
   <div class="relative mx-auto my-28 flex w-screen max-w-6xl gap-9">
-    <ConfirmModal
+    <CompleteModal
+      :isShowCompleteModal="state.isVisible"
+      :title="state.text"
+      :status="state.status"
+      @completeAction="handleConfirmPopup"
+      @cancleAction="state.isVisible = false"
+    />
+    <!-- <ConfirmModal
       title="Delete this contact?"
       subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
       :isShowConfirmModal="isShowConfirm"
       @confirmAction="deleteContact()"
       @cancleAction="isShowConfirm = !isShowConfirm"
-    />
+    /> -->
     <ProfileSidebar @shareContact="handleShareContact" />
     <div class="w-full">
       <div class="flex w-full flex-wrap gap-4">
