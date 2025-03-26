@@ -25,7 +25,11 @@ interface UserProfile {
   users_email: string;
   users_phone: string;
   users_image: string;
-  users_birthday: string; // << เพิ่มตรงนี้
+  users_birthday: string;
+  email_new_events: boolean;
+  email_reminders_day: boolean;
+  email_reminders_hour: boolean;
+  email_updated_events: boolean;
 }
 
 type SocialLink = {
@@ -133,29 +137,36 @@ const notiSettingMsg = ref({
 const { state, showPopup } = usePopup();
 
 const handleNotiSetting = async () => {
+  if (isSaving.value['noti']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['noti']: true }; // เริ่มโหลดเฉพาะปุ่มนี้
   console.log('notiSetting', notiSetting.value);
-
-  const response = await useFetchWithAuth(
-    `v1/profile`,
-    'PUT',
-    accessToken.value,
-    notiSetting.value
-  );
-
-  if (response.status === 200) {
-    showPopup('Update email notification success', 'complete');
-    const userProfileData = await useFetchWithAuth(
-      'v1/profile',
-      'GET',
-      accessToken.value
+  try {
+    const response = await useFetchWithAuth(
+      `v1/profile`,
+      'PUT',
+      accessToken.value,
+      notiSetting.value
     );
 
-    if ('data' in userProfileData) {
-      userProfile.value = userProfileData.data;
+    if (response.status === 200) {
+      showPopup('Update email notification success', 'complete');
+      const userProfileData = await useFetchWithAuth(
+        'v1/profile',
+        'GET',
+        accessToken.value
+      );
+
+      if ('data' in userProfileData) {
+        userProfile.value = userProfileData.data;
+      }
+    } else {
+      showPopup('Update email notification fail, try again later', 'error');
     }
-  } else {
+  } catch (error) {
     showPopup('Update email notification fail, try again later', 'error');
   }
+  isSaving.value = { ...isSaving.value, ['noti']: false };
 };
 
 const handelFileUpload = (file: any) => {
@@ -172,78 +183,158 @@ const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
+// const editProfile = async () => {
+//   userProfileEdited.value.birthday = formattedBirthday.value;
+//   userProfileEdited.value.gender = selectedGender.value;
+//   validateForm();
+//   if (isFormValid.value) {
+//     const currentFileName = userProfile.value.users_image.replace(
+//       `${config.public.minioUrl}/profiles/`,
+//       ''
+//     );
+
+//     if (uploadFileName.value) {
+//       await useFetchWithAuth(
+//         `v1/files/delete/${currentFileName}?bucket=profiles`,
+//         'DELETE',
+//         accessToken.value
+//       );
+//       userProfileEdited.value.image = uploadFileName.value;
+//       await useFetchUpload(
+//         `v1/files/upload`,
+//         fileToUpload.value,
+//         'profiles',
+//         accessToken.value
+//       );
+//     } else {
+//       userProfileEdited.value.image = currentFileName;
+//     }
+//     console.log('userProfileEdited: ', userProfileEdited.value);
+
+//     const response = await useFetchWithAuth(
+//       `v1/profile`,
+//       'PUT',
+//       accessToken.value,
+//       userProfileEdited.value
+//     );
+
+//     if (response.status === 200) {
+//       const userProfileData = await useFetchWithAuth(
+//         'v1/profile',
+//         'GET',
+//         accessToken.value
+//       );
+
+//       if ('data' in userProfileData) {
+//         userProfile.value = userProfileData.data;
+//       }
+//       isShowConfirmSave.value = !isShowConfirmSave.value;
+//       isShowCompleteModal.value = !isShowCompleteModal.value;
+//     }
+//   } else {
+//     showPopup('Fail, try again later', 'error');
+//   }
+// };
+
+const isSaving = ref({});
 const editProfile = async () => {
+  if (isSaving.value['profile']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['profile']: true }; // เริ่มโหลดเฉพาะปุ่มนี้
+
   userProfileEdited.value.birthday = formattedBirthday.value;
   userProfileEdited.value.gender = selectedGender.value;
   validateForm();
+
   if (isFormValid.value) {
-    const currentFileName = userProfile.value.users_image.replace(
-      `${config.public.minioUrl}/profiles/`,
-      ''
-    );
-
-    if (uploadFileName.value) {
-      await useFetchWithAuth(
-        `v1/files/delete/${currentFileName}?bucket=profiles`,
-        'DELETE',
-        accessToken.value
-      );
-      userProfileEdited.value.image = uploadFileName.value;
-      await useFetchUpload(
-        `v1/files/upload`,
-        fileToUpload.value,
-        'profiles',
-        accessToken.value
-      );
-    } else {
-      userProfileEdited.value.image = currentFileName;
-    }
-    console.log('userProfileEdited: ', userProfileEdited.value);
-
-    const response = await useFetchWithAuth(
-      `v1/profile`,
-      'PUT',
-      accessToken.value,
-      userProfileEdited.value
-    );
-
-    if (response.status === 200) {
-      const userProfileData = await useFetchWithAuth(
-        'v1/profile',
-        'GET',
-        accessToken.value
+    try {
+      const currentFileName = userProfile.value.users_image.replace(
+        `${config.public.minioUrl}/profiles/`,
+        ''
       );
 
-      if ('data' in userProfileData) {
-        userProfile.value = userProfileData.data;
+      if (uploadFileName.value) {
+        await useFetchWithAuth(
+          `v1/files/delete/${currentFileName}?bucket=profiles`,
+          'DELETE',
+          accessToken.value
+        );
+        userProfileEdited.value.image = uploadFileName.value;
+        await useFetchUpload(
+          `v1/files/upload`,
+          fileToUpload.value,
+          'profiles',
+          accessToken.value
+        );
+      } else {
+        userProfileEdited.value.image = currentFileName;
       }
-      isShowConfirmSave.value = !isShowConfirmSave.value;
-      isShowCompleteModal.value = !isShowCompleteModal.value;
+
+      console.log('userProfileEdited: ', userProfileEdited.value);
+
+      const response = await useFetchWithAuth(
+        `v1/profile`,
+        'PUT',
+        accessToken.value,
+        userProfileEdited.value
+      );
+
+      if (response.status === 200) {
+        const userProfileData = await useFetchWithAuth(
+          'v1/profile',
+          'GET',
+          accessToken.value
+        );
+
+        if ('data' in userProfileData) {
+          userProfile.value = userProfileData.data;
+        }
+
+        isShowConfirmSave.value = !isShowConfirmSave.value;
+        isShowCompleteModal.value = !isShowCompleteModal.value;
+        showPopup('Update profile success', 'complete');
+      }
+    } catch (error) {
+      console.error(error);
+      showPopup('Fail, try again later', 'error');
     }
   } else {
     showPopup('Fail, try again later', 'error');
   }
+
+  isSaving.value = { ...isSaving.value, ['profile']: false };
 };
 
 const changePassword = async () => {
-  const response = await useFetchWithAuth(
-    'v1/password',
-    'PUT',
-    accessToken.value,
-    {
-      currentPassword: currentPassword.value,
-      newPassword: newPassword.value,
-    }
-  );
+  if (isSaving.value['password']) return; // ป้องกันกดซ้ำ
 
-  if (response.status === 200) {
-    showPopup('Change password success', 'complete');
-  } else {
+  isSaving.value = { ...isSaving.value, ['password']: true }; // เริ่มโหลดเฉพาะปุ่มนี้
+  try {
+    const response = await useFetchWithAuth(
+      'v1/password',
+      'PUT',
+      accessToken.value,
+      {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value,
+      }
+    );
+
+    if (response.status === 200) {
+      showPopup('Change password success', 'complete');
+    } else {
+      showPopup('Change password fail, try again later', 'error');
+    }
+  } catch (error) {
     showPopup('Change password fail, try again later', 'error');
   }
+  isSaving.value = { ...isSaving.value, ['password']: false };
 };
 
 const handleAddSocial = async () => {
+  if (isSaving.value['noti']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['noti']: true };
   console.log(socialLinkSet.value);
   const filteredSocialLinks = socialLinkSet.value.filter((sc: SocialLink) => {
     return sc.socialLink !== '';
@@ -262,6 +353,8 @@ const handleAddSocial = async () => {
     showPopup('Add social fail', 'error');
   }
   console.log(response);
+
+  isSaving.value = { ...isSaving.value, ['profile']: false };
 };
 
 const trimTrailingSlash = (url: string) => {
@@ -604,9 +697,11 @@ onMounted(async () => {
           <!-- Save Button -->
           <div class="flex gap-2 self-end">
             <BtnComp
-              text="Save"
+              :text="isSaving['profile'] ? 'Saving...' : 'Save'"
               color="black"
               class="mt-8 h-fit"
+              :disabled="isSaving['profile']"
+              :isLoading="isSaving['profile']"
               @click="editProfile"
             />
           </div>
@@ -659,6 +754,8 @@ onMounted(async () => {
             <BtnComp
               @click="handleAddSocial"
               text="Save"
+              :disabled="isSaving['social']"
+              :isLoading="isSaving['social']"
               color="black"
               class="mt-3 w-fit self-end"
             />
@@ -686,9 +783,11 @@ onMounted(async () => {
           </div>
           <BtnComp
             @click="changePassword"
-            text="Save"
+            :text="isSaving['password'] ? 'Saving...' : 'Save'"
+            :isLoading="isSaving['password']"
             color="black"
             class="mt-3 w-fit self-end"
+            :disabled="isSaving['password']"
           />
         </div>
       </div>
@@ -732,6 +831,8 @@ onMounted(async () => {
             text="Save"
             color="black"
             class="mt-3 w-fit self-end"
+            :disabled="isSaving['noti']"
+            :isLoading="isSaving['noti']"
           />
         </div>
       </div>
