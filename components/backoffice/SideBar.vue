@@ -11,7 +11,7 @@ const emit = defineEmits(['close']); // ใช้ส่ง event กลับไ
 <template>
   <div
     :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-    class="fixed flex h-full w-80 flex-col justify-between bg-white px-8 py-16 drop-shadow-lg"
+    class="fixed flex h-full w-80 flex-col justify-between border border-white/90 bg-white/90 px-8 py-16 drop-shadow-md backdrop-blur-xl"
   >
     <button
       @click="$emit('close')"

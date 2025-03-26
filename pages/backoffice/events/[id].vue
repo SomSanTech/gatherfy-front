@@ -453,7 +453,7 @@ async function downloadReport() {
 
   // ตั้งชื่อไฟล์จาก header "Content-Disposition"
   const contentDisposition = response.headers.get('Content-Disposition');
-  let filename = `${event.value.slug}-response.xlsx`;
+  let filename = `${event.value.name} response.xlsx`;
   if (contentDisposition) {
     const match = contentDisposition.match(/filename="(.+)"/);
     if (match) {

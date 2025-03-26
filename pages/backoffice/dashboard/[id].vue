@@ -597,7 +597,7 @@ watch(selectedViewOption, (newValue) => {
     >
       <span class="loader"></span>
     </div>
-    <div v-else class="mx-20 my-24 flex w-full flex-col gap-3">
+    <div v-else class="mx-20 my-24 flex w-full flex-col gap-4">
       <NuxtLink
         to="/backoffice/dashboard"
         class="mb-1 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -605,11 +605,11 @@ watch(selectedViewOption, (newValue) => {
         <Arrow />
         <p class="b2">Back to overall dashboard</p>
       </NuxtLink>
-      <div class="mb-4 flex items-center gap-5">
+      <div class="bg-glass flex items-center gap-4 rounded-[20px] p-3">
         <img
           :src="eventDetail?.image"
           alt=""
-          class="h-[180px] rounded-lg object-cover"
+          class="h-[180px] rounded-[12px] object-cover"
         />
         <div class="flex w-fit flex-col justify-center gap-2">
           <div class="tag-group b4 flex gap-2">
@@ -650,9 +650,9 @@ watch(selectedViewOption, (newValue) => {
         </div>
       </div>
 
-      <div class="grid h-full max-h-[] grid-cols-10 gap-3">
+      <div class="grid h-full grid-cols-10 gap-4">
         <div
-          class="jus col-span-5 flex flex-col gap-5 rounded-[20px] border border-white/90 bg-white/70 px-8 py-5 drop-shadow-md backdrop-blur-xl"
+          class="jus bg-glass col-span-5 flex flex-col gap-4 rounded-[20px] px-8 py-5"
         >
           <div class="flex items-center justify-between">
             <h1 class="b1 font-semibold">
@@ -671,12 +671,12 @@ watch(selectedViewOption, (newValue) => {
           </div>
           <canvas
             ref="viewsChartRef"
-            class="h-fit"
-            style="height: 100%"
+            class=""
+            style="height: 100%; max-height: 400px"
           ></canvas>
         </div>
         <div
-          class="col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-8 drop-shadow-md backdrop-blur-xl"
+          class="col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-8 drop-shadow-md backdrop-blur-xl"
         >
           <p class="b1 self-start font-semibold">Registration Goal</p>
           <div
@@ -699,10 +699,10 @@ watch(selectedViewOption, (newValue) => {
           />
         </div>
       </div>
-      <div class="grid grid-cols-12 gap-3">
-        <div class="col-span-7 flex flex-col gap-3">
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-7 flex flex-col gap-4">
           <div
-            class="view-by-gender-age rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-gender-age rounded-[20px] border border-white/90 bg-white p-12 drop-shadow-md backdrop-blur-xl"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -713,13 +713,9 @@ watch(selectedViewOption, (newValue) => {
               class="h-full"
               style="height: 100%"
             ></canvas>
-            <!-- <StackBarChart
-              :groupedByAgeRangeAndGender="groupedByAgeRangeAndGender"
-              :colors="colors"
-            /> -->
           </div>
           <div
-            class="view-by-checkin flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-checkin flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -779,14 +775,14 @@ watch(selectedViewOption, (newValue) => {
           </div>
         </div>
 
-        <div class="col-span-5 flex flex-col gap-3">
+        <div class="col-span-5 flex flex-col gap-4">
           <div
-            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
           <div
-            class="view-by-feedback flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-feedback flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div

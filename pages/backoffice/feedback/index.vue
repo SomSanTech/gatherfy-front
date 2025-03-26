@@ -121,6 +121,45 @@ function closePreview() {
   document.body.style.overflow = '';
 }
 
+const config = useRuntimeConfig();
+
+async function downloadReport(eventId, eventName) {
+  const response = await fetch(
+    `${config.public.baseUrl}/api/v1/report/${eventId}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to download report');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  // ตั้งชื่อไฟล์จาก header "Content-Disposition"
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = `${eventName} response.xlsx`;
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="(.+)"/);
+    if (match) {
+      filename = match[1];
+    }
+  }
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -182,6 +221,7 @@ onMounted(async () => {
                 :responses="feedbacksCount[index]"
                 :canEdit="compareDate(event.eventStartDate)"
                 @preview-feedback="onPreviewFeedback"
+                @export-feedback="downloadReport"
               />
             </tr>
           </tbody>

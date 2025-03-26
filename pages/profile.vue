@@ -130,6 +130,7 @@ const notiSettingMsg = ref({
     desc: 'Stay informed when an event you follow gets updated or modified.',
   },
 });
+const { state, showPopup } = usePopup();
 
 const handleNotiSetting = async () => {
   console.log('notiSetting', notiSetting.value);
@@ -142,7 +143,7 @@ const handleNotiSetting = async () => {
   );
 
   if (response.status === 200) {
-    alert('yesss');
+    showPopup('Update email notification success', 'complete');
     const userProfileData = await useFetchWithAuth(
       'v1/profile',
       'GET',
@@ -153,7 +154,7 @@ const handleNotiSetting = async () => {
       userProfile.value = userProfileData.data;
     }
   } else {
-    alert('wrong weii');
+    showPopup('Update email notification fail, try again later', 'error');
   }
 };
 
@@ -220,7 +221,7 @@ const editProfile = async () => {
       isShowCompleteModal.value = !isShowCompleteModal.value;
     }
   } else {
-    alert('wrong');
+    showPopup('Fail, try again later', 'error');
   }
 };
 
@@ -236,9 +237,9 @@ const changePassword = async () => {
   );
 
   if (response.status === 200) {
-    alert('change pass');
+    showPopup('Change password success', 'complete');
   } else {
-    alert('failed');
+    showPopup('Change password fail, try again later', 'error');
   }
 };
 
@@ -255,7 +256,11 @@ const handleAddSocial = async () => {
     accessToken.value,
     { socialLinks: filteredSocialLinks }
   );
-
+  if (response.status === 200) {
+    showPopup('Add social success', 'complete');
+  } else {
+    showPopup('Add social fail', 'error');
+  }
   console.log(response);
 };
 
@@ -412,7 +417,13 @@ onMounted(async () => {
   <!-- <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9"> -->
 
   <div class="relative w-full duration-300">
-    <ConfirmModal
+    <CompleteModal
+      :isShowCompleteModal="state.isVisible"
+      :title="state.text"
+      :status="state.status"
+      @complete-action="state.isVisible = false"
+    />
+    <!-- <ConfirmModal
       title="Update profile?"
       subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
       :isShowConfirmModal="isShowConfirmSave"
@@ -423,7 +434,7 @@ onMounted(async () => {
       title="Already Edit your profile"
       :isShowCompleteModal="isShowCompleteModal"
       @confirmAction="isShowCompleteModal = !isShowCompleteModal"
-    />
+    /> -->
     <!-- <p class="t3">My Profile</p> -->
     <div class="flex flex-col gap-5">
       <div
@@ -596,7 +607,7 @@ onMounted(async () => {
               text="Save"
               color="black"
               class="mt-8 h-fit"
-              @click="isShowConfirmSave = !isShowConfirmSave"
+              @click="editProfile"
             />
           </div>
         </div>

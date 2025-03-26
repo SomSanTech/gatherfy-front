@@ -32,7 +32,7 @@ const someCalculation = Math.round(totalViews / totalEntries);
       :class="`${format === 'row' ? 'col-span-3 flex h-24' : 'grid w-full grid-rows-3'} h-full gap-3`"
     >
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full flex-grow justify-between gap-3 rounded-[20px] border border-white/90 bg-white/70 p-4 drop-shadow-md backdrop-blur-xl`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full flex-grow justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl`"
       >
         <div>
           <div class="flex flex-col gap-4">
@@ -45,7 +45,7 @@ const someCalculation = Math.round(totalViews / totalEntries);
         <RegisPeople class="self-start !fill-black/70 text-4xl" />
       </div>
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/70 p-4 drop-shadow-md backdrop-blur-xl`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl`"
       >
         <div class="flex flex-col gap-4">
           <p class="b3">Views</p>
@@ -54,13 +54,13 @@ const someCalculation = Math.round(totalViews / totalEntries);
         <AllViews class="!fill-black/70 text-4xl" />
       </div>
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/70 p-4 drop-shadow-md backdrop-blur-xl`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} items- flex w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl`"
       >
         <div class="flex flex-col gap-4">
           <p class="b3">Views</p>
           <p class="b3">
             <span class="!text-5xl">
-              {{ someCalculation }}
+              {{ totalViews === 0 ? '0' : someCalculation }}
             </span>
             <span class="b3 font-normal">per day</span>
           </p>

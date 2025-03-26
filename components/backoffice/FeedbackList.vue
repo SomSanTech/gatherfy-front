@@ -16,7 +16,10 @@ interface Event {
   eventStartDate: Date;
 }
 
-const emit = defineEmits(['previewFeedback']);
+const emit = defineEmits(['previewFeedback', 'exportFeedback']);
+const exportFeedback = () => {
+  emit('exportFeedback', props.event?.eventId, props.event?.eventName);
+};
 </script>
 
 <template>
@@ -31,7 +34,7 @@ const emit = defineEmits(['previewFeedback']);
     {{ responses }}
   </td> -->
   <td>
-    <div class="flex justify-center gap-5 text-xl text-gray-600">
+    <div class="flex justify-center gap-2 text-xl text-gray-600">
       <div v-if="canEdit" class="flex items-center justify-center gap-2 p-4">
         <NuxtLink
           class="go-to-feedback"
@@ -60,6 +63,12 @@ const emit = defineEmits(['previewFeedback']);
         class="flex items-center justify-center gap-2 p-4"
       >
         <View class="t3 cursor-pointer" />
+      </div>
+      <div
+        @click="exportFeedback"
+        class="flex items-center justify-center gap-2 p-4"
+      >
+        <FileDownload class="t3 cursor-pointer" />
       </div>
     </div>
   </td>

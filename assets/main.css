@@ -225,3 +225,7 @@
   height: 70%;
   pointer-events: none;
 }
+
+.bg-glass {
+  @apply border border-white/90 bg-white/90 drop-shadow-md backdrop-blur-xl;
+}
