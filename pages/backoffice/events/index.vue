@@ -8,10 +8,10 @@ definePageMeta({
   layout: 'backoffice',
 });
 const profileData = useCookie('profileData');
+const isLoading = useState('isLoading', () => true);
 
 const eventsData = ref<Event[]>([]);
 const adminData = ref<UserProfile>();
-const isLoading = ref(true);
 const deleteAlert = ref(false);
 const deleteAlertMessage = ref('');
 const deletePopup = ref(false);
@@ -58,7 +58,6 @@ async function deleteEvent() {
 }
 onMounted(() => {
   try {
-    isLoading.value = true;
     if (profileData.value) {
       adminData.value = profileData.value;
     }
@@ -71,8 +70,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
-    <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
+    <div class="bg-glass mx-20 mb-16 mt-32 w-full rounded-3xl">
       <div class="p-12">
         <div class="grid grid-cols-2">
           <h1 class="t1">Event list</h1>

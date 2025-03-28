@@ -8,7 +8,8 @@ definePageMeta({
 });
 const eventsData = ref<Event[]>([]);
 const adminData = ref<User | null>(null);
-const isLoading = ref(true);
+const isLoading = useState('isLoading', () => true);
+
 const accessToken = useCookie('accessToken');
 const fetchData = async () => {
   const fetchedData = await useFetchWithAuth(
@@ -32,7 +33,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
         <h1 class="t1">Registrations by event</h1>

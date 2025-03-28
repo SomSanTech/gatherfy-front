@@ -38,14 +38,14 @@ const pieOfRegisChartRef = ref<HTMLCanvasElement | null>(null);
 const pieOfRegisChartData = ref();
 const isLoading = useState('isLoading', () => true);
 const lineChartColorSet = [
-  '#D2FF52',
+  '#ff0000',
   '#DEDDD7',
   '#1C46F5',
   '#131313',
   '#FFD700',
   '#FF82A9',
   '#B4B4B4',
-  '#9A55FF',
+  '#ff4e20',
   '#52FFA8',
   '#FF8C00',
 ];
@@ -131,10 +131,10 @@ const prepareViewsData = (views: any, type: string) => {
 
 function getColor(category: any) {
   const colors = {
-    Female: '#D2FF52 ',
+    Female: '#ff823f ',
     Male: '#deddd7',
-    Other: '#1C46F5 ',
-    'Prefer not to say': '#131313 ',
+    Other: '#ff0000 ',
+    'Prefer not to say': '#ff4e20 ',
   };
   return colors[category] || 'black';
 }
@@ -154,7 +154,7 @@ const transformData = (registrations: Registration[]) => {
     datasets: [
       {
         data: [checkedIn, awaitingCheckIn, unattended],
-        backgroundColor: ['#1C46F5', '#D2FF52', '#131313'],
+        backgroundColor: ['#ff0000', '#ff4e20', '#ffd073'],
       },
     ],
   };
@@ -447,10 +447,20 @@ const initializePieRegisChart = () => {
         data: pieOfRegisChartData.value,
         options: {
           responsive: true,
+          layout: {
+            padding: {
+              bottom: 0, // ปรับระยะห่างระหว่าง chart กับ legend
+            },
+          },
           plugins: {
             legend: {
-              position: 'right',
-              // gap: 5,
+              position: 'bottom',
+              align: 'start',
+              labels: {
+                padding: 10, // เพิ่มระยะห่างระหว่าง legend items
+                boxWidth: 15, // ขนาดของสี่เหลี่ยมสี
+                usePointStyle: true, // ทำให้เป็นวงกลมแทนสี่เหลี่ยม (optional)
+              },
             },
             title: {
               display: false,
@@ -502,21 +512,15 @@ watch(pieOfRegisChartRef, (newValue) => {
 
   <div v-else class="w-full bg-[#EEEEEE] pb-24">
     <div
-      v-if="isLoading"
-      class="my-16 flex h-screen w-full items-center justify-center"
-    >
-      <span class="loader"></span>
-    </div>
-    <div
-      v-else-if="eventsData.length === 0"
+      v-if="eventsData.length === 0"
       class="error-msg flex h-screen w-full items-center justify-center"
     >
       <p class="t3">
         No events to display. Create your first event to get started!
       </p>
     </div>
-    <div v-else class="ml-80 flex h-full">
-      <div class="mx-20 mt-32 flex w-full flex-col gap-3">
+    <div v-else class="flex h-full lg:ml-80">
+      <div class="mt-32 flex w-full flex-col gap-3 px-4 lg:mx-20">
         <SumaryOfView
           v-if="profileData"
           :sumOfViews="sumOfViews?.totalViews"
@@ -526,9 +530,9 @@ watch(pieOfRegisChartRef, (newValue) => {
           format="row"
         />
 
-        <div class="grid grid-cols-10 gap-3">
+        <div class="grid gap-3 lg:grid-cols-10">
           <div
-            class="view-by-month col-span-7 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-month bg-glass col-span-7 rounded-[20px] p-4 lg:p-12"
           >
             <p class="b1 pb-5 font-semibold">
               Monthly Event View Counts (4 months)
@@ -537,7 +541,7 @@ watch(pieOfRegisChartRef, (newValue) => {
             <canvas ref="viewLineChartRef" class=""></canvas>
           </div>
           <div
-            class="view-by-gender col-span-3 flex h-full flex-col gap-3 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-gender bg-glass col-span-3 flex h-full flex-col gap-3 rounded-[20px] p-4 lg:p-12"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -552,21 +556,19 @@ watch(pieOfRegisChartRef, (newValue) => {
         </div>
         <div class="grid grid-cols-10 gap-4">
           <div
-            class="col-span-3 grid h-full grid-rows-2 gap-4 md:max-h-[600px]"
+            class="col-span-3 grid h-full grid-rows-3 gap-4 md:max-h-[600px]"
           >
             <div
               v-if="eventsData"
-              class="flex flex-col gap-5 rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
+              class="bg-glass row-span-1 flex flex-col gap-2 rounded-[20px] p-6"
             >
               <h1 class="b1 font-semibold">Your Event</h1>
               <p class="b1">
-                <span class="text-[100px]"> {{ eventsData.length }}</span> Event
+                <span class="text-8xl"> {{ eventsData.length }}</span> Event
               </p>
             </div>
-            <div
-              class="rounded-[20px] border border-white/90 bg-white/70 p-12 drop-shadow-md backdrop-blur-xl"
-            >
-              <h1 class="b1 font-semibold">
+            <div class="bg-glass row-span-2 rounded-[20px] p-12">
+              <h1 class="b1 pb-2 font-semibold">
                 Registration and Check-in Proportion
               </h1>
               <canvas
@@ -618,7 +620,7 @@ watch(pieOfRegisChartRef, (newValue) => {
                   <div
                     v-else
                     v-for="event in eventsData"
-                    class="b3 grid h-fit w-full grid-cols-12 content-center gap-6 rounded-md border border-white/90 bg-white/70 p-3 drop-shadow-md backdrop-blur-xl"
+                    class="b3 bg-glass grid h-fit w-full grid-cols-12 content-center gap-6 rounded-md p-3"
                   >
                     <p class="col-span-4">{{ event?.eventName }}</p>
                     <p class="col-span-4">{{ event?.eventLocation }}</p>

@@ -33,14 +33,14 @@ const viewsData = ref();
 const totalViewCount = ref(0);
 
 const colors = {
-  Female: '#D2FF52 ',
+  Female: '#ff823f ',
   Male: '#deddd7',
-  Other: '#1C46F5 ',
-  'Prefer not to say': '#131313 ',
+  Other: '#ff0000 ',
+  'Prefer not to say': '#ff4e20 ',
 };
 const statusColor: any = {
   'Awaiting Check-in': '#131313',
-  'Checked in': '#1C46F5',
+  'Checked in': '#ff0000',
   Unattended: '#deddd7',
 };
 
@@ -65,8 +65,8 @@ const generateregistrationGoalChartData = (
 };
 const isLoading = useState('isLoading', () => true);
 
-const colorRegistered = '#D2FF52';
-const colorGoal = '#1C46F5';
+const colorRegistered = '#ffb661';
+const colorGoal = '#ff0000';
 const registrationGoalChartRef = ref<HTMLCanvasElement | null>(null);
 const registrationGoalChartData = ref();
 
@@ -129,10 +129,10 @@ const fetchViewsData = async () => {
 
 function getColor(category: any) {
   const colors = {
-    Female: '#D2FF52 ',
+    Female: '#ff823f ',
     Male: '#deddd7',
-    Other: '#1C46F5 ',
-    'Prefer not to say': '#131313 ',
+    Other: '#ff0000 ',
+    'Prefer not to say': '#ff4e20 ',
   };
   return colors[category] || 'black';
 }
@@ -383,7 +383,7 @@ function generateChartData(data, period = '7 days') {
       {
         label: 'views',
         data: datasetData,
-        backgroundColor: '#1C46F5',
+        backgroundColor: '#ff0000',
         borderRadius: 18,
         borderSkipped: false,
       },
@@ -679,7 +679,7 @@ watch(selectedViewOption, (newValue) => {
           ></canvas>
         </div>
         <div
-          class="col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-8 drop-shadow-md backdrop-blur-xl"
+          class="bg-glass col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] p-8"
         >
           <p class="b1 self-start font-semibold">Registration Goal</p>
           <div
@@ -693,7 +693,7 @@ watch(selectedViewOption, (newValue) => {
             "
             class="b1 text-center font-semibold"
           >
-            <span class="text-[#1C46F5]">{{ registrationsData?.length }}</span>
+            <span class="text-[#ff0000]">{{ registrationsData?.length }}</span>
             from {{ eventDetail?.registration_goal }} Registration
           </p>
         </div>
@@ -708,9 +708,9 @@ watch(selectedViewOption, (newValue) => {
         </div>
       </div>
       <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-7 flex flex-col gap-4">
+        <div class="col-span-7 grid gap-4">
           <div
-            class="view-by-gender-age rounded-[20px] border border-white/90 bg-white p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-gender-age bg-glass rounded-[20px] p-12"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -723,7 +723,7 @@ watch(selectedViewOption, (newValue) => {
             ></canvas>
           </div>
           <div
-            class="view-by-checkin flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-checkin bg-glass flex flex-col gap-2 rounded-[20px] p-12"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -786,12 +786,12 @@ watch(selectedViewOption, (newValue) => {
         <div class="col-span-5 flex flex-col gap-4">
           <div
             v-if="groupedByGender"
-            class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-gender bg-glass flex flex-grow flex-col gap-2 rounded-[20px] p-12"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
           <div
-            class="view-by-feedback flex flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
+            class="view-by-feedback bg-glass flex flex-col gap-2 rounded-[20px] p-12"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div
@@ -803,7 +803,7 @@ watch(selectedViewOption, (newValue) => {
             <div v-else class="flex flex-col justify-center gap-2">
               <div class="text-center">
                 <div class="flex items-center justify-center gap-1">
-                  <Star class="t3 fill-[#1C46F5]" />
+                  <Star class="t3 fill-[#ff0000]" />
                   <p class="t3 font-semibold">{{ averageRating }}</p>
                 </div>
 

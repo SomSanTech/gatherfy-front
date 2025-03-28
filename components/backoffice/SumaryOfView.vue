@@ -24,7 +24,7 @@ const someCalculation = Math.round(totalViews / totalEntries);
   >
     <div
       v-if="format === 'row'"
-      class="col-span-1 flex w-full items-center justify-between rounded-[20px] border border-white/90 bg-white/70 p-3 px-6 drop-shadow-md backdrop-blur-xl"
+      class="bg-glass col-span-1 flex w-full items-center justify-between rounded-[20px] p-3 lg:px-6"
     >
       <p class="t3">Hi, {{ profileData?.username }}</p>
     </div>

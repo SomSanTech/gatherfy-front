@@ -295,7 +295,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-fit w-screen bg-ghost-white">
+  <div class="ml-80 flex h-fit w-screen bg-[#EEEEEE]">
     <div
       class="mx-20 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg"
     >

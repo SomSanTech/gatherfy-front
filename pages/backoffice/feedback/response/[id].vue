@@ -141,7 +141,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <div class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"

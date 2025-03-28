@@ -11,8 +11,8 @@
       @click="isSidebarOpen = !isSidebarOpen"
       class="fixed left-4 top-4 z-50 rounded-lg bg-gray-200 p-2 shadow-lg md:hidden"
     >
-      <MenuIcon v-if="!isSidebarOpen" />
-      <XIcon v-else />
+      <Cancle v-if="!isSidebarOpen" />
+      <Trash v-else />
     </button>
 
     <!-- Sidebar (แสดงซ่อนตาม isSidebarOpen) -->
@@ -28,6 +28,7 @@
 
 <script setup>
 import SideBar from '~/components/backoffice/SideBar.vue';
+import Cancle from '~/components/icons/Cancle.vue';
 
 const route = useRoute();
 const error = useError();

@@ -36,7 +36,6 @@ const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
 const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
 const adminData = ref<UserProfile>();
-const isLoading = ref(true);
 const feedbacksCount = ref();
 const previewFeedback = ref(false);
 const token = useCookie('accessToken');
@@ -159,6 +158,7 @@ async function downloadReport(eventId, eventName) {
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
 }
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
   try {
@@ -172,7 +172,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
         <h1 class="t1">Feedback list</h1>

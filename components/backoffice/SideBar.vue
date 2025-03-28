@@ -7,6 +7,17 @@ const route = useRoute();
 const isBackoffice = ref(route.fullPath.includes('backoffice'));
 defineProps<{ isOpen: boolean }>(); // รับค่าเปิด-ปิด Sidebar
 const emit = defineEmits(['close']); // ใช้ส่ง event กลับไปปิด Sidebar
+
+const isOpen = ref(
+  route.fullPath === '/backoffice/registrations/event' ||
+    route.fullPath === '/backoffice/registrations'
+);
+
+watchEffect(() => {
+  isOpen.value =
+    route.fullPath === '/backoffice/registrations/event' ||
+    route.fullPath === '/backoffice/registrations';
+});
 </script>
 <template>
   <div
@@ -52,15 +63,17 @@ const emit = defineEmits(['close']); // ใช้ส่ง event กลับไ
         <div class="hs-accordion" id="registration-accordion">
           <button
             type="button"
-            class="hs-accordion-toggle flex w-full items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-[#E8E8E8] hover:text-black hs-accordion-active:text-black hs-accordion-active:hover:bg-[#E8E8E8]"
+            class="hs-accordion-toggle flex w-full items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-[#E8E8E8] hover:text-black"
+            :class="{ 'hs-accordion-active text-black': isOpen }"
             aria-expanded="true"
-            aria-controls="registration-accordion"
+            @click="isOpen = !isOpen"
           >
             <User class="t3" />
             <p class="b2 font-medium">Registration</p>
 
             <svg
-              class="ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500 hs-accordion-active:block"
+              class="ms-auto hidden size-4 text-gray-600 group-hover:text-gray-500"
+              :class="{ 'hs-accordion-active:block': isOpen }"
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -75,7 +88,8 @@ const emit = defineEmits(['close']); // ใช้ส่ง event กลับไ
             </svg>
 
             <svg
-              class="ms-auto block size-4 text-gray-600 group-hover:text-gray-500 hs-accordion-active:hidden"
+              class="ms-auto block size-4 text-gray-600 group-hover:text-gray-500"
+              :class="{ 'hs-accordion-active:hidden': isOpen }"
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -91,9 +105,9 @@ const emit = defineEmits(['close']); // ใช้ส่ง event กลับไ
           </button>
           <div
             id="registration-accordion"
-            class="hs-accordion-content hidden w-full overflow-hidden rounded-lg shadow-inner transition-[height] duration-300"
+            class="hs-accordion-content w-full overflow-hidden rounded-lg shadow-inner transition-[height] duration-300"
+            :class="{ hidden: !isOpen }"
             role="region"
-            aria-labelledby="registration-accordion"
           >
             <div class="ps-2 pt-2">
               <NuxtLink to="/backoffice/registrations/event">
