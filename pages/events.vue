@@ -13,7 +13,6 @@ const selectedStatus = ref(new Set());
 const tags = ref([]);
 const showFilter = ref();
 const sortFilter = ref('');
-const isLoading = ref(false);
 const isInitializing = ref(true);
 
 const handleDateUpdate = (newDate: Date) => {
@@ -82,6 +81,8 @@ const handleSortFilter = (sortByOption: any) => {
 const viewportWidth = computed(() => window.innerWidth);
 
 const isMobile = computed(() => viewportWidth.value <= 450);
+const isLoading = useState('isLoading', () => true);
+
 onMounted(async () => {
   if (isMobile.value) {
     showFilter.value = false;
@@ -133,7 +134,9 @@ watch(
 </script>
 
 <template>
-  <div class="py-24">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="py-24">
     <div class="mx-auto w-full px-5 lg:max-w-6xl lg:px-0">
       <h1 v-if="searchTerm" class="t1 font-semibold">
         {{ eventSearch?.length }} Events for "{{

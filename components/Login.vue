@@ -88,9 +88,6 @@ const handleSelectRole = async () => {
   if (response.status === 200) {
     isSelectRolePopUp.value = !isSelectRolePopUp.value;
     showPopup('Sign up with Google success please go Sing in', 'complete');
-    // console.log('isvisible,', state.isVisible);
-
-    // alert('signin success ja');
   }
 };
 const signInWithGoogle = async () => {
@@ -134,13 +131,17 @@ const signInWithGoogle = async () => {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60,
       });
-      if (response.data.accessToken) {
-        const userProfileData = await useFetchWithAuth(
-          'v1/profile',
-          'GET',
-          response.data.accessToken
-        );
-        profileData.value = userProfileData.data;
+      if ('data' in response) {
+        if (response.data.accessToken) {
+          const userProfileData = await useFetchWithAuth(
+            'v1/profile',
+            'GET',
+            response.data.accessToken
+          );
+          if ('data' in userProfileData) {
+            profileData.value = userProfileData.data;
+          }
+        }
       }
 
       if (roleCookie.value === 'Attendee') {
@@ -374,7 +375,7 @@ const validateFields = () => {
 
   const hasError = Object.values(checkField.value).includes(false);
 
-  if (hasError) {
+  if (hasError && isSignup.value) {
     triggerShake();
   }
 
@@ -603,41 +604,6 @@ const userCredential = ref<string | null>(null);
           <Cancle /> {{ er }}
         </p>
       </div>
-      <!-- <button
-        @click="signInGG()"
-        id="google-login-button"
-        class="custom-google-btn"
-      >
-        Login with Google
-      </button> -->
-
-      <!-- <div class="flex w-full justify-between gap-3">
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          A
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          B
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          C
-        </button>
-      </div>
-
-      <div class="flex w-full gap-2">
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-        <p class="b3 text-black/60">OR</p>
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-      </div> -->
 
       <div class="flex flex-col gap-3">
         <div class="flex gap-3">
@@ -932,24 +898,6 @@ const userCredential = ref<string | null>(null);
 
         <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
       </button>
-
-      <!-- <div class="flex w-full justify-between gap-3">
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          A
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          B
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          C
-        </button>
-      </div>-->
 
       <div class="flex w-full gap-2">
         <div

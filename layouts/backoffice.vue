@@ -16,7 +16,11 @@
     </button>
 
     <!-- Sidebar (แสดงซ่อนตาม isSidebarOpen) -->
-    <SideBar :is-open="isSidebarOpen" @close="isSidebarOpen = false" />
+    <SideBar
+      v-if="!isLoading"
+      :is-open="isSidebarOpen"
+      @close="isSidebarOpen = false"
+    />
 
     <slot />
   </div>
@@ -33,6 +37,7 @@ const isErrorPage = computed(() => {
 });
 
 const isSidebarOpen = ref(false); // ค่าดีฟอลต์ปิดอยู่
+const isLoading = useState('isLoading', () => true);
 </script>
 
 <style scoped>

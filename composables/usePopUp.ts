@@ -9,7 +9,7 @@ export function usePopup() {
 
   function showPopup(
     message: string,
-    status: 'complete' | 'confirm' | 'error'
+    status: 'complete' | 'confirm' | 'error' | 'warn'
   ) {
     state.text = message;
     state.status = status;

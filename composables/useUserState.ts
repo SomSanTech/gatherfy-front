@@ -6,3 +6,4 @@ export const userProfile = useState('userProfile', () => null);
 export const role = useState('role', () => null);
 export const isUserSignIn = useState('isUserSignIn', () => false);
 export const isUserSignInCookie = useCookie('is_user_sign_in');
+export const isLoading = useState('isLoading', () => true);

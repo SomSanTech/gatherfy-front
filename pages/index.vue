@@ -118,11 +118,11 @@ const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
 
-const isLoading = ref(false);
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
-  isLoading.value = true;
   try {
+    isLoading.value = true;
     await fetchData();
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -168,13 +168,13 @@ watch(selectedEventTime, (newValue) => {
 </script>
 
 <template>
+  <Loader v-if="isLoading" />
+
   <div
-    v-if="isLoading"
-    class="flex h-screen w-full items-center justify-center"
+    v-else
+    :class="isLoading ? 'opacity-0' : 'opacity-100'"
+    class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0"
   >
-    <span class="loader"></span>
-  </div>
-  <div v-else class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0">
     <!-- Header Event Banner -->
     <div class="relative">
       <button
@@ -465,35 +465,6 @@ watch(selectedEventTime, (newValue) => {
         <div
           class="absolute right-0 top-0 z-20 h-full w-10 bg-gradient-to-l from-white"
         ></div>
-      </div>
-    </div>
-
-    <div
-      class="group relative max-w-lg overflow-hidden rounded-3xl shadow-lg duration-700"
-    >
-      <!-- Background Image -->
-      <div class="group relative duration-700">
-        <img
-          src="../components/images/kornnaphat.png"
-          alt="Severance"
-          class="h-64 w-full object-cover"
-        />
-
-        <!-- Blurred Overlay (ต้องมาก่อน content เพื่อให้ blur อยู่ข้างล่าง) -->
-        <div class="mask-gradient"></div>
-
-        <!-- Content (วางให้อยู่ข้างหน้าสุด) -->
-        <div class="absolute bottom-4 left-4 z-50 text-white">
-          <h2 class="text-2xl font-bold">Severance</h2>
-          <p class="text-sm opacity-80">Season 2 streaming now</p>
-        </div>
-
-        <!-- Watch Now Button -->
-        <button
-          class="absolute bottom-4 right-4 z-50 rounded-lg bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-md backdrop-blur-md hover:bg-white"
-        >
-          Watch Now
-        </button>
       </div>
     </div>
 

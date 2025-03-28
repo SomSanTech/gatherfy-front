@@ -187,24 +187,30 @@ const filterTimeEventData = (time: string) => {
 
   console.log('filteredTicketData.value', filteredTicketData.value);
 };
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
-  const response = await useFetchWithAuth(
-    'v1/tickets',
-    'GET',
-    accessToken.value
-  );
-  tickets.value = response.data;
-  const feedbacked = await useFetchWithAuth(
-    'v1/feedbacked',
-    'GET',
-    accessToken.value
-  );
-  if ('data' in feedbacked) {
-    userAnswerFeedbackHistory.value = feedbacked.data;
-  }
+  try {
+    const response = await useFetchWithAuth(
+      'v1/tickets',
+      'GET',
+      accessToken.value
+    );
+    tickets.value = response.data;
+    const feedbacked = await useFetchWithAuth(
+      'v1/feedbacked',
+      'GET',
+      accessToken.value
+    );
+    if ('data' in feedbacked) {
+      userAnswerFeedbackHistory.value = feedbacked.data;
+    }
 
-  filterTimeEventData(selectedEventTime.value);
+    filterTimeEventData(selectedEventTime.value);
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 watch(selectedEventTime, (newValue) => {
@@ -235,7 +241,9 @@ function formatTimeRange(start, end) {
 </script>
 
 <template>
-  <div class="flex w-full gap-9">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="flex w-full gap-9">
     <div class="w-full">
       <p class="t3 pb-2">My Ticket</p>
       <ExploreBar

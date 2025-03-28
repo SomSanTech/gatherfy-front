@@ -24,13 +24,11 @@ const param = route.params.id;
 const feedbackData = ref<Feedback[]>([]);
 const averageRating = ref();
 const registrationsData = ref<Registration[]>([]);
-const isLoading = ref(true);
 const sumOfGender: any = ref(0);
 const groupedByGender = ref();
 const groupedByAgeRangeAndGender = ref();
 const groupedByStatus = ref();
-const last7DayData = ref();
-const maxForLast7Day = ref(0);
+
 const viewsData = ref();
 const totalViewCount = ref(0);
 
@@ -65,9 +63,10 @@ const generateregistrationGoalChartData = (
     ],
   };
 };
+const isLoading = useState('isLoading', () => true);
 
-const colorRegistered = '#D2FF52'; // สีของส่วนที่ลงทะเบียนแล้ว
-const colorGoal = '#1C46F5'; // สีของส่วนที่ยังไม่ถึงเป้าหมาย
+const colorRegistered = '#D2FF52';
+const colorGoal = '#1C46F5';
 const registrationGoalChartRef = ref<HTMLCanvasElement | null>(null);
 const registrationGoalChartData = ref();
 
@@ -159,13 +158,15 @@ const fetchRegisData = async () => {
     )
   );
 
-  groupedByStatus.value = Object.fromEntries(
-    d3.rollup(
-      registrationsData.value,
-      (v) => v.length,
-      (d) => d.status
-    )
-  );
+  groupedByStatus.value = registrationsData.value.length
+    ? Object.fromEntries(
+        d3.rollup(
+          registrationsData.value,
+          (v) => v.length,
+          (d) => d.status
+        )
+      )
+    : {};
 
   sumOfGender.value = Object.values(groupedByGender.value).reduce(
     (sum: any, value) => sum + value,
@@ -553,12 +554,18 @@ onMounted(async () => {
     await fetchRegisData();
     await fetchViewsData();
     await fetchEventDetail();
-    registrationGoalChartData.value = generateregistrationGoalChartData(
-      registrationsData?.value.length,
-      eventDetail.value.registration_goal,
-      colorGoal,
-      colorRegistered
-    );
+
+    if (
+      eventDetail.value &&
+      eventDetail.value.registration_goal !== undefined
+    ) {
+      registrationGoalChartData.value = generateregistrationGoalChartData(
+        registrationsData?.value.length,
+        eventDetail.value.registration_goal,
+        colorGoal,
+        colorRegistered
+      );
+    }
 
     barData.value = generateChartData(
       viewsData.value[0]?.views,
@@ -590,14 +597,10 @@ watch(selectedViewOption, (newValue) => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
-    <div
-      v-if="isLoading"
-      class="my-16 flex h-screen w-full items-center justify-center"
-    >
-      <span class="loader"></span>
-    </div>
-    <div v-else class="mx-20 my-24 flex w-full flex-col gap-4">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
+    <div class="mx-20 my-24 flex w-full flex-col gap-4">
       <NuxtLink
         to="/backoffice/dashboard"
         class="mb-1 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -684,14 +687,19 @@ watch(selectedViewOption, (newValue) => {
           >
             <canvas ref="registrationGoalChartRef" class=""></canvas>
           </div>
-          <p class="b1 text-center font-semibold">
+          <p
+            v-if="
+              eventDetail?.registration_goal && registrationsData?.length > 0
+            "
+            class="b1 text-center font-semibold"
+          >
             <span class="text-[#1C46F5]">{{ registrationsData?.length }}</span>
-            from {{ eventDetail.registration_goal }} Registration
+            from {{ eventDetail?.registration_goal }} Registration
           </p>
         </div>
         <div class="col-span-2 flex h-full">
           <SumaryOfView
-            v-if="viewsData"
+            v-if="viewsData && registrationsData"
             :profile-data="profileData"
             :sumOfViews="totalViewCount"
             :viewsEntries="viewsData[0].views?.length"
@@ -719,7 +727,7 @@ watch(selectedViewOption, (newValue) => {
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
-              v-if="Object.keys(groupedByGender).length === 0"
+              v-if="Object.keys(groupedByStatus || {}).length === 0"
               class="flex items-center justify-center"
             >
               <p class="b2">No registration now</p>
@@ -742,12 +750,12 @@ watch(selectedViewOption, (newValue) => {
                   :key="index"
                   :style="{
                     backgroundColor: statusColor[status],
-                    width: `${(groupedByStatus[status] * 100) / registrationsData?.length}%`,
+                    width: `${(groupedByStatus[status] * 100) / (registrationsData?.length || 1)}%`,
                   }"
                   :class="`${index === 0 ? 'rounded-l-md' : index === Object.keys(groupedByStatus).length - 1 ? 'rounded-r-md' : ''} w-10`"
                 ></div>
               </div>
-              <div>
+              <div v-if="Object.keys(groupedByStatus)?.length > 0">
                 <ul class="legend">
                   <li
                     v-for="(status, index) in Object.keys(groupedByStatus).sort(
@@ -777,6 +785,7 @@ watch(selectedViewOption, (newValue) => {
 
         <div class="col-span-5 flex flex-col gap-4">
           <div
+            v-if="groupedByGender"
             class="view-by-gender flex flex-grow flex-col gap-2 rounded-[20px] border border-white/90 bg-white/90 p-12 drop-shadow-md backdrop-blur-xl"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />

@@ -8,7 +8,7 @@ const userProfile = useCookie('profileData', { default: () => ({}) });
 
 <template>
   <div
-    class="flex h-[90vh] w-fit flex-col gap-5"
+    class="h- flex w-fit flex-col gap-5"
     :class="isTicketPage ? 'shrink-0' : ''"
   >
     <div

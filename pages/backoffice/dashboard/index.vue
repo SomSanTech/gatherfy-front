@@ -2,7 +2,6 @@
 import * as d3 from 'd3';
 import Chart from 'chart.js/auto';
 import type { Registration } from '~/models/registration';
-import type { Event } from '~/models/event';
 import type { User } from '~/models/user';
 import SumaryOfView from '~/components/backoffice/SumaryOfView.vue';
 import type { UserProfile } from '~/models/userProfile';
@@ -10,10 +9,15 @@ import type { UserProfile } from '~/models/userProfile';
 definePageMeta({
   layout: 'backoffice',
 });
-
+interface Event {
+  eventId: number;
+  eventName: string;
+  eventLocation: string;
+  eventStartDate: string;
+  eventEndDate: string;
+}
 const eventsData = ref<Event[]>([]);
 const adminData: any = ref<User | null>(null);
-const isLoading = ref(true);
 const registrationsData = ref<Registration[]>([]);
 const accessToken = useCookie('accessToken');
 const profileData = useCookie<UserProfile>('profileData');
@@ -32,6 +36,7 @@ const ageGenderChartData = ref();
 const ageGenderLabels = ref();
 const pieOfRegisChartRef = ref<HTMLCanvasElement | null>(null);
 const pieOfRegisChartData = ref();
+const isLoading = useState('isLoading', () => true);
 const lineChartColorSet = [
   '#D2FF52',
   '#DEDDD7',
@@ -161,20 +166,22 @@ const fetchAllRegisData = async () => {
     'GET',
     accessToken.value
   );
-  registrationsData.value = fetchedData.data || [];
+  if ('data' in fetchedData) {
+    registrationsData.value = fetchedData.data || [];
+  }
 
-  groupedByGender.value = Object.fromEntries(
-    d3.rollup(
-      registrationsData.value,
-      (v) => v.length,
-      (d) => d.gender
-    )
-  );
+  // groupedByGender.value = Object.fromEntries(
+  //   d3.rollup(
+  //     registrationsData.value,
+  //     (v) => v.length,
+  //     (d) => d.gender
+  //   )
+  // );
 
-  sumOfGender.value = Object.values(groupedByGender.value).reduce(
-    (sum: any, value: any) => sum + value,
-    0
-  );
+  // sumOfGender.value = Object.values(groupedByGender.value).reduce(
+  //   (sum: any, value: any) => sum + value,
+  //   0
+  // );
 
   const groupedByAgeRangeAndGenderData = d3.rollup(
     registrationsData.value,
@@ -192,6 +199,8 @@ const fetchAllRegisData = async () => {
       return '30+';
     }
   );
+  console.log('registrationsData.value', registrationsData.value);
+  console.log('groupedByAgeRangeAndGenderData', groupedByAgeRangeAndGenderData);
 
   groupedByAgeRangeAndGender.value = Object.fromEntries(
     Array.from(groupedByAgeRangeAndGenderData, ([ageRange, genderMap]) => [
@@ -199,6 +208,7 @@ const fetchAllRegisData = async () => {
       Object.fromEntries(genderMap),
     ])
   );
+  console.log('groupedByAgeRangeAndGender', groupedByAgeRangeAndGender.value);
 
   if (Object.keys(groupedByAgeRangeAndGender.value).length > 0) {
     ageGenderLabels.value = Object.keys(groupedByAgeRangeAndGender.value);
@@ -214,7 +224,7 @@ const fetchAllRegisData = async () => {
     ageGenderChartData.value = categories.map((category) => ({
       label: category,
       data: ageGenderLabels.value.map(
-        (age) => groupedByAgeRangeAndGender.value[age]?.[category] || 0
+        (age: string) => groupedByAgeRangeAndGender.value[age]?.[category] || 0
       ),
       backgroundColor: getColor(category),
       stack: 'Stack 0',
@@ -234,8 +244,9 @@ const fetchAllEventData = async () => {
     'GET',
     accessToken.value
   );
-  eventsData.value = fetchedData.data || [];
-  // eventsData.value =  [];
+  if ('data' in fetchedData) {
+    eventsData.value = fetchedData.data || [];
+  }
 };
 
 const fetchAllViewData = async () => {
@@ -262,12 +273,12 @@ const fetchAllViewData = async () => {
       viewLineChartData.value.datasets.push({
         label: eventData ? `${eventData.eventName}` : 'Unknown event',
         data: data,
-        borderColor: lineChartColorSet[index % lineChartColorSet.length], // เลือกสีวนไป
+        borderColor: lineChartColorSet[index % lineChartColorSet.length],
         backgroundColor: lineChartColorSet[index % lineChartColorSet.length]
           .replace('hsl', 'hsla')
-          .replace(')', ', 0.2)'), // เพิ่ม transparency
+          .replace(')', ', 0.2)'),
         fill: false,
-        tension: 0.4, // ให้เส้นโค้งนุ่มขึ้น แต่ไม่เว้าเกินไป
+        tension: 0.4,
       });
     });
   }
@@ -461,7 +472,9 @@ onMounted(async () => {
     await fetchAllEventData();
     await fetchAllViewData();
   } finally {
-    isLoading.value = false;
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1000);
   }
 });
 
@@ -485,7 +498,9 @@ watch(pieOfRegisChartRef, (newValue) => {
 </script>
 
 <template>
-  <div class="w-full bg-[#EEEEEE] pb-24">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="w-full bg-[#EEEEEE] pb-24">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"
@@ -569,33 +584,31 @@ watch(pieOfRegisChartRef, (newValue) => {
             </div>
             <div class="w-full table-auto caption-top text-sm">
               <div
-                class="b3 border-default-300 grid grid-cols-12 border-b !text-sm transition-colors"
+                class="b3 border-default-300 grid grid-cols-12 border-b pb-2 !text-sm transition-colors"
               >
-                <p
-                  class="col-span-4 px-4 text-base font-semibold text-black/40"
-                >
+                <p class="px- col-span-4 text-base font-semibold text-black/40">
                   Event Name
                 </p>
                 <p
-                  class="col-span-4 px-4 text-base font-semibold text-black/40"
+                  class="col-span-4 px-2 text-base font-semibold text-black/40"
                 >
                   Location
                 </p>
                 <p
-                  class="col-span-1 px-4 text-center text-base font-semibold text-black/40"
+                  class="px- col-span-1 text-center text-base font-semibold text-black/40"
                 >
                   Status
                 </p>
                 <p
-                  class="col-span-3 px-4 text-center text-base font-semibold text-black/40"
+                  class="px- col-span-3 text-center text-base font-semibold text-black/40"
                 >
                   Action
                 </p>
               </div>
               <div class="relative">
-                <div
+                <!-- <div
                   class="absolute left-0 top-0 z-40 h-8 w-full bg-gradient-to-b from-[#EEEEEE]"
-                ></div>
+                ></div> -->
                 <div
                   class="flex w-full flex-col gap-2 overflow-y-auto md:max-h-[550px]"
                 >
@@ -646,9 +659,9 @@ watch(pieOfRegisChartRef, (newValue) => {
                   
                 </tr> -->
                 </div>
-                <div
+                <!-- <div
                   class="absolute bottom-0 left-0 z-40 h-8 w-full bg-gradient-to-t from-[#EEEEEE]"
-                ></div>
+                ></div> -->
               </div>
             </div>
           </div>

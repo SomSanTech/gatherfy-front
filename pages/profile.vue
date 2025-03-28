@@ -183,59 +183,6 @@ const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
-// const editProfile = async () => {
-//   userProfileEdited.value.birthday = formattedBirthday.value;
-//   userProfileEdited.value.gender = selectedGender.value;
-//   validateForm();
-//   if (isFormValid.value) {
-//     const currentFileName = userProfile.value.users_image.replace(
-//       `${config.public.minioUrl}/profiles/`,
-//       ''
-//     );
-
-//     if (uploadFileName.value) {
-//       await useFetchWithAuth(
-//         `v1/files/delete/${currentFileName}?bucket=profiles`,
-//         'DELETE',
-//         accessToken.value
-//       );
-//       userProfileEdited.value.image = uploadFileName.value;
-//       await useFetchUpload(
-//         `v1/files/upload`,
-//         fileToUpload.value,
-//         'profiles',
-//         accessToken.value
-//       );
-//     } else {
-//       userProfileEdited.value.image = currentFileName;
-//     }
-//     console.log('userProfileEdited: ', userProfileEdited.value);
-
-//     const response = await useFetchWithAuth(
-//       `v1/profile`,
-//       'PUT',
-//       accessToken.value,
-//       userProfileEdited.value
-//     );
-
-//     if (response.status === 200) {
-//       const userProfileData = await useFetchWithAuth(
-//         'v1/profile',
-//         'GET',
-//         accessToken.value
-//       );
-
-//       if ('data' in userProfileData) {
-//         userProfile.value = userProfileData.data;
-//       }
-//       isShowConfirmSave.value = !isShowConfirmSave.value;
-//       isShowCompleteModal.value = !isShowCompleteModal.value;
-//     }
-//   } else {
-//     showPopup('Fail, try again later', 'error');
-//   }
-// };
-
 const isSaving = ref({});
 const editProfile = async () => {
   if (isSaving.value['profile']) return; // ป้องกันกดซ้ำ
@@ -462,73 +409,69 @@ watch(
   },
   { deep: true }
 );
-
+const isLoading = useState('isLoading', () => true);
 onMounted(async () => {
-  console.log('userProfile ', userProfile.value);
-  if (userProfile.value) {
-    userProfileEdited.value = {
-      firstname: userProfile.value.users_firstname,
-      lastname: userProfile.value.users_lastname,
-      username: userProfile.value.username,
-      gender: userProfile.value.users_gender,
-      email: userProfile.value.users_email,
-      phone: userProfile.value.users_phone,
-      image: userProfile.value.users_image,
-      birthday: '',
-    };
-    if (userProfile.value.users_birthday !== null) {
-      const [year, month, day] = userProfile.value.users_birthday
-        .split('T')[0]
-        .split('-');
+  try {
+    isLoading.value = true;
+    console.log('userProfile ', userProfile.value);
+    if (userProfile.value) {
+      userProfileEdited.value = {
+        firstname: userProfile.value.users_firstname,
+        lastname: userProfile.value.users_lastname,
+        username: userProfile.value.username,
+        gender: userProfile.value.users_gender,
+        email: userProfile.value.users_email,
+        phone: userProfile.value.users_phone,
+        image: userProfile.value.users_image,
+        birthday: '',
+      };
+      if (userProfile.value.users_birthday !== null) {
+        const [year, month, day] = userProfile.value.users_birthday
+          .split('T')[0]
+          .split('-');
 
-      selectedDay.value = parseInt(day);
-      selectedMonth.value = parseInt(month);
-      selectedYear.value = year;
+        selectedDay.value = parseInt(day);
+        selectedMonth.value = parseInt(month);
+        selectedYear.value = year;
 
-      console.log(selectedDay.value);
-      console.log(selectedMonth.value);
-      console.log(selectedYear.value);
-    }
-    if (userProfile.value.users_gender) {
-      selectedGender.value = userProfile.value.users_gender;
-    }
-    if (accessToken.value) {
-      await fetchSocialLink();
-      socialLinkSet.value = fillSocialLinks(socialLinksData.value);
-      console.log('socialLinkSet', socialLinkSet.value);
-    }
+        console.log(selectedDay.value);
+        console.log(selectedMonth.value);
+        console.log(selectedYear.value);
+      }
+      if (userProfile.value.users_gender) {
+        selectedGender.value = userProfile.value.users_gender;
+      }
+      if (accessToken.value) {
+        await fetchSocialLink();
+        socialLinkSet.value = fillSocialLinks(socialLinksData.value);
+        console.log('socialLinkSet', socialLinkSet.value);
+      }
 
-    notiSetting.value.newEvents = userProfile.value.email_new_events;
-    notiSetting.value.remindersDay = userProfile.value.email_reminders_day;
-    notiSetting.value.remindersHour = userProfile.value.email_reminders_hour;
-    notiSetting.value.updatedEvents = userProfile.value.email_updated_events;
+      notiSetting.value.newEvents = userProfile.value.email_new_events;
+      notiSetting.value.remindersDay = userProfile.value.email_reminders_day;
+      notiSetting.value.remindersHour = userProfile.value.email_reminders_hour;
+      notiSetting.value.updatedEvents = userProfile.value.email_updated_events;
+    }
+  } catch (error) {
+    console.log('error');
+  } finally {
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 500);
   }
 });
 </script>
 
 <template>
   <!-- <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9"> -->
-
-  <div class="relative w-full duration-300">
+  <Loader v-if="isLoading" />
+  <div v-else class="relative w-full duration-300">
     <CompleteModal
       :isShowCompleteModal="state.isVisible"
       :title="state.text"
       :status="state.status"
       @complete-action="state.isVisible = false"
     />
-    <!-- <ConfirmModal
-      title="Update profile?"
-      subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
-      :isShowConfirmModal="isShowConfirmSave"
-      @confirmAction="editProfile"
-      @cancleAction="isShowConfirmSave = !isShowConfirmSave"
-    />
-    <CompleteModal
-      title="Already Edit your profile"
-      :isShowCompleteModal="isShowCompleteModal"
-      @confirmAction="isShowCompleteModal = !isShowCompleteModal"
-    /> -->
-    <!-- <p class="t3">My Profile</p> -->
     <div class="flex flex-col gap-5">
       <div
         class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"

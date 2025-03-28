@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Warning from './icons/Warning.vue';
+
 const props = defineProps<{
   title?: string;
   subTitle?: string;
@@ -17,7 +19,7 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
     class="fixed left-0 top-0 z-50 flex h-screen w-full items-center justify-center bg-black/40 duration-200"
   >
     <div
-      class="absolute flex w-1/4 max-w-3xl flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md"
+      class="absolute flex w-1/4 max-w-[400px] flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md"
     >
       <div class="flex items-center gap-4">
         <div
@@ -25,6 +27,7 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
         >
           <Trash v-if="status === 'confirm'" class="text-lg" />
           <Cancle v-else-if="status === 'error'" class="text-xl" />
+          <Warning v-else-if="status === 'warn'" class="text-xl" />
           <Check v-else class="text-2xl" />
         </div>
         <div class="w-full">
@@ -34,7 +37,7 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
           </p> -->
         </div>
       </div>
-      <div class="flex w-fit gap-2 pt-4">
+      <div class="flex w-fit gap-2">
         <BtnComp text="OK" @click="$emit('completeAction')" />
         <BtnComp
           v-if="status === 'confirm'"
