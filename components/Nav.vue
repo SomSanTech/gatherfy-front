@@ -75,13 +75,13 @@ const profileData = useCookie<UserProfile>('profileData');
         <div class="relative" v-else>
           <div
             @click="handleOpenProfilePopup"
-            class="h-8 w-8 rounded-full bg-zinc-300"
+            class="signed-profile h-8 w-8 rounded-full bg-zinc-300"
           >
             <img
               v-if="profileData?.users_image"
               :src="profileData?.users_image"
               alt=""
-              class="h-8 w-8 rounded-full"
+              class="signed-profile h-8 w-8 rounded-full"
             />
             <div
               v-else
@@ -101,7 +101,7 @@ const profileData = useCookie<UserProfile>('profileData');
             <NuxtLink to="/profile" class="w-full">
               <button
                 @click.stop
-                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+                class="profile-btn flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
               >
                 <UserProfile class="h-5 w-5 text-gray-600" />
                 <span>My Profile</span>

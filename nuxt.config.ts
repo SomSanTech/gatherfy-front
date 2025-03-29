@@ -45,6 +45,9 @@ export default defineNuxtConfig({
 
   app: {
     baseURL: process.env.NUXT_BASE_URL,
+    head: {
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    },
   },
 
   plugins: ['~/plugins/preline.client.ts', '~/plugins/error-handler.ts'],

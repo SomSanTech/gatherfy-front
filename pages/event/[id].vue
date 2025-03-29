@@ -410,7 +410,7 @@ function clearWidthHeightValues(htmlString) {
       >
         <Cancle />
       </button>
-      <div class="flex justify-between gap-3 lg:gap-5">
+      <div class="flex flex-col justify-between gap-3 lg:flex-row lg:gap-5">
         <div>
           <div>
             <p class="b2 font-semibold">Registration</p>
