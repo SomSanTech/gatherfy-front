@@ -52,7 +52,7 @@ const signInWithGoogle = async () => {
     } else {
       const accessToken = useCookie('accessToken', {
         httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
+        // secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60,
       });
       if ('data' in response) accessToken.value = response.data.accessToken;
@@ -65,7 +65,7 @@ const signInWithGoogle = async () => {
 
       const roleCookie = useCookie('roleCookie', {
         httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
+        // secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60,
       });
 
@@ -73,7 +73,7 @@ const signInWithGoogle = async () => {
 
       const profileData = useCookie('profileData', {
         httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
+        // secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60,
       });
       if ('data' in response) {
@@ -338,7 +338,7 @@ const handleSignin = async () => {
 
         const accessToken = useCookie('accessToken', {
           httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
+          // secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60,
         });
 
@@ -353,7 +353,7 @@ const handleSignin = async () => {
         // role.value = decodeToken(accessToken.value)?.role;
         const roleCookie = useCookie('roleCookie', {
           httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
+          // secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60,
         });
 
@@ -361,7 +361,7 @@ const handleSignin = async () => {
 
         const profileData = useCookie('profileData', {
           httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
+          // secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60,
         });
         if (fetchedData.data.accessToken) {
