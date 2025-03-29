@@ -617,10 +617,11 @@ onMounted(async () => {
           <div>
             <p class="b2 font pb-1 font-semibold">Email</p>
             <input
+              disabled
               type="email"
               placeholder="Email"
               v-model="userProfileEdited.email"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              class="b2 w-full cursor-not-allowed rounded-lg border-[1px] border-black/20 bg-gray-400/40 p-2 text-gray-600 disabled:border-gray-300 disabled:bg-gray-200 disabled:text-gray-400"
               @blur="validateField('email', userProfileEdited.email)"
             />
             <p v-if="errors.email" class="b4 mt-1 text-sm text-red-500">
@@ -720,7 +721,10 @@ onMounted(async () => {
         >
           <p class="b1 pb-5 font-semibold">Social Links</p>
 
-          <div v-if="socialLinkSet.length !== 0" class="flex flex-col gap-2">
+          <div
+            v-if="socialLinkSet && socialLinkSet.length !== 0"
+            class="flex flex-col gap-2"
+          >
             <div
               v-for="(item, index) in socialLinkSet"
               :key="index"
@@ -759,6 +763,17 @@ onMounted(async () => {
                 placeholder="Insert your link"
                 class="w-full rounded-lg border p-2"
               />
+              <button
+                v-if="item.socialLink !== ''"
+                @click="
+                  item.socialLink = '';
+                  item.socialPlatform = '';
+                "
+              >
+                <TrashSolid
+                  class="text-gray-500 duration-200 hover:text-burgundy"
+                />
+              </button>
             </div>
             <BtnComp
               @click="handleAddSocial"

@@ -231,9 +231,9 @@ onMounted(async () => {
             <div class="mask-gradient-profile"></div>
             <div class="mask-gradient-profile"></div>
             <div
-              class="absolute bottom-0 right-0 z-50 h-4/5 w-full bg-gradient-to-t from-black/90"
+              class="absolute bottom-0 right-0 z-30 h-4/5 w-full bg-gradient-to-t from-black/90"
             ></div>
-            <div class="p absolute bottom-4 z-50 w-full px-4 text-white">
+            <div class="p absolute bottom-4 z-30 w-full px-4 text-white">
               <h2 class="mt-4 text-xl font-semibold">
                 {{ userProfile.username }}
               </h2>
@@ -294,7 +294,7 @@ onMounted(async () => {
 
     <div class="w-full px-8 lg:px-0">
       <div
-        v-if="contactData.length === 0"
+        v-if="contactData && contactData.length === 0"
         class="flex h-full w-full items-center justify-center"
       >
         <p class="b2 py-32">No contact</p>
@@ -381,7 +381,7 @@ onMounted(async () => {
       </div>
       <div
         v-show="isClickShareContact"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        class="fixed inset-0 z-40 flex items-center justify-center bg-black/50"
       >
         <!-- Mask -->
         <div class="relative h-full w-full">
@@ -421,7 +421,7 @@ onMounted(async () => {
               <!-- QR Code Panel -->
               <div
                 :class="isShowQR ? 'translate-y-12' : 'translate-y-[400px]'"
-                class="absolute left-1/2 z-50 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-2xl bg-white p-2 pt-20 transition-transform duration-700 ease-in-out"
+                class="absolute left-1/2 z-40 flex h-full w-full -translate-x-1/2 cursor-pointer flex-col items-center rounded-t-2xl bg-white p-2 pt-20 transition-transform duration-700 ease-in-out"
               >
                 <qrcode-vue :size="200" :value="qrValues" />
                 <p class="b3 max-w-[200px] pt-2 text-center text-black/70">
