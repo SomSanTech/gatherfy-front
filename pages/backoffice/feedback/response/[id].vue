@@ -141,14 +141,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <div class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"
     >
       <span class="loader"></span>
     </div>
-    <div v-else class="mx-20 my-24 flex w-full flex-col gap-3">
+    <div v-else class="mx-2 my-24 flex w-full flex-col gap-3 lg:mx-20">
       <NuxtLink
         to="/backoffice/feedback"
         class="mb-1 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -156,7 +156,7 @@ onMounted(async () => {
         <Arrow />
         <p class="b2">Back to feedback list</p>
       </NuxtLink>
-      <div class="w-full rounded-3xl bg-white p-10 drop-shadow-lg">
+      <div class="w-full rounded-3xl bg-white p-2 drop-shadow-lg lg:p-10">
         <div class="flex items-center gap-5">
           <img
             :src="eventData?.image"
@@ -206,7 +206,7 @@ onMounted(async () => {
       </div>
       <div
         v-if="averageRating"
-        class="grid w-full grid-cols-6 gap-5 rounded-3xl bg-white p-10 drop-shadow-lg"
+        class="grid w-full grid-cols-6 gap-5 rounded-3xl bg-white p-3 drop-shadow-lg lg:p-10"
       >
         <div class="col-span-2 place-items-center content-center">
           <p class="t3 mb-5">Average Rating</p>
@@ -266,7 +266,7 @@ onMounted(async () => {
       </div>
       <div
         v-else
-        class="flex h-96 flex-col justify-center rounded-3xl bg-white p-10 text-center drop-shadow-lg"
+        class="flex h-96 flex-col justify-center rounded-3xl bg-white p-3 text-center drop-shadow-lg lg:p-10"
       >
         <img
           src="/components/images/catch-feedback.png"
@@ -277,7 +277,7 @@ onMounted(async () => {
       </div>
       <div
         v-for="(question, index) in questionData"
-        class="w-full rounded-3xl bg-white p-10 drop-shadow-lg"
+        class="w-full rounded-3xl bg-white p-3 drop-shadow-lg lg:p-10"
       >
         <p class="b1 mb-3">{{ index + 1 }}. {{ question.questionText }}</p>
         <div v-if="answerData[question.questionId]">

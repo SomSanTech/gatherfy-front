@@ -99,7 +99,6 @@ async function submitFeedback() {
     accessToken.value,
     answers.value[answers.value.length - 1]
   );
-  console.log(feedbackResponse);
   if (feedbackResponse.status === 200) {
     const feedbackId = feedbackResponse.data.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
@@ -183,28 +182,31 @@ const filterTimeEventData = (time: string) => {
   }
 
   filteredTicketData.value = filter;
-  console.log(time);
-
-  console.log('filteredTicketData.value', filteredTicketData.value);
 };
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
-  const response = await useFetchWithAuth(
-    'v1/tickets',
-    'GET',
-    accessToken.value
-  );
-  tickets.value = response.data;
-  const feedbacked = await useFetchWithAuth(
-    'v1/feedbacked',
-    'GET',
-    accessToken.value
-  );
-  if ('data' in feedbacked) {
-    userAnswerFeedbackHistory.value = feedbacked.data;
-  }
+  try {
+    const response = await useFetchWithAuth(
+      'v1/tickets',
+      'GET',
+      accessToken.value
+    );
+    tickets.value = response.data;
+    const feedbacked = await useFetchWithAuth(
+      'v1/feedbacked',
+      'GET',
+      accessToken.value
+    );
+    if ('data' in feedbacked) {
+      userAnswerFeedbackHistory.value = feedbacked.data;
+    }
 
-  filterTimeEventData(selectedEventTime.value);
+    filterTimeEventData(selectedEventTime.value);
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 watch(selectedEventTime, (newValue) => {
@@ -235,7 +237,9 @@ function formatTimeRange(start, end) {
 </script>
 
 <template>
-  <div class="flex w-full gap-9">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="flex w-full gap-9 px-8 lg:px-0">
     <div class="w-full">
       <p class="t3 pb-2">My Ticket</p>
       <ExploreBar

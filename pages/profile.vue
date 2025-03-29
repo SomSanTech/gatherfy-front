@@ -25,7 +25,11 @@ interface UserProfile {
   users_email: string;
   users_phone: string;
   users_image: string;
-  users_birthday: string; // << เพิ่มตรงนี้
+  users_birthday: string;
+  email_new_events: boolean;
+  email_reminders_day: boolean;
+  email_reminders_hour: boolean;
+  email_updated_events: boolean;
 }
 
 type SocialLink = {
@@ -33,7 +37,7 @@ type SocialLink = {
   socialLink: string;
 };
 
-const checked = ref(false);
+// const checked = ref(false);
 const selectedGender = ref<string>('');
 const userProfile = useCookie<UserProfile>('profileData');
 const selectedDay = ref<number | null>(null);
@@ -72,12 +76,12 @@ const genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const config = useRuntimeConfig();
 const accessToken = useCookie<string>('accessToken');
 const fileToUpload = ref();
-const previewImage = ref('');
+const previewImage = ref<string>('');
 const uploadFileName = ref();
 const fileInput = ref<HTMLInputElement>();
 const isShowCompleteModal = ref<boolean>(false);
-const currentPassword = ref('');
-const newPassword = ref('');
+const currentPassword = ref<string>('');
+const newPassword = ref<string>('');
 const socialLinksData = ref();
 const socialLinkSet = ref();
 const isShowConfirmSave = ref<boolean>(false);
@@ -105,6 +109,71 @@ const isFormValid = computed(() => {
   return Object.values(errors.value).every((error) => error === '');
 });
 
+const notiSetting = ref({
+  newEvents: false,
+  remindersDay: false,
+  remindersHour: false,
+  updatedEvents: false,
+});
+
+const notiSettingMsg = ref({
+  newEvents: {
+    title: 'Notify me when a new event is created',
+    desc: 'Get notified when a new event is created under the tags you follow.',
+  },
+  remindersDay: {
+    title: 'Reminder one day before the event',
+    desc: 'Receive a reminder one day before the event starts to help you prepare.',
+  },
+  remindersHour: {
+    title: 'Reminder one hour before the event',
+    desc: 'Get a last-minute reminder one hour before the event begins.',
+  },
+  updatedEvents: {
+    title: 'Notify me when an event is updated',
+    desc: 'Stay informed when an event you follow gets updated or modified.',
+  },
+});
+const { state, showPopup } = usePopup();
+const isSaving = ref({
+  noti: false,
+  password: false,
+  profile: false,
+  social: false,
+});
+
+const handleNotiSetting = async () => {
+  if (isSaving.value['noti']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['noti']: true }; // เริ่มโหลดเฉพาะปุ่มนี้
+  try {
+    const response = await useFetchWithAuth(
+      `v1/profile`,
+      'PUT',
+      accessToken.value,
+      notiSetting.value
+    );
+
+    if (response.status === 200) {
+      showPopup('Update email notification success', 'complete');
+      const userProfileData = await useFetchWithAuth(
+        'v1/profile',
+        'GET',
+        accessToken.value
+      );
+
+      if ('data' in userProfileData) {
+        userProfile.value = userProfileData.data;
+      }
+    } else {
+      showPopup('Update email notification fail, try again later', 'error');
+    }
+  } catch (error) {
+    showPopup('Update email notification fail, try again later', 'error');
+  }
+  isSaving.value = { ...isSaving.value, ['noti']: false };
+};
+
 const handelFileUpload = (file: any) => {
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
@@ -120,82 +189,164 @@ const triggerFileInput = () => {
 };
 
 const editProfile = async () => {
+  if (isSaving.value['profile']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['profile']: true }; // เริ่มโหลดเฉพาะปุ่มนี้
+
   userProfileEdited.value.birthday = formattedBirthday.value;
   userProfileEdited.value.gender = selectedGender.value;
   validateForm();
+
   if (isFormValid.value) {
-    const currentFileName = userProfile.value.users_image.replace(
-      `${config.public.minioUrl}/profiles/`,
-      ''
-    );
+    try {
+      if (userProfile.value.users_image !== null) {
+        const currentFileName = userProfile.value.users_image.replace(
+          `${config.public.minioUrl}/profiles/`,
+          ''
+        );
 
-    if (uploadFileName.value) {
-      await useFetchWithAuth(
-        `v1/files/delete/${currentFileName}?bucket=profiles`,
-        'DELETE',
-        accessToken.value
+        if (uploadFileName.value) {
+          await useFetchWithAuth(
+            `v1/files/delete/${currentFileName}?bucket=profiles`,
+            'DELETE',
+            accessToken.value
+          );
+          userProfileEdited.value.image = uploadFileName.value;
+          await useFetchUpload(
+            `v1/files/upload`,
+            fileToUpload.value,
+            'profiles',
+            accessToken.value
+          );
+        } else {
+          userProfileEdited.value.image = currentFileName;
+        }
+      }
+
+      const response = await useFetchWithAuth(
+        `v1/profile`,
+        'PUT',
+        accessToken.value,
+        userProfileEdited.value
       );
-      userProfileEdited.value.image = uploadFileName.value;
-      await useFetchUpload(
-        `v1/files/upload`,
-        fileToUpload.value,
-        'profiles',
-        accessToken.value
-      );
-    } else {
-      userProfileEdited.value.image = currentFileName;
+
+      if (response.status === 200) {
+        const userProfileData = await useFetchWithAuth(
+          'v1/profile',
+          'GET',
+          accessToken.value
+        );
+
+        if ('data' in userProfileData) {
+          userProfile.value = userProfileData.data;
+        }
+
+        isShowConfirmSave.value = !isShowConfirmSave.value;
+        isShowCompleteModal.value = !isShowCompleteModal.value;
+        showPopup('Update profile success', 'complete');
+      }
+    } catch (error) {
+      console.error(error);
+      showPopup('Fail, try again later', 'error');
     }
-    console.log('userProfileEdited: ', userProfileEdited.value);
+  } else {
+    showPopup('Please complete all fields', 'warn');
+  }
 
+  isSaving.value = { ...isSaving.value, ['profile']: false };
+};
+const allPatternCheck = ref<boolean>();
+
+const patternCheck = ref<{ [key: string]: boolean }>({});
+const checkPasswordPattern = () => {
+  const hasUppercase = /[A-Z]/.test(newPassword.value);
+  const hasLowercase = /[a-z]/.test(newPassword.value);
+  const hasNumber = /[0-9]/.test(newPassword.value);
+  const hasSpecialChar = /[@#$%^&+=.*!]/.test(newPassword.value);
+  const isMinLength = newPassword.value.length >= 8;
+
+  if (hasUppercase) {
+    patternCheck.value['uppercase'] = true;
+  } else {
+    patternCheck.value['uppercase'] = false;
+  }
+  if (hasLowercase) {
+    patternCheck.value['lowercase'] = true;
+  } else {
+    patternCheck.value['lowercase'] = false;
+  }
+  if (hasNumber) {
+    patternCheck.value['number'] = true;
+  } else {
+    patternCheck.value['number'] = false;
+  }
+  if (hasSpecialChar) {
+    patternCheck.value['specialChar'] = true;
+  } else {
+    patternCheck.value['specialChar'] = false;
+  }
+  if (isMinLength) {
+    patternCheck.value['minLength'] = true;
+  } else {
+    patternCheck.value['minLength'] = false;
+  }
+
+  if (
+    hasUppercase &&
+    hasLowercase &&
+    hasNumber &&
+    hasSpecialChar &&
+    isMinLength
+  ) {
+    allPatternCheck.value = true;
+  } else {
+    allPatternCheck.value = false;
+  }
+};
+watch(
+  newPassword,
+  (newPassword) => {
+    if (newPassword) {
+      checkPasswordPattern();
+    }
+  },
+  { immediate: true }
+);
+const changePassword = async () => {
+  if (isSaving.value['password']) return;
+
+  isSaving.value = { ...isSaving.value, ['password']: true };
+  try {
     const response = await useFetchWithAuth(
-      `v1/profile`,
+      'v1/password',
       'PUT',
       accessToken.value,
-      userProfileEdited.value
+      {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value,
+      }
     );
 
     if (response.status === 200) {
-      const userProfileData = await useFetchWithAuth(
-        'v1/profile',
-        'GET',
-        accessToken.value
-      );
-
-      if ('data' in userProfileData) {
-        userProfile.value = userProfileData.data;
-      }
-      isShowConfirmSave.value = !isShowConfirmSave.value;
-      isShowCompleteModal.value = !isShowCompleteModal.value;
+      showPopup('Change password success', 'complete');
+    } else if ('error' in response) {
+      showPopup(`${response.error}`, 'error');
+    } else {
+      showPopup('Change password fail, try again later', 'error');
     }
-  } else {
-    alert('wrong');
+  } catch (error) {
+    showPopup('Change password fail, try again later', 'error');
   }
-};
-
-const changePassword = async () => {
-  const response = await useFetchWithAuth(
-    'v1/password',
-    'PUT',
-    accessToken.value,
-    {
-      currentPassword: currentPassword.value,
-      newPassword: newPassword.value,
-    }
-  );
-
-  if (response.status === 200) {
-    alert('change pass');
-  } else {
-    alert('failed');
-  }
+  isSaving.value = { ...isSaving.value, ['password']: false };
 };
 
 const handleAddSocial = async () => {
-  console.log(socialLinkSet.value);
+  if (isSaving.value['social']) return; // ป้องกันกดซ้ำ
+
+  isSaving.value = { ...isSaving.value, ['social']: true };
   const filteredSocialLinks = socialLinkSet.value.filter((sc: SocialLink) => {
     return sc.socialLink !== '';
   });
-  console.log('filteredSocialLinks', { socialLinks: filteredSocialLinks });
 
   const response = await useFetchWithAuth(
     'v1/socials',
@@ -203,8 +354,13 @@ const handleAddSocial = async () => {
     accessToken.value,
     { socialLinks: filteredSocialLinks }
   );
+  if (response.status === 200) {
+    showPopup('Add social success', 'complete');
+  } else {
+    showPopup('Add social fail', 'error');
+  }
 
-  console.log(response);
+  isSaving.value = { ...isSaving.value, ['social']: false };
 };
 
 const trimTrailingSlash = (url: string) => {
@@ -247,7 +403,6 @@ const fetchSocialLink = async () => {
   );
   if ('data' in response) {
     socialLinksData.value = response.data;
-    console.log(response.data);
   }
 };
 
@@ -290,7 +445,6 @@ watch(
           .split('-');
 
         selectedDay.value = parseInt(day);
-        console.log('day', selectedDay.value);
 
         selectedMonth.value = parseInt(month);
         selectedYear.value = year;
@@ -313,82 +467,96 @@ watch(
   { deep: true }
 );
 
+const isLoading = useState<boolean>('isLoading', () => true);
+defineExpose({ isLoading });
 onMounted(async () => {
-  console.log('userProfile ', userProfile.value);
-  if (userProfile.value) {
-    userProfileEdited.value = {
-      firstname: userProfile.value.users_firstname,
-      lastname: userProfile.value.users_lastname,
-      username: userProfile.value.username,
-      gender: userProfile.value.users_gender,
-      email: userProfile.value.users_email,
-      phone: userProfile.value.users_phone,
-      image: userProfile.value.users_image,
-      birthday: '',
-    };
-    if (userProfile.value.users_birthday !== null) {
-      const [year, month, day] = userProfile.value.users_birthday
-        .split('T')[0]
-        .split('-');
+  try {
+    isLoading.value = true;
+    if (userProfile.value) {
+      userProfileEdited.value = {
+        firstname: userProfile.value.users_firstname,
+        lastname: userProfile.value.users_lastname,
+        username: userProfile.value.username,
+        gender: userProfile.value.users_gender,
+        email: userProfile.value.users_email,
+        phone: userProfile.value.users_phone,
+        image: userProfile.value.users_image,
+        birthday: '',
+      };
+      if (userProfile.value.users_birthday !== null) {
+        const [year, month, day] = userProfile.value.users_birthday
+          .split('T')[0]
+          .split('-');
 
-      selectedDay.value = parseInt(day);
-      selectedMonth.value = parseInt(month);
-      selectedYear.value = year;
+        selectedDay.value = parseInt(day);
+        selectedMonth.value = parseInt(month);
+        selectedYear.value = year;
+      }
+      if (userProfile.value.users_gender) {
+        selectedGender.value = userProfile.value.users_gender;
+      }
+      if (accessToken.value) {
+        await fetchSocialLink();
+        socialLinkSet.value = fillSocialLinks(socialLinksData.value);
+      }
 
-      console.log(selectedDay.value);
-      console.log(selectedMonth.value);
-      console.log(selectedYear.value);
+      notiSetting.value.newEvents = userProfile.value.email_new_events;
+      notiSetting.value.remindersDay = userProfile.value.email_reminders_day;
+      notiSetting.value.remindersHour = userProfile.value.email_reminders_hour;
+      notiSetting.value.updatedEvents = userProfile.value.email_updated_events;
     }
-    if (userProfile.value.users_gender) {
-      selectedGender.value = userProfile.value.users_gender;
-    }
-    if (accessToken.value) {
-      await fetchSocialLink();
-      socialLinkSet.value = fillSocialLinks(socialLinksData.value);
-      console.log('socialLinkSet', socialLinkSet.value);
-    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 500);
   }
 });
 </script>
 
 <template>
   <!-- <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9"> -->
-
-  <div class="relative w-full duration-300">
-    <ConfirmModal
-      title="Update profile?"
-      subTitle="lorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdffffffffffffffffffflorem10dfsssssssssssssssssssssssssdfffffffffffffffffff"
-      :isShowConfirmModal="isShowConfirmSave"
-      @confirmAction="editProfile"
-      @cancleAction="isShowConfirmSave = !isShowConfirmSave"
-    />
+  <Loader v-if="isLoading" />
+  <div v-else class="relative w-full px-8 duration-300 lg:px-0">
     <CompleteModal
-      title="Already Edit your profile"
-      :isShowCompleteModal="isShowCompleteModal"
-      @confirmAction="isShowCompleteModal = !isShowCompleteModal"
+      :isShowCompleteModal="state.isVisible"
+      :title="state.text"
+      :status="state.status"
+      @complete-action="state.isVisible = false"
     />
-    <!-- <p class="t3">My Profile</p> -->
     <div class="flex flex-col gap-5">
       <div
-        class="g-[#E9E9E9]/40 flex gap-20 rounded-xl border border-zinc-500/10 p-8 px-20 shadow-md shadow-zinc-300/30"
+        class="flex flex-col items-center gap-6 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30 lg:flex-row lg:items-start lg:gap-20 lg:px-20"
       >
-        <div class="relative h-fit shrink-0">
+        <div class="relative h-fit w-fit shrink-0">
           <img
-            v-if="!previewImage"
+            v-if="!previewImage && userProfile?.users_image"
             :src="userProfile?.users_image"
             alt=""
-            class="relative h-40 w-40 shrink-0 rounded-full object-cover"
-          /><img
+            class="relative h-32 w-32 shrink-0 rounded-full object-cover lg:h-40 lg:w-40"
+          />
+
+          <div
+            v-if="!previewImage && !userProfile?.users_image"
+            class="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-black/90 object-cover lg:h-40 lg:w-40"
+          >
+            <img
+              src="/favicon.ico"
+              class="relative h-28 w-28 shrink-0 rounded-full object-cover"
+            />
+          </div>
+          <img
             v-if="previewImage"
             :src="previewImage"
-            class="relative h-40 w-40 shrink-0 rounded-full object-cover"
+            class="relative h-32 w-32 shrink-0 rounded-full object-cover lg:h-40 lg:w-40"
           />
-          <div
-            class="absolute bottom-0 right-3 w-fit rounded-full bg-gray-200 p-2"
+          <button
+            class="absolute bottom-0 right-3 w-fit cursor-pointer rounded-full border-2 border-black/0 bg-gray-200 p-2 duration-150 hover:border-red-700"
             @click="triggerFileInput"
           >
             <Edit />
-          </div>
+          </button>
         </div>
 
         <input
@@ -410,7 +578,7 @@ onMounted(async () => {
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               @blur="validateField('firstname', userProfileEdited.firstname)"
             />
-            <p v-if="errors.firstname" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.firstname" class="b4 mt-1 text-sm text-red-500">
               {{ errors.firstname }}
             </p>
           </div>
@@ -440,7 +608,7 @@ onMounted(async () => {
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               @blur="validateField('username', userProfileEdited.username)"
             />
-            <p v-if="errors.username" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.username" class="b4 mt-1 text-sm text-red-500">
               {{ errors.username }}
             </p>
           </div>
@@ -455,7 +623,7 @@ onMounted(async () => {
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               @blur="validateField('email', userProfileEdited.email)"
             />
-            <p v-if="errors.email" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.email" class="b4 mt-1 text-sm text-red-500">
               {{ errors.email }}
             </p>
           </div>
@@ -470,7 +638,7 @@ onMounted(async () => {
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               @blur="validateField('phone', userProfileEdited.phone)"
             />
-            <p v-if="errors.phone" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.phone" class="b4 mt-1 text-sm text-red-500">
               {{ errors.phone }}
             </p>
           </div>
@@ -511,7 +679,7 @@ onMounted(async () => {
                 </option>
               </select>
             </div>
-            <p v-if="errors.birthday" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.birthday" class="b4 mt-1 text-sm text-red-500">
               Please select a valid birthday.
             </p>
           </div>
@@ -528,7 +696,7 @@ onMounted(async () => {
                 {{ gender }}
               </option>
             </select>
-            <p v-if="errors.gender" class="mt-1 text-sm text-red-500">
+            <p v-if="errors.gender" class="b4 mt-1 text-sm text-red-500">
               {{ errors.gender }}
             </p>
           </div>
@@ -536,19 +704,23 @@ onMounted(async () => {
           <!-- Save Button -->
           <div class="flex gap-2 self-end">
             <BtnComp
-              text="Save"
+              :text="isSaving['profile'] ? 'Saving...' : 'Save'"
               color="black"
               class="mt-8 h-fit"
-              @click="isShowConfirmSave = !isShowConfirmSave"
+              :disabled="isSaving['profile']"
+              :isLoading="isSaving['profile']"
+              @click="editProfile"
             />
           </div>
         </div>
       </div>
-      <div class="grid w-full grid-cols-2 gap-3">
+      <div class="grid w-full gap-3 lg:grid-cols-2">
         <div
           class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
-          <div v-if="socialLinkSet !== []" class="flex flex-col gap-2">
+          <p class="b1 pb-5 font-semibold">Social Links</p>
+
+          <div v-if="socialLinkSet.length !== 0" class="flex flex-col gap-2">
             <div
               v-for="(item, index) in socialLinkSet"
               :key="index"
@@ -560,27 +732,27 @@ onMounted(async () => {
                   item.socialPlatform.toLowerCase() ===
                   'Instagram'.toLowerCase()
                 "
-                class="text-4xl"
+                class="text-2xl"
               />
               <X
                 v-else-if="
                   item.socialPlatform.toLowerCase() === 'X'.toLowerCase()
                 "
-                class="text-4xl"
+                class="text-2xl"
               />
               <Facebook
                 v-else-if="
                   item.socialPlatform.toLowerCase() === 'Facebook'.toLowerCase()
                 "
-                class="text-4xl"
+                class="text-2xl"
               />
               <Linkedin
                 v-else-if="
                   item.socialPlatform.toLowerCase() === 'Linkedin'.toLowerCase()
                 "
-                class="text-4xl"
+                class="text-2xl"
               />
-              <LinkSocial v-else class="text-4xl" />
+              <LinkSocial v-else class="text-2xl" />
               <input
                 @blur="item.socialLink = trimTrailingSlash(item.socialLink)"
                 v-model="item.socialLink"
@@ -591,6 +763,8 @@ onMounted(async () => {
             <BtnComp
               @click="handleAddSocial"
               text="Save"
+              :disabled="isSaving['social']"
+              :isLoading="isSaving['social']"
               color="black"
               class="mt-3 w-fit self-end"
             />
@@ -614,64 +788,134 @@ onMounted(async () => {
                 v-model="newPassword"
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               />
+              <div v-if="newPassword.length > 0" class="b4">
+                <div
+                  class="flex items-center"
+                  :class="
+                    patternCheck['minLength']
+                      ? 'text-green-700'
+                      : 'text-red-500'
+                  "
+                >
+                  <Check v-if="patternCheck['minLength']" /><Cancle v-else /> At
+                  least 8 characters
+                </div>
+                <div
+                  class="flex items-center"
+                  :class="
+                    patternCheck['uppercase']
+                      ? 'text-green-700'
+                      : 'text-red-500'
+                  "
+                >
+                  <Check v-if="patternCheck['uppercase']" /><Cancle v-else />At
+                  least one uppercase letter (A–Z)
+                </div>
+                <div
+                  class="flex items-center"
+                  :class="
+                    patternCheck['lowercase']
+                      ? 'text-green-700'
+                      : 'text-red-500'
+                  "
+                >
+                  <Check v-if="patternCheck['lowercase']" /><Cancle v-else />At
+                  least one lowercase letter (a–z)
+                </div>
+                <div
+                  class="flex items-center"
+                  :class="
+                    patternCheck['number'] ? 'text-green-700' : 'text-red-500'
+                  "
+                >
+                  <Check v-if="patternCheck['number']" /><Cancle v-else />At
+                  least one number (0–9)
+                </div>
+                <div
+                  class="flex items-center"
+                  :class="
+                    patternCheck['specialChar']
+                      ? 'text-green-700'
+                      : 'text-red-500'
+                  "
+                >
+                  <Check v-if="patternCheck['specialChar']" /><Cancle
+                    v-else
+                  />At least one special character (@, #, $, %, ^, &, +, =, .,
+                  *, etc.)
+                </div>
+              </div>
             </div>
           </div>
           <BtnComp
             @click="changePassword"
-            text="Save"
+            :text="isSaving['password'] ? 'Saving...' : 'Save'"
+            :isLoading="isSaving['password']"
             color="black"
+            :class="
+              isSaving['password'] ||
+              currentPassword.length === 0 ||
+              newPassword.length === 0 ||
+              !allPatternCheck
+                ? 'cursor-not-allowed opacity-50'
+                : ''
+            "
             class="mt-3 w-fit self-end"
+            :disabled="
+              isSaving['password'] ||
+              currentPassword.length === 0 ||
+              newPassword.length === 0 ||
+              !allPatternCheck
+            "
           />
         </div>
       </div>
       <div
-        class="g-[#E9E9E9]/40 flex flex-col gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
+        class="g-[#E9E9E9]/40 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
       >
-        <div>
+        <div class="flex flex-col gap-5">
           <p class="b1 font pb-5 font-semibold">Custom Notification</p>
           <div class="flex flex-col gap-2">
             <div
-              v-for="n in 7"
+              v-for="noti in Object.keys(notiSetting)"
               class="b3 flex items-center justify-between rounded-md border p-4"
             >
               <div class="flex items-center gap-3">
                 <Ticket class="text-2xl" />
                 <div>
-                  <p class="b2 font-semibold">All Event</p>
+                  <p class="b2 font-semibold">
+                    {{ notiSettingMsg[noti]?.title }}
+                  </p>
                   <p>
-                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                    {{ notiSettingMsg[noti]?.desc }}
                   </p>
                 </div>
               </div>
-              <UToggle color="gray" v-model="checked" class="just flex" />
+              <label class="inline-flex cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  v-model="notiSetting[noti]"
+                  class="peer sr-only"
+                />
+
+                <div
+                  class="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-800"
+                ></div>
+              </label>
             </div>
           </div>
+          <BtnComp
+            @click="handleNotiSetting"
+            text="Save"
+            color="black"
+            class="mt-3 w-fit self-end"
+            :disabled="isSaving['noti']"
+            :isLoading="isSaving['noti']"
+          />
         </div>
       </div>
     </div>
   </div>
-  <!-- </div> -->
 </template>
 
-<style scoped>
-.mask-gradient-profile {
-  mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 1),
-    rgba(0, 0, 0, 0.7),
-    rgba(0, 0, 0, 0)
-  );
-  -webkit-mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 1),
-    rgba(0, 0, 0, 0.7),
-    rgba(0, 0, 0, 0)
-  );
-  backdrop-filter: blur(20px);
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 50%;
-  pointer-events: none;
-}
-</style>
+<style scoped></style>

@@ -26,15 +26,16 @@ interface Tag {
 }
 
 const date = ref();
-const statusData = ['Soon', 'Available', 'Unavailable'];
 const filterShowOrNot = ref({
   tag: true,
   status: true,
   date: true,
 });
-
-const updateDate = (newDate: Date) => {
+watch([date], ([newDate]) => {
   date.value = newDate;
+});
+const updateDate = (newDate: Date) => {
+  date.value = newDate || new Date();
   emit('update-date', newDate);
 };
 </script>
@@ -60,33 +61,6 @@ const updateDate = (newDate: Date) => {
       </button>
     </div>
 
-    <!-- <div class="w-full pt-4">
-      <button
-        @click="filterShowOrNot.status = !filterShowOrNot.status"
-        class="flex w-full items-center justify-between"
-      >
-        <p class="b1">Status</p>
-        <Arrow
-          :class="`${filterShowOrNot.status ? 'rotate-90' : '-rotate-90'} `"
-        />
-      </button>
-      <div class="flex flex-col gap-[9px] pt-4" v-if="filterShowOrNot?.status">
-        <button
-          v-for="status in statusData"
-          :class="`${selectedStatus?.includes(status) ? 'bg-burgundy pl-2 text-light-grey' : ''} b2 flex items-center rounded-md py-[5px] pl-4`"
-          @click="$emit('selectStatus', status)"
-        >
-          <Check
-            v-if="selectedStatus?.includes(status)"
-            class="fill-light-grey text-3xl"
-          />
-          <p>
-            {{ status }}
-          </p>
-        </button>
-      </div>
-    </div> -->
-
     <div
       :class="`w-[254px] pt-4 ${filterShowOrNot.date ? '' : ''} duration-1000`"
     >
@@ -99,21 +73,23 @@ const updateDate = (newDate: Date) => {
           :class="`${filterShowOrNot.date ? 'rotate-90' : '-rotate-90'} duration-300`"
         />
       </button>
-      <div :class="`w-[254px] pt-4`" v-if="filterShowOrNot?.date">
+      <div :class="`DatePicker pt-4`" v-if="filterShowOrNot?.date">
         <DatePicker
+          borderless
+          expanded
           v-model="date"
           mode="date"
-          class=""
+          color="red"
           @update:model-value="updateDate"
         />
       </div>
     </div>
   </div>
   <div
-    :class="`fixed -left-0 top-0 z-40 flex h-screen w-screen flex-col gap-4 bg-white p-4 px-8 pt-20 lg:hidden`"
+    :class="`fixed -left-0 top-0 z-40 flex h-screen w-3/4 flex-col gap-4 bg-white p-4 px-8 pt-20 drop-shadow-md lg:pointer-events-none lg:hidden`"
   >
     <button @click="$emit('handleShowFilter')">
-      <Cancle class="t2 absolute right-7 top-7" />
+      <Cancle class="t2 absolute right-7 top-20" />
     </button>
     <div class="flex w-full flex-col gap-[9px]">
       <p class="b1">Tags</p>
@@ -144,11 +120,14 @@ const updateDate = (newDate: Date) => {
           :class="`${filterShowOrNot.date ? 'rotate-90' : '-rotate-90'} duration-300`"
         />
       </button>
-      <div :class="`w-[254px] pt-4`" v-if="filterShowOrNot?.date">
+      {{ date }}
+      <div :class="`DatePicker pt-4`" v-if="filterShowOrNot?.date">
         <DatePicker
+          borderless
+          expanded
           v-model="date"
           mode="date"
-          class=""
+          color="red"
           @update:model-value="updateDate"
         />
       </div>

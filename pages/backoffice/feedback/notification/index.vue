@@ -77,13 +77,11 @@ const fetchData = async () => {
 };
 
 // const filterRating = (star: number) => {
-//   console.log(star);
 
 //   if (activeStar.value === star) {
 //     // If the same star is clicked again, reset the filter
 //     activeStar.value = null;
 //     filterFeedbackData.value = feedbackData.value; // Reset to original feedbacks
-//     console.log("Filter reset");
 //   } else {
 //     // Apply the filter
 //     activeStar.value = star;
@@ -98,16 +96,13 @@ const fetchData = async () => {
 //     // If the same star is clicked again, reset the filter
 //     activeEventId.value = null;
 //     filterFeedbackData.value = feedbackData.value; // Reset to original feedbacks
-//     console.log("Filter reset");
 //   } else {
 //     // Apply the filter
-//     console.log(eventId)
 //     activeEventId.value = eventId;
 //     const filter = feedbackData.value.filter((item) => item.eventId === eventId);
 //     if(filter.length === 0){
 
 //     }
-//     console.log(filter)
 //     filterFeedbackData.value = filter;
 //   }
 // };
@@ -125,33 +120,26 @@ const filterEvent = (eventId: number) => {
   if (activeEventId.value === eventId) {
     activeEventId.value = null;
   } else {
-    console.log(eventId);
     activeEventId.value = eventId;
   }
   goToFilter();
 };
 
 const goToFilter = () => {
-  console.log(activeEventId.value + ' and ' + activeStar.value);
-
   if (activeEventId.value && activeStar.value) {
     filterFeedbackData.value = feedbackData.value
       .filter((item) => item.eventId === activeEventId.value)
       .filter((item) => item.feedbackRating === activeStar.value);
-    console.log('both');
   } else if (activeEventId.value && !activeStar.value) {
     filterFeedbackData.value = feedbackData.value.filter(
       (item) => item.eventId === activeEventId.value
     );
-    console.log('event');
   } else if (!activeEventId.value && activeStar.value) {
     filterFeedbackData.value = feedbackData.value.filter(
       (item) => item.feedbackRating === activeStar.value
     );
-    console.log('rating');
   } else if (!activeEventId.value && !activeStar.value) {
     filterFeedbackData.value = feedbackData.value;
-    console.log('nothing');
   }
 };
 
@@ -161,7 +149,6 @@ const goToResponse = async (feedbackId: number) => {
   );
   feedbackResponse.value = fetchedFeedbackData;
   previewFeedback.value = true;
-  console.log(feedbackResponse.value);
 };
 
 onMounted(async () => {
@@ -170,7 +157,6 @@ onMounted(async () => {
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
     await fetchData();
-    console.log(activeStar.value);
   } finally {
     isLoading.value = false;
   }
@@ -178,7 +164,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
+  <div class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
     <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
       <div class="p-12">
         <h1 class="t1 flex items-center">

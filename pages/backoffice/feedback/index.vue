@@ -36,7 +36,6 @@ const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
 const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
 const adminData = ref<UserProfile>();
-const isLoading = ref(true);
 const feedbacksCount = ref();
 const previewFeedback = ref(false);
 const token = useCookie('accessToken');
@@ -121,6 +120,46 @@ function closePreview() {
   document.body.style.overflow = '';
 }
 
+const config = useRuntimeConfig();
+
+async function downloadReport(eventId, eventName) {
+  const response = await fetch(
+    `${config.public.baseUrl}/api/v1/report/${eventId}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to download report');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  // ตั้งชื่อไฟล์จาก header "Content-Disposition"
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = `${eventName} response.xlsx`;
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="(.+)"/);
+    if (match) {
+      filename = match[1];
+    }
+  }
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+const isLoading = useState('isLoading', () => true);
+
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -133,9 +172,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
-    <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
-      <div class="p-12">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
+    <div
+      class="mx-3 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
+    >
+      <div class="p-3 lg:p-12">
         <h1 class="t1">Feedback list</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
@@ -182,6 +225,7 @@ onMounted(async () => {
                 :responses="feedbacksCount[index]"
                 :canEdit="compareDate(event.eventStartDate)"
                 @preview-feedback="onPreviewFeedback"
+                @export-feedback="downloadReport"
               />
             </tr>
           </tbody>

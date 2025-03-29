@@ -9,14 +9,13 @@ useHead({
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup');
 const route = useRoute();
-const role = useState('role');
 const isBackoffice = ref(route.fullPath.includes('backoffice'));
-const isSignUpPage = ref(route.fullPath.includes('signup'));
 const isSessionTimeOuts = useState('isSessionTimeOut');
 const handleSessionExpire = useAuth().handleSessionExpire;
 const isSignInCookie = useCookie('is_user_sign_in');
 const isHavePopupOpen = useState('isHavePopupOpen', () => false);
 const isClickOK = useState('isClickOk');
+const isLoading = useState('isLoading', () => true);
 
 onMounted(() => {
   const observer = new MutationObserver(() => {
@@ -39,6 +38,10 @@ onMounted(() => {
   });
 });
 
+watchEffect(() => {
+  isBackoffice.value = route.fullPath.includes('backoffice');
+});
+
 watch(
   [isHavePopupOpen, isOTPPopup, isSessionTimeOuts],
   ([openPopup, otp, session]) => {
@@ -55,17 +58,14 @@ watch(
 <template>
   <div class="relative mx-auto w-full">
     <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-black/20' : ''"></div>
-    <Nav
-      v-if="!isBackoffice && !isSignUpPage && role !== 'Organization'"
-      class="fixed top-0 z-40 w-full"
-    />
+    <Nav v-if="!isBackoffice && !isLoading" class="fixed top-0 z-40 w-full" />
     <Login />
     <OtpPopup />
     <div
       class="absolute left-1/2 top-[600px] z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-[100%] flex-col gap-4 rounded-xl bg-white p-10 text-center shadow-lg"
       v-if="isSessionTimeOuts"
     >
-      <p class="b1">Session expired pls sign in mai ja</p>
+      <p class="b1">Session expired pls sign in again</p>
       <button
         class="b2 rounded-lg bg-burgundy py-1 text-light-grey"
         @click="handleSessionExpire"

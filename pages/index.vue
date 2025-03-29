@@ -70,12 +70,6 @@ const sampleEventIndex = ref(0);
 const maxDate = new Date();
 maxDate.setMonth(maxDate.getMonth() + 2);
 
-const addDays = (date: Date, days: number) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
-
 type GroupedEvents = {
   [date: string]: Event[];
 };
@@ -118,11 +112,11 @@ const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
 
-const isLoading = ref(false);
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
-  isLoading.value = true;
   try {
+    isLoading.value = true;
     await fetchData();
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -168,13 +162,13 @@ watch(selectedEventTime, (newValue) => {
 </script>
 
 <template>
+  <Loader v-if="isLoading" />
+
   <div
-    v-if="isLoading"
-    class="flex h-screen w-full items-center justify-center"
+    v-else
+    :class="isLoading ? 'opacity-0' : 'opacity-100'"
+    class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0"
   >
-    <span class="loader"></span>
-  </div>
-  <div v-else class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0">
     <!-- Header Event Banner -->
     <div class="relative">
       <button
@@ -445,7 +439,7 @@ watch(selectedEventTime, (newValue) => {
         ></div>
         <div class="w-full overflow-x-auto px-4 pb-5">
           <div class="pt-14" v-if="filteredTimeData?.length === 0">
-            <p class="no-card-message b2">
+            <p class="no-card-message b2 lg:py-24">
               No
               {{
                 selectedEventTime === 'today'
@@ -468,54 +462,38 @@ watch(selectedEventTime, (newValue) => {
       </div>
     </div>
 
-    <div
-      class="group relative max-w-lg overflow-hidden rounded-3xl shadow-lg duration-700"
-    >
-      <!-- Background Image -->
-      <div class="group relative duration-700">
-        <img
-          src="../components/images/kornnaphat.png"
-          alt="Severance"
-          class="h-64 w-full object-cover"
-        />
-
-        <!-- Blurred Overlay (ต้องมาก่อน content เพื่อให้ blur อยู่ข้างล่าง) -->
-        <div class="mask-gradient"></div>
-
-        <!-- Content (วางให้อยู่ข้างหน้าสุด) -->
-        <div class="absolute bottom-4 left-4 z-50 text-white">
-          <h2 class="text-2xl font-bold">Severance</h2>
-          <p class="text-sm opacity-80">Season 2 streaming now</p>
-        </div>
-
-        <!-- Watch Now Button -->
-        <button
-          class="absolute bottom-4 right-4 z-50 rounded-lg bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-md backdrop-blur-md hover:bg-white"
-        >
-          Watch Now
-        </button>
-      </div>
-    </div>
-
     <!-- Tags section -->
     <div class="py-7">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
-        <div v-for="tag in tagsData" :key="tag.tag_id">
+        <div v-for="tag in tagsData" :key="tag.tag_id" class="group">
           <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
             <button
-              class="flex h-[40px] w-[110px] items-center gap-3 rounded-md bg-light-grey p-3 drop-shadow-md duration-200 hover:bg-grey lg:h-[60px] lg:w-[160px]"
+              class="group flex items-center gap-3 rounded-md bg-light-grey p-4 drop-shadow-md duration-200 hover:bg-grey"
             >
-              <div
+              <!-- <div
                 :style="{ backgroundColor: tag.tag_code }"
                 class="h-full w-[5px] rounded"
-              ></div>
-              <span class="b3 ml-2 font-semibold">{{ tag.tag_title }}</span>
+              ></div> -->
+              <Entertainment
+                v-if="tag.tag_title.includes('Entertainment')"
+                :class="`group-hover:stroke-[${tag.tag_code}] group-hover:text-[${tag.tag_code}]`"
+              />
+              <Music v-if="tag.tag_title === 'Music'" />
+              <Technology v-if="tag.tag_title === 'Technology'" />
+              <Sports v-if="tag.tag_title === 'Sports'" />
+              <Art
+                v-if="tag.tag_title === 'Art'"
+                :class="`group-hover:stroke-[${tag.tag_code}] group-hover:fill -[${tag.tag_code}]`"
+              />
+              <Workshop v-if="tag.tag_title === 'Workshop'" />
+              <span class="b3 font-semibold">{{ tag.tag_title }}</span>
             </button>
           </NuxtLink>
         </div>
       </div>
     </div>
+
     <!-- Explore Date section -->
     <div id="explore-date" class="w-full py-7">
       <h1 class="explore-title t2 py-3">Explore by date</h1>
@@ -555,7 +533,7 @@ watch(selectedEventTime, (newValue) => {
         </div>
 
         <div class="DatePicker sticky top-28 hidden self-start lg:block">
-          <DatePicker v-model="today" mode="date" />
+          <DatePicker v-model="today" mode="date" color="red" />
         </div>
       </div>
     </div>

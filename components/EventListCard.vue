@@ -2,7 +2,7 @@
 import type { Event } from '~/models/event';
 
 const props = defineProps<{
-  eventDetail?: Event;
+  eventDetail: Event;
   isVertical?: boolean;
 }>();
 </script>
@@ -12,6 +12,12 @@ const props = defineProps<{
     :class="`event-card shrink-0 drop-shadow-md duration-300 ${isVertical ? 'w-[150px] lg:w-[260px]' : 'w-[186px] hover:scale-105 hover:drop-shadow-2xl lg:w-[275px]'}`"
   >
     <div class="relative">
+      <button
+        v-if="new Date(eventDetail?.end_date).getTime() < new Date().getTime()"
+        class="event-card-tag b4 absolute left-2 top-2 z-10 rounded-md bg-burgundy/80 px-2 py-1 text-white backdrop-blur-lg"
+      >
+        Event Ended
+      </button>
       <img
         :src="eventDetail?.image"
         alt=""

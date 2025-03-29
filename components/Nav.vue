@@ -40,7 +40,7 @@ const profileData = useCookie<UserProfile>('profileData');
 </script>
 
 <template>
-  <div class="w-screen bg-white/20 py-4 backdrop-blur-sm lg:py-6">
+  <div class="z-50 w-screen bg-white/20 py-4 backdrop-blur-sm lg:py-6">
     <div
       class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
     >
@@ -86,9 +86,12 @@ const profileData = useCookie<UserProfile>('profileData');
             />
             <div
               v-else
-              class="flex h-full w-full items-center justify-center text-zinc-600"
+              class="flex h-full w-full items-center justify-center rounded-full bg-black/80"
             >
-              <UserProfileImg />
+              <img
+                src="/favicon.ico"
+                class="relative h-5 w-5 shrink-0 rounded-full object-cover"
+              />
             </div>
           </div>
           <div
@@ -122,6 +125,19 @@ const profileData = useCookie<UserProfile>('profileData');
               >
                 <Contact class="h-5 w-5 text-gray-600" />
                 <span>My Contact</span>
+              </button>
+            </NuxtLink>
+            <NuxtLink
+              v-if="profileData && profileData.users_role !== 'Attendee'"
+              to="/backoffice"
+              class="w-full"
+            >
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <Bookmark class="h-5 w-5 text-gray-600" />
+                <span>Manage Event</span>
               </button>
             </NuxtLink>
             <!-- Divider -->
@@ -172,3 +188,25 @@ const profileData = useCookie<UserProfile>('profileData');
     </div>
   </div>
 </template>
+<style scoped>
+.mask-gradient {
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0)
+  );
+  /* backdrop-filter: blur(20px); */
+  /* position: fixed; */
+  /* z-index: 1; */
+  /* top: 0;  */
+  /* width: 100%; */
+  /* height: 10%; */
+}
+</style>

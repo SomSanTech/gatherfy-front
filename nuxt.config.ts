@@ -1,12 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['nuxt-rating', 'nuxt-vue3-google-signin', '@nuxt/ui'],
-  ui: {
-    global: true,
-  },
-  colorMode: {
-    preference: 'light',
-  },
+  modules: ['nuxt-rating', 'nuxt-vue3-google-signin'],
   googleSignIn: {
     clientId:
       '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com',

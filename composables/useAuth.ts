@@ -47,7 +47,7 @@ export const useAuth = () => {
   const logout = () => {
     isLoggingOut.value = true;
     if (!accessToken.value && !refreshToken.value) {
-      console.log('Already logged out, skipping reload');
+      console.error('Already logged out, skipping reload');
       return;
     }
     accessToken.value = null;
