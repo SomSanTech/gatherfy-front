@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/models/userProfile';
-import { vOnClickOutside } from '@vueuse/components';
 
 import SearchIcon from './icons/Search.vue';
 import User from './icons/User.vue';
@@ -96,7 +95,6 @@ const profileData = useCookie<UserProfile>('profileData');
           </div>
           <div
             v-if="isOpenProfilePopup"
-            v-on-click-outside="handleOpenProfilePopup"
             @click="isOpenProfilePopup = false"
             class="b2 absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-xl bg-white p-2 shadow-lg"
           >

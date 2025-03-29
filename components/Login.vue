@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { vOnClickOutside } from '@vueuse/components';
 import {
   GoogleSignInButton,
   type CredentialResponse,
@@ -507,10 +506,12 @@ watch(
   />
   <div v-if="loginPopup" class="fixed z-50 h-screen w-full">
     <div
-      v-on-click-outside="handleLoginPopup"
       :class="{ 'animate-shake': shouldShake }"
       class="absolute left-1/2 top-1/2 z-50 flex min-w-[320px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-7 shadow-lg lg:min-w-[420px] lg:p-10"
     >
+      <button @click="handleLoginPopup" class="absolute right-5 top-5">
+        <Cancle />
+      </button>
       <div v-if="!isSignup" class="text-center">
         <p class="t3">Welcome!</p>
         <p :class="isAlreadySignup ? 'b1 text-green-600' : 'b1 text-gray-600'">
