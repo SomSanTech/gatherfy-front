@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Archive build files
-        run: tar -czf build.tar.gz -C . .output
+        run: tar -czf build.tar.gz ./.output
 
       - name: Upload build files
         uses: actions/upload-artifact@v4
@@ -95,8 +95,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           sshpass -p "$REMOTE_PASSWORD" ssh -t -o StrictHostKeyChecking=no -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            cd /home/somsan/Gatherfy
-            tar -xzf build.tar.gz
+            cd /home/somsan/Gatherfy/staging
+            tar -xzf ./front/build.tar.gz -C ./front/
 
             # docker stop gatherfy-web || true
             # docker rm gatherfy-web || true

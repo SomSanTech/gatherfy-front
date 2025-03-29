@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     clientId:
       '208535017949-i5clt2a567g51nhu9lj58ctdqo8vkp2i.apps.googleusercontent.com',
   },
-  compatibilityDate: '2024-04-03',
+  // compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   css: ['~/assets/main.css'],
   postcss: {
@@ -27,7 +27,7 @@ export default defineNuxtConfig({
     ],
   },
   typescript: {
-    strict: true,
+    strict: false,
   },
   runtimeConfig: {
     public: {
