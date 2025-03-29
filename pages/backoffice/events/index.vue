@@ -72,9 +72,9 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
-    <div class="bg-glass mx-20 mb-16 mt-32 w-full rounded-3xl">
-      <div class="p-12">
+  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
+    <div class="bg-glass mx-5 mb-16 mt-32 w-full rounded-3xl lg:mx-20">
+      <div class="p-5 lg:p-12">
         <div class="grid grid-cols-2">
           <h1 class="t1">Event list</h1>
           <NuxtLink
@@ -138,7 +138,7 @@ onMounted(() => {
     class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm duration-500"
   >
     <div
-      class="relative w-[30%] overflow-auto rounded-xl border border-opacity-5 bg-white px-14 pt-5 shadow-lg"
+      class="relative w-2/3 overflow-auto rounded-xl border border-opacity-5 bg-white pt-5 shadow-lg lg:w-[30%] lg:px-14"
     >
       <div class="px-6 pb-6 pt-5 text-center">
         <img

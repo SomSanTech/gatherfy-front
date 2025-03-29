@@ -199,8 +199,6 @@ const fetchAllRegisData = async () => {
       return '30+';
     }
   );
-  console.log('registrationsData.value', registrationsData.value);
-  console.log('groupedByAgeRangeAndGenderData', groupedByAgeRangeAndGenderData);
 
   groupedByAgeRangeAndGender.value = Object.fromEntries(
     Array.from(groupedByAgeRangeAndGenderData, ([ageRange, genderMap]) => [
@@ -208,7 +206,6 @@ const fetchAllRegisData = async () => {
       Object.fromEntries(genderMap),
     ])
   );
-  console.log('groupedByAgeRangeAndGender', groupedByAgeRangeAndGender.value);
 
   if (Object.keys(groupedByAgeRangeAndGender.value).length > 0) {
     ageGenderLabels.value = Object.keys(groupedByAgeRangeAndGender.value);
@@ -342,7 +339,7 @@ const initializeViewLineChart = () => {
         },
       });
     } else {
-      console.log('Chart canvas not found');
+      console.error('Chart canvas not found');
     }
   });
 };
@@ -554,9 +551,9 @@ watch(pieOfRegisChartRef, (newValue) => {
             ></canvas>
           </div>
         </div>
-        <div class="grid grid-cols-10 gap-4">
+        <div class="grid gap-4 lg:grid-cols-10">
           <div
-            class="col-span-3 grid h-full grid-rows-3 gap-4 md:max-h-[600px]"
+            class="col-span-3 grid h-full gap-4 md:max-h-[600px] lg:grid-rows-3"
           >
             <div
               v-if="eventsData"

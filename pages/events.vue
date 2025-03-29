@@ -54,7 +54,7 @@ const buildFilterUrl = () => {
 };
 
 const filterAndSearchEvents = async () => {
-  isLoading.value = true;
+  isSearching.value = true;
   try {
     let url;
     if (searchTerm.value) {
@@ -66,7 +66,7 @@ const filterAndSearchEvents = async () => {
   } catch (error) {
     console.error('Error fetching events:', error);
   } finally {
-    isLoading.value = false;
+    isSearching.value = false;
     isInitializing.value = false;
   }
 };
@@ -82,6 +82,7 @@ const viewportWidth = computed(() => window.innerWidth);
 
 const isMobile = computed(() => viewportWidth.value <= 450);
 const isLoading = useState('isLoading', () => true);
+const isSearching = ref(false);
 
 onMounted(async () => {
   if (isMobile.value) {
@@ -167,12 +168,12 @@ watch(
           :selectedTags="[...selectedTags]"
           :selectedStatus="[...selectedStatus]"
         />
-        <div v-if="isLoading" class="flex w-full items-center justify-center">
-          <span class="loader"></span>
+        <div v-if="isSearching" class="flex w-full items-center justify-center">
+          <span class="load"></span>
         </div>
         <h1
           v-else-if="eventSearch?.length === 0"
-          class="no-event-search t3 mx-auto flex items-center justify-center font-semibold"
+          class="no-event-search t3 mx-auto flex items-center justify-center py-24 font-semibold"
         >
           Can't Find Events You're Looking For
         </h1>

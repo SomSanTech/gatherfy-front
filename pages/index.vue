@@ -70,12 +70,6 @@ const sampleEventIndex = ref(0);
 const maxDate = new Date();
 maxDate.setMonth(maxDate.getMonth() + 2);
 
-const addDays = (date: Date, days: number) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
-
 type GroupedEvents = {
   [date: string]: Event[];
 };
@@ -445,7 +439,7 @@ watch(selectedEventTime, (newValue) => {
         ></div>
         <div class="w-full overflow-x-auto px-4 pb-5">
           <div class="pt-14" v-if="filteredTimeData?.length === 0">
-            <p class="no-card-message b2">
+            <p class="no-card-message b2 lg:py-24">
               No
               {{
                 selectedEventTime === 'today'
@@ -499,6 +493,7 @@ watch(selectedEventTime, (newValue) => {
         </div>
       </div>
     </div>
+
     <!-- Explore Date section -->
     <div id="explore-date" class="w-full py-7">
       <h1 class="explore-title t2 py-3">Explore by date</h1>
@@ -538,7 +533,7 @@ watch(selectedEventTime, (newValue) => {
         </div>
 
         <div class="DatePicker sticky top-28 hidden self-start lg:block">
-          <DatePicker v-model="today" mode="date" />
+          <DatePicker v-model="today" mode="date" color="red" />
         </div>
       </div>
     </div>

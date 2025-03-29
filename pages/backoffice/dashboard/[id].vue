@@ -116,7 +116,6 @@ const fetchViewsData = async () => {
   try {
     const fetchedData = await useFetchData(`v1/views?eventIds=${param}`, 'GET');
     viewsData.value = fetchedData.data || [];
-    console.log('viewsData.value', viewsData.value);
 
     totalViewCount.value = viewsData.value[0].views.reduce(
       (sum: any, record: any) => sum + record.count,
@@ -396,89 +395,7 @@ const ageGenderChartRef = ref<HTMLCanvasElement | null>(null);
 const ageGenderChartData = ref();
 const chartInstance = ref<Chart | null>(null);
 const barData = ref();
-// const initializeBarChart = () => {
-//   nextTick(() => {
-//     if (viewsChartRef.value) {
-//       new Chart(viewsChartRef.value, {
-//         type: 'bar',
-//         data: barData.value,
-//         options: {
-//           responsive: true,
-//           plugins: {
-//             legend: {
-//               position: 'bottom',
-//               gap: 5,
-//             },
-//             title: {
-//               display: false,
-//               text: 'Chart.js Doughnut Chart',
-//             },
-//           },
-//         },
-//       });
-//     }
-//   });
-// };
-// const initializeBarChart = () => {
-//   nextTick(() => {
-//     if (viewsChartRef.value) {
-//       new Chart(viewsChartRef.value, {
-//         type: 'bar',
-//         data: barData.value,
-//         options: {
-//           responsive: true,
-//           scales: {
-//             x: {
-//               grid: {
-//                 drawBorder: false,
-//                 drawOnChartArea: false,
-//                 display: false,
-//               },
-//               border: {
-//                 display: false,
-//               },
-//               ticks: {
-//                 font: { size: 12, family: 'Poppins', weight: '' },
-//                 color: '#333',
-//                 align: 'center', // จัดให้อยู่ตรงกลาง
-//                 maxRotation: 90, // หมุน label เป็นแนวตั้ง
-//                 minRotation: 90, // บังคับให้เป็นแนวตั้ง
-//               },
-//             },
-//             y: {
-//               grid: {
-//                 drawBorder: false,
-//                 drawOnChartArea: false,
-//                 display: false,
-//               },
-//               border: {
-//                 display: false,
-//               },
-//               ticks: {
-//                 display: false,
-//               },
-//             },
-//           },
-//           hover: {
-//             mode: 'nearest',
-//             intersect: true, // hover only when intersecting a bar
-//           },
-//           plugins: {
-//             legend: {
-//               display: false,
-//             },
-//             title: {
-//               display: false,
-//             },
-//           },
-//           layout: {
-//             padding: { top: 10, bottom: 10 },
-//           },
-//         },
-//       });
-//     }
-//   });
-// };
+
 const initializeBarChart = () => {
   nextTick(() => {
     if (viewsChartRef.value) {
@@ -571,7 +488,6 @@ onMounted(async () => {
       viewsData.value[0]?.views,
       selectedViewOption.value
     );
-    console.log('barData', barData.value);
 
     initializeBarChart();
   } finally {
@@ -599,8 +515,8 @@ watch(selectedViewOption, (newValue) => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
-    <div class="mx-20 my-24 flex w-full flex-col gap-4">
+  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
+    <div class="my-24 flex w-full flex-col gap-4 px-5 lg:mx-20 lg:px-0">
       <NuxtLink
         to="/backoffice/dashboard"
         class="mb-1 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -653,7 +569,7 @@ watch(selectedViewOption, (newValue) => {
         </div>
       </div>
 
-      <div class="grid h-full grid-cols-10 gap-4">
+      <div class="grid h-full gap-4 lg:grid-cols-10">
         <div
           class="jus bg-glass col-span-5 flex flex-col gap-4 rounded-[20px] px-8 py-5"
         >
@@ -707,10 +623,10 @@ watch(selectedViewOption, (newValue) => {
           />
         </div>
       </div>
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-7 grid gap-4">
+      <div class="flex flex-col gap-4">
+        <div class="grid gap-4 lg:grid-cols-12">
           <div
-            class="view-by-gender-age bg-glass rounded-[20px] p-12"
+            class="view-by-gender-age bg-glass rounded-[20px] p-12 lg:col-span-8"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -723,7 +639,16 @@ watch(selectedViewOption, (newValue) => {
             ></canvas>
           </div>
           <div
-            class="view-by-checkin bg-glass flex flex-col gap-2 rounded-[20px] p-12"
+            v-if="groupedByGender"
+            class="view-by-gender bg-glass col-span-4 flex flex-grow flex-col gap-2 rounded-[20px] p-12"
+          >
+            <PieChart :groupedByGender="groupedByGender" :colors="colors" />
+          </div>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-12">
+          <div
+            class="view-by-checkin bg-glass col-span-7 flex flex-col gap-2 rounded-[20px] p-12"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -781,17 +706,8 @@ watch(selectedViewOption, (newValue) => {
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="col-span-5 flex flex-col gap-4">
           <div
-            v-if="groupedByGender"
-            class="view-by-gender bg-glass flex flex-grow flex-col gap-2 rounded-[20px] p-12"
-          >
-            <PieChart :groupedByGender="groupedByGender" :colors="colors" />
-          </div>
-          <div
-            class="view-by-feedback bg-glass flex flex-col gap-2 rounded-[20px] p-12"
+            class="view-by-feedback bg-glass col-span-5 flex flex-col gap-2 rounded-[20px] p-12"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div

@@ -4,17 +4,17 @@ import RegistrationList from '~/components/backoffice/RegistrationList.vue';
 
 // const scannedValue = ref<string | null>(null);
 
-const onDecode = (result: string) => {
-  scannedValue.value = result;
-};
+// const onDecode = (result: string) => {
+//   scannedValue.value = result;
+// };
 
-const onInit = (error: any) => {
-  if (error) {
-    console.error('QR code scanner initialization failed', error);
-  } else {
-    console.log('QR code scanner initialized');
-  }
-};
+// const onInit = (error: any) => {
+//   if (error) {
+//     console.error('QR code scanner initialization failed', error);
+//   } else {
+//     console.error('QR code scanner initialized');
+//   }
+// };
 definePageMeta({
   layout: 'backoffice',
 });
@@ -37,7 +37,7 @@ const fetchData = async () => {
 const registrationsData = ref();
 const fetchRegisListData = async (eventId: string) => {
   const fetchedData = await useFetchWithAuth(
-    `v1/registrations/event/${eventId}`,
+    `v2/registrations/event/${eventId}`,
     'GET',
     accessToken.value
   );
@@ -176,8 +176,10 @@ onBeforeUnmount(() => {
   />
   <!-- <Loader v-if="isLoading" /> -->
 
-  <div class="ml-80 h-screen w-full bg-[#EEEEEE]">
-    <div class="justify- flex h-full items-center gap-12 px-5 text-center">
+  <div class="h-screen w-full bg-[#EEEEEE] lg:ml-80">
+    <div
+      class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-12"
+    >
       <div class="my-auto flex aspect-square h-fit shrink-0">
         <video
           ref="video"
@@ -186,7 +188,7 @@ onBeforeUnmount(() => {
           class="rounded-lg object-cover"
         ></video>
       </div>
-      <div class="bg-glass my-32 mr-10 h-2/4 w-full rounded-xl p-7">
+      <div class="bg-glass mb-5 h-2/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
           {{ selectedOption }}

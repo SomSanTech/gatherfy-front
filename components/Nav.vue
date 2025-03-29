@@ -86,9 +86,12 @@ const profileData = useCookie<UserProfile>('profileData');
             />
             <div
               v-else
-              class="flex h-full w-full items-center justify-center text-zinc-600"
+              class="flex h-full w-full items-center justify-center rounded-full bg-black/80"
             >
-              <UserProfileImg />
+              <img
+                src="/favicon.ico"
+                class="relative h-5 w-5 shrink-0 rounded-full object-cover"
+              />
             </div>
           </div>
           <div
@@ -122,6 +125,19 @@ const profileData = useCookie<UserProfile>('profileData');
               >
                 <Contact class="h-5 w-5 text-gray-600" />
                 <span>My Contact</span>
+              </button>
+            </NuxtLink>
+            <NuxtLink
+              v-if="profileData && profileData.users_role !== 'Attendee'"
+              to="/backoffice"
+              class="w-full"
+            >
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <Bookmark class="h-5 w-5 text-gray-600" />
+                <span>Manage Event</span>
               </button>
             </NuxtLink>
             <!-- Divider -->

@@ -8,7 +8,6 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 
   const eventName = await page.locator('.event-name');
   const eventNameText = await eventName.innerText();
-  console.log('eventNameText', eventNameText);
 
   const joinButton = await page.locator('button', { hasText: 'Join now' });
   joinButton.click();
@@ -17,7 +16,6 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 
   const detailName = await page.locator('.detail-name');
   const detailNameText = await detailName.innerText();
-  console.log('detailNameText', detailNameText);
 
   expect(eventNameText).toEqual(detailNameText);
   await expect(detailName).toBeVisible();
@@ -42,7 +40,6 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 
   const recomName = await page.locator('.reccom-name');
   const recomNameText = await recomName.innerText();
-  console.log('eventNameText', eventNameText);
 
   const regisButton = await page.locator('button', { hasText: 'Registor now' });
   regisButton.click();
@@ -51,7 +48,6 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
 
   const detailNameRecom = await page.locator('.detail-name');
   const detailNameTextRecom = await detailNameRecom.innerText();
-  console.log('detailNameText', detailNameText);
 
   expect(recomNameText).toEqual(detailNameTextRecom);
   await expect(detailNameRecom).toBeVisible();
@@ -92,7 +88,6 @@ test('TC-PBI-2.1 go to event detail', async ({ page }) => {
   await page.waitForTimeout(3000);
   const detailNameCard = await page.locator('.detail-name');
   const detailNameTextCard = await detailNameCard.innerText();
-  console.log('detailNameText', detailNameText);
 
   expect(eventCardNameText).toEqual(detailNameTextCard);
   await expect(detailNameCard).toBeVisible();

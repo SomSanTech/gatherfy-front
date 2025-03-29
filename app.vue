@@ -9,9 +9,7 @@ useHead({
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup');
 const route = useRoute();
-const role = useState('role');
 const isBackoffice = ref(route.fullPath.includes('backoffice'));
-const isSignUpPage = ref(route.fullPath.includes('signup'));
 const isSessionTimeOuts = useState('isSessionTimeOut');
 const handleSessionExpire = useAuth().handleSessionExpire;
 const isSignInCookie = useCookie('is_user_sign_in');
@@ -40,6 +38,10 @@ onMounted(() => {
   });
 });
 
+watchEffect(() => {
+  isBackoffice.value = route.fullPath.includes('backoffice');
+});
+
 watch(
   [isHavePopupOpen, isOTPPopup, isSessionTimeOuts],
   ([openPopup, otp, session]) => {
@@ -56,12 +58,7 @@ watch(
 <template>
   <div class="relative mx-auto w-full">
     <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-black/20' : ''"></div>
-    <Nav
-      v-if="
-        !isBackoffice && !isSignUpPage && role !== 'Organization' && !isLoading
-      "
-      class="fixed top-0 z-40 w-full"
-    />
+    <Nav v-if="!isBackoffice && !isLoading" class="fixed top-0 z-40 w-full" />
     <Login />
     <OtpPopup />
     <div

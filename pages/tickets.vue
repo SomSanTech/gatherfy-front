@@ -99,7 +99,6 @@ async function submitFeedback() {
     accessToken.value,
     answers.value[answers.value.length - 1]
   );
-  console.log(feedbackResponse);
   if (feedbackResponse.status === 200) {
     const feedbackId = feedbackResponse.data.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
@@ -183,9 +182,6 @@ const filterTimeEventData = (time: string) => {
   }
 
   filteredTicketData.value = filter;
-  console.log(time);
-
-  console.log('filteredTicketData.value', filteredTicketData.value);
 };
 const isLoading = useState('isLoading', () => true);
 
@@ -243,7 +239,7 @@ function formatTimeRange(start, end) {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex w-full gap-9">
+  <div v-else class="flex w-full gap-9 px-8 lg:px-0">
     <div class="w-full">
       <p class="t3 pb-2">My Ticket</p>
       <ExploreBar

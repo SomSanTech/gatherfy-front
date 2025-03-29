@@ -9,17 +9,19 @@
     <!-- Burger Button -->
     <button
       @click="isSidebarOpen = !isSidebarOpen"
-      class="fixed left-4 top-4 z-50 rounded-lg bg-gray-200 p-2 shadow-lg md:hidden"
+      class="fixed left-4 top-4 z-50 p-2 md:hidden"
     >
-      <Cancle v-if="!isSidebarOpen" />
-      <Trash v-else />
+      <button v-if="!isSidebarOpen && !isLoading">
+        <Burger class="text-2xl" />
+      </button>
+      <button v-else :class="!isLoading ? '' : 'hidden'"><Cancle /></button>
     </button>
 
     <!-- Sidebar (แสดงซ่อนตาม isSidebarOpen) -->
     <SideBar
       v-if="!isLoading"
-      :is-open="isSidebarOpen"
-      @close="isSidebarOpen = false"
+      :class="isSidebarOpen ? '' : 'hidden lg:flex'"
+      :isOpen="isSidebarOpen"
     />
 
     <slot />

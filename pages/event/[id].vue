@@ -34,11 +34,14 @@ const handleGoSignIn = () => {
   isHavePopupOpen.value = true;
   plsLoginPopUp.value = false;
 };
+const router = useRouter();
 
+const goBack = () => {
+  router.back();
+};
 const regis = async () => {
   if (event.value) {
     isLoadRegis.value = true;
-    console.log('helloe');
 
     const regsitered = await useFetchWithAuth(
       `v2/registrations`,
@@ -62,7 +65,7 @@ const regis = async () => {
       showPopup('Registor success', 'complete');
     }
     if ('error' in regsitered) {
-      showPopup('Already Registered for the Event', 'warn');
+      showPopup(`${regsitered.error}`, 'warn');
     }
     isOpenPopup.value = false;
     isLoadRegis.value = false;
@@ -183,7 +186,8 @@ onMounted(async () => {
       if ('data' in regisData) {
         userRegisHistory.value = regisData.data;
       } else {
-        console.error('Fetch failed:', regisData.error);
+        if ('error' in regisData)
+          console.error('Fetch failed:', regisData.error);
       }
 
       const subscribeTagData = await useFetchWithAuth(
@@ -194,7 +198,8 @@ onMounted(async () => {
       if ('data' in subscribeTagData) {
         userSubscribeTagData.value = subscribeTagData.data;
       } else {
-        console.error('Fetch failed:', subscribeTagData.error);
+        if ('error' in subscribeTagData)
+          console.error('Fetch failed:', subscribeTagData.error);
       }
     }
   } finally {
@@ -215,6 +220,13 @@ watchEffect(() => {
     fetchData();
   }
 });
+
+function removeWidthHeightAttributes(htmlString) {
+  if (htmlString) return htmlString.replace(/\s(width|height)="\d+"/g, '');
+}
+function clearWidthHeightValues(htmlString) {
+  return htmlString.replace(/(width|height)="\d+"/g, '$1=""');
+}
 </script>
 <template>
   <CompleteModal
@@ -225,8 +237,8 @@ watchEffect(() => {
   />
   <Loader v-if="isLoading" />
 
-  <div v-else class="relative w-full lg:my-24">
-    <div class="mx-auto my-16 w-full lg:my-20">
+  <div v-else class="relative w-full">
+    <div class="my-16 w-full lg:my-24">
       <!-- header -->
       <div
         :style="{ backgroundImage: `url(${event?.image})` }"
@@ -347,72 +359,50 @@ watchEffect(() => {
         <div class="col-span-2 flex flex-col gap-6">
           <div class="flex flex-col gap-5">
             <p class="t3 font-semibold">Event location</p>
-            <div v-html="event?.map" class="detail-map"></div>
+            <div class="">
+              <div
+                v-html="removeWidthHeightAttributes(event?.map)"
+                class="h-full w-full"
+              ></div>
+            </div>
           </div>
           <div class="flex flex-col gap-2 lg:gap-5">
             <p class="t3 font-semibold">Tags</p>
-            <div class="tag-group flex gap-2">
+            <div class="tag-group flex flex-wrap gap-2">
               <div
                 v-for="tag in event?.tags"
-                class="flex h-full items-center justify-center"
+                class="flex h-full items-center justify-center gap-2 rounded-lg border border-dark-grey/60 p-2 px-4"
               >
                 <NuxtLink
                   :to="{ name: 'events', query: { tag: tag.tag_title } }"
                 >
                   <button
-                    class="b3 flex w-fit items-center gap-1 rounded-l-lg border border-dark-grey/60 px-10 py-2 text-center drop-shadow-md duration-300 hover:bg-grey"
+                    class="b3 flex h-full w-fit items-center gap-1 rounded-l-lg border-dark-grey/60 text-center drop-shadow-md duration-300 hover:text-burgundy"
                   >
                     {{ tag.tag_title }}
                   </button>
                 </NuxtLink>
-                <div
-                  class="flex h-full w-full items-center justify-center rounded-r-lg border-y border-r border-dark-grey/60 px-2 duration-300 hover:bg-burgundy hover:text-light-grey"
+
+                <button
+                  @click="handleSubscribeTag(tag.tag_id)"
+                  class="flex h-full w-full flex-auto items-center justify-center rounded-r-lg border-dark-grey/60 duration-300 hover:text-burgundy"
                 >
-                  <button @click="handleSubscribeTag(tag.tag_id)" class=" ">
-                    <Check
-                      v-if="checkIsAlreadySubTag(tag.tag_id)"
-                      class="text-3xl"
-                    />
-                    <Subscribe v-else class="text-xl" />
-                  </button>
-                </div>
+                  <Check
+                    v-if="checkIsAlreadySubTag(tag.tag_id)"
+                    class="text-lg"
+                  />
+                  <Subscribe v-else class="text-lg" />
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- pop up -->
-    <!-- <CompleteModal
-      :isShowCompleteModal="state.isVisible"
-      :title="state.text"
-      @complete-action="handleCompleteGGSignUp"
-    /> -->
-    <!-- <BasicPopup
-      :showPopup="plsLoginPopUp"
-      text="Please Sign in before Registor event"
-      btn-text="Go Sign in"
-      @handleBasicPopAction="handleGoSignIn"
-    /> -->
-    <!-- <BasicPopup
-      :showPopup="isShowSubTagPopup"
-      :text="
-        subAction === 'follow'
-          ? 'Thank you for subscribing to this event tag! Stay tuned for updates and announcements'
-          : 'You have successfully unsubscribed from this event tag'
-      "
-      btn-text="Continue"
-      @handleBasicPopAction="isShowSubTagPopup = false"
-    /> -->
-    <!-- <BasicPopup
-      :showPopup="isShowSuccessRegisPopup"
-      text="Thank you for registration"
-      btn-text="Continue"
-      @handleBasicPopAction="isShowSuccessRegisPopup = false"
-    /> -->
+    <!-- Regis popup -->
     <div
       v-show="isOpenPopup"
-      class="regis-popup fixed right-1/2 top-1/2 z-50 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-lg bg-white p-3 shadow-2xl lg:w-[600px] lg:p-7"
+      class="regis-popup fixed right-1/2 top-1/2 z-50 w-3/4 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-xl bg-white p-5 shadow-2xl lg:w-[600px] lg:p-7"
     >
       <button
         @click="isOpenPopup = false"
@@ -447,7 +437,7 @@ watchEffect(() => {
                 <span class="mr-3 font-semibold">{{
                   userProfile?.username
                 }}</span
-                >{{ userProfile?.users_email }}
+                ><br class="lg:hidden" />{{ userProfile?.users_email }}
               </p>
             </div>
             <div
@@ -473,7 +463,7 @@ watchEffect(() => {
             </div>
 
             <button
-              class="b3 mt-4 flex items-center gap-2 rounded-lg bg-black px-4 py-1 text-white"
+              class="b3 mt-4 flex items-center gap-2 rounded-md bg-black px-4 py-1 text-white lg:rounded-lg"
               @click="regis"
             >
               One-click Register
@@ -493,7 +483,11 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-.detail-map iframe {
-  width: 100px;
+.detail-map {
+  @apply flex w-full justify-center;
+}
+
+.map-container iframe {
+  @apply h-full w-full;
 }
 </style>

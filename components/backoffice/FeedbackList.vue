@@ -34,8 +34,11 @@ const exportFeedback = () => {
     {{ responses }}
   </td> -->
   <td>
-    <div class="flex justify-center gap-2 text-xl text-gray-600">
-      <div v-if="canEdit" class="flex items-center justify-center gap-2 p-4">
+    <div class="flex justify-center gap-0 text-xl text-gray-600 lg:gap-2">
+      <div
+        v-if="canEdit"
+        class="flex items-center justify-center gap-2 p-1 lg:p-4"
+      >
         <NuxtLink
           class="go-to-feedback"
           :to="{
@@ -45,10 +48,10 @@ const exportFeedback = () => {
           <PenEdit class="t3" />
         </NuxtLink>
       </div>
-      <div v-else class="flex items-center justify-center gap-2 p-4">
+      <div v-else class="flex items-center justify-center gap-2 p-1 lg:p-4">
         <PenEdit class="t3 cursor-not-allowed text-cool-gray" />
       </div>
-      <div class="flex items-center justify-center gap-2 p-4">
+      <div class="flex items-center justify-center gap-2 p-1 lg:p-4">
         <NuxtLink
           class="go-to-response"
           :to="{
@@ -60,13 +63,13 @@ const exportFeedback = () => {
       </div>
       <div
         @click="$emit('previewFeedback', event?.eventId)"
-        class="flex items-center justify-center gap-2 p-4"
+        class="flex items-center justify-center gap-2 p-1 lg:p-4"
       >
         <View class="t3 cursor-pointer" />
       </div>
       <div
         @click="exportFeedback"
-        class="flex items-center justify-center gap-2 p-4"
+        class="flex items-center justify-center gap-2 fill-gray-600 p-1 lg:p-4"
       >
         <FileDownload class="t3 cursor-pointer" />
       </div>

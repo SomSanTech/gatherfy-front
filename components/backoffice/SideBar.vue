@@ -3,6 +3,7 @@ import type { UserProfile } from '~/models/userProfile';
 import Cancle from '../icons/Cancle.vue';
 const signOut = useAuth().logout;
 const profileData = useCookie<UserProfile>('profileData');
+const role = useCookie<String>('roleCookie');
 const route = useRoute();
 const isBackoffice = ref(route.fullPath.includes('backoffice'));
 defineProps<{ isOpen: boolean }>(); // รับค่าเปิด-ปิด Sidebar
@@ -21,21 +22,25 @@ watchEffect(() => {
 </script>
 <template>
   <div
-    :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-    class="fixed flex h-full w-80 flex-col justify-between border border-white/90 bg-white/90 px-8 py-16 drop-shadow-md backdrop-blur-xl"
+    class="fixed z-40 flex h-screen w-80 flex-col justify-between border border-white/90 bg-white/90 px-8 py-16 drop-shadow-md backdrop-blur-xl"
   >
-    <button
-      @click="$emit('close')"
-      class="absolute right-4 top-4 z-50 text-gray-600 md:hidden"
-    >
-      <Cancle />
-    </button>
     <div>
       <div class="oooh-baby-regular mb-10 px-14 text-center text-5xl">
         <NuxtLink to="/backoffice">Gatherfy</NuxtLink>
       </div>
       <div class="flex flex-col gap-3">
         <div class="b3">Main menu</div>
+        <NuxtLink to="/">
+          <div
+            :class="
+              route.fullPath.includes('Home') ? 'bg-burgundy text-white' : ''
+            "
+            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+          >
+            <Home class="t3" />
+            <p class="b2 font-medium">Home</p>
+          </div>
+        </NuxtLink>
         <NuxtLink to="/backoffice/dashboard">
           <div
             :class="

@@ -27,7 +27,6 @@ onMounted(() => {
     const storedUser = localStorage.getItem('admin');
     adminData.value = storedUser ? JSON.parse(storedUser) : {};
     fetchData();
-    console.log(registrationsData.value);
   } finally {
     setTimeout(() => {
       isLoading.value = false;

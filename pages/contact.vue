@@ -3,6 +3,7 @@ import { BrowserQRCodeReader } from '@zxing/browser';
 import Phone from '~/components/icons/Phone.vue';
 import Gmail from '~/components/icons/Gmail.vue';
 import QrcodeVue from 'qrcode.vue';
+const userProfile = useCookie('profileData', { default: () => ({}) });
 
 let qrCodeReader: BrowserQRCodeReader;
 const qrValues = ref<string>('');
@@ -14,6 +15,7 @@ const isClickShareContact = ref<boolean>(false);
 const scannedValue = ref<string | null>(null);
 const config = useRuntimeConfig();
 const contactDeletedId = ref<number>(0);
+const socialLinksData = ref();
 // const isShowConfirm = ref<boolean>(false);
 const handleConfirmPopup = () => {
   if (state.status === 'confirm') {
@@ -26,7 +28,16 @@ const handleClickDeleteContact = (contactId: number) => {
   showPopup('Delete this contact?', 'confirm');
   contactDeletedId.value = contactId;
 };
-
+const fetchSocialLink = async () => {
+  const response = await useFetchWithAuth(
+    'v1/socials',
+    'GET',
+    accessToken.value
+  );
+  if ('data' in response) {
+    socialLinksData.value = response.data;
+  }
+};
 const generateQRCode = async () => {
   const token = await useFetchWithAuth(
     `v1/shareContact`,
@@ -36,11 +47,10 @@ const generateQRCode = async () => {
   if (token.status === 200) {
     if ('data' in token) {
       qrValues.value = await token.data;
-      console.log('qrValues.value', qrValues.value);
       isShowQR.value = !isShowQR.value;
     }
   } else {
-    console.log('wrong!!!');
+    showPopup('Something wrong!!', 'error');
   }
 };
 
@@ -62,8 +72,6 @@ const handleShareContact = () => {
 const { state, showPopup } = usePopup();
 const deleteContact = async () => {
   if (contactDeletedId.value) {
-    console.log(contactDeletedId.value);
-
     const response = await useFetchWithAuth(
       `v1/contact/${contactDeletedId.value}`,
       'DELETE',
@@ -114,12 +122,9 @@ const handleScan = () => {
   qrCodeReader = new BrowserQRCodeReader();
 
   if (video.value) {
-    console.log('is video');
-
     qrCodeReader.decodeFromVideoDevice(null, video.value, (result, error) => {
       if (result) {
         scannedValue.value = result.getText();
-        console.log('scannedValue:', scannedValue.value);
 
         const response = checkInFetch(
           'v1/saveContact',
@@ -147,15 +152,14 @@ const handleScan = () => {
 onMounted(async () => {
   try {
     await getContact();
+    await fetchSocialLink();
     // qrCodeReader = new BrowserQRCodeReader();
 
     // if (video.value) {
-    //   console.log('is video');
 
     //   qrCodeReader.decodeFromVideoDevice(null, video.value, (result, error) => {
     //     if (result) {
     //       scannedValue.value = result.getText();
-    //       console.log('scannedValue:', scannedValue.value);
 
     //       const response = checkInFetch(
     //         'v1/saveContact',
@@ -189,7 +193,10 @@ onMounted(async () => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="relative mx-auto my-28 flex w-screen max-w-6xl gap-9">
+  <div
+    v-else
+    class="relative mx-auto my-28 flex w-screen max-w-6xl flex-col gap-9 lg:flex-row"
+  >
     <CompleteModal
       :isShowCompleteModal="state.isVisible"
       :title="state.text"
@@ -197,9 +204,102 @@ onMounted(async () => {
       @completeAction="handleConfirmPopup"
       @cancleAction="state.isVisible = false"
     />
-    <ProfileSidebar @shareContact="handleShareContact" />
-    <div class="w-full">
-      <div class="grid w-full grid-cols-2 gap-4">
+
+    <div class="flex flex-col gap-5 px-8 lg:px-0">
+      <div
+        class="flex w-full gap-5 rounded-xl border border-zinc-500/10 bg-[#E9E9E9]/70 p-5 shadow-md shadow-zinc-300/30 duration-700"
+      >
+        <div
+          class="group relative w-full max-w-lg overflow-hidden rounded-lg shadow-lg duration-700"
+        >
+          <div class="b3 group relative duration-700">
+            <img
+              v-if="userProfile.users_image"
+              :src="userProfile.users_image"
+              alt="Severance"
+              class="h-[500px] w-full min-w-[220px] object-cover lg:min-w-[280px]"
+            />
+            <div
+              v-else
+              class="flex h-[500px] w-full min-w-[220px] items-center justify-center bg-black/90 lg:min-w-[280px]"
+            >
+              <img
+                src="/favicon.ico"
+                class="relative h-60 w-60 shrink-0 object-cover"
+              />
+            </div>
+            <div class="mask-gradient-profile"></div>
+            <div class="mask-gradient-profile"></div>
+            <div
+              class="absolute bottom-0 right-0 z-50 h-4/5 w-full bg-gradient-to-t from-black/90"
+            ></div>
+            <div class="p absolute bottom-4 z-50 w-full px-4 text-white">
+              <h2 class="mt-4 text-xl font-semibold">
+                {{ userProfile.username }}
+              </h2>
+              <p class="text-white">
+                {{ userProfile.users_firstname }}
+                {{ userProfile.users_lastname }}
+              </p>
+              <div class="mt-1 flex flex-col justify-end gap-1">
+                <div
+                  v-for="social in socialLinksData"
+                  class="flex items-center gap-2"
+                >
+                  <a
+                    :href="social?.socialLink"
+                    target="_blank"
+                    class="b3 flex items-center gap-1"
+                  >
+                    <X v-if="social?.socialPlatform === 'X'" />
+                    <Facebook
+                      v-else-if="social?.socialPlatform === 'Facebook'"
+                    />
+                    <Instagram
+                      v-else-if="social?.socialPlatform === 'Instagram'"
+                    />
+                    <Linkedin v-else-if="social?.socialPlatform === 'LinkIn'" />
+                    <LinkSocial v-else />
+                    {{ social?.socialLink.split('/').pop() }}
+                  </a>
+                </div>
+              </div>
+              <div
+                class="mt-2 flex w-full flex-col gap-2 rounded-md border border-dashed p-2"
+              >
+                <div class="flex items-center gap-1">
+                  <Phone class="fill-white text-[15px]" />
+                  <p>{{ userProfile.users_phone }}</p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <Gmail class="fill-white text-[15px]" />
+                  <p>{{ userProfile.users_email }}</p>
+                </div>
+              </div>
+
+              <div class="mt-3 w-full">
+                <button
+                  @click="handleShareContact"
+                  class="b3 w-full rounded-lg bg-white px-4 py-2 text-black hover:bg-blue-600"
+                >
+                  Share contact
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ProfileSidebar class="w-full" />
+    </div>
+
+    <div class="w-full px-8 lg:px-0">
+      <div
+        v-if="contactData.length === 0"
+        class="flex h-full w-full items-center justify-center"
+      >
+        <p class="b2 py-32">No contact</p>
+      </div>
+      <div class="grid w-full gap-4 lg:grid-cols-2">
         <div
           v-for="contact in contactData"
           :key="contact?.contactId"
@@ -281,7 +381,7 @@ onMounted(async () => {
       </div>
       <div
         v-show="isClickShareContact"
-        class="fixed inset-0 flex items-center justify-center bg-black/50"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       >
         <!-- Mask -->
         <div class="relative h-full w-full">

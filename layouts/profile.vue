@@ -9,7 +9,7 @@ const isErrorPage = computed(() => {
 <template>
   <div
     :class="!isLoading ? 'my-28' : ''"
-    class="mx-auto flex w-screen max-w-6xl gap-9"
+    class="mx-auto flex w-screen gap-9 lg:max-w-6xl"
   >
     <ProfileSidebar v-if="!isLoading" />
     <slot />

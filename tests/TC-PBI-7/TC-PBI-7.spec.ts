@@ -13,14 +13,12 @@ test('TC-PBI-7.1 not click regis', async ({ page }) => {
 
   const detailName = await page.locator('.detail-name');
   const detailNameText = await detailName.innerText();
-  console.log('detailNameText', detailNameText);
 
   expect(eventNameText).toEqual(detailNameText);
 
   await page.getByRole('button', { name: 'Registor event' }).click();
 
   page.on('dialog', async (dialog) => {
-    console.log(`Dialog message: ${dialog.message()}`);
     expect(dialog.message()).toBe('Thank you for registration'); // ตรวจสอบข้อความ
     await dialog.accept();
   });
@@ -52,7 +50,6 @@ test('TC-PBI-7.2 regis', async ({ page }) => {
 
   const detailName = await page.locator('.detail-name');
   const detailNameText = await detailName.innerText();
-  console.log('detailNameText', detailNameText);
   await page.waitForTimeout(3000);
 
   expect(eventNameText).toEqual(detailNameText);
@@ -60,7 +57,6 @@ test('TC-PBI-7.2 regis', async ({ page }) => {
   await page.getByRole('button', { name: 'Registor event' }).click();
 
   page.on('dialog', async (dialog) => {
-    console.log(`Dialog message: ${dialog.message()}`);
     // expect(dialog.message()).toContain('Already Registered for the Event');
     expect(dialog.message()).toContain('Thank you for registration');
     await dialog.accept();
@@ -93,7 +89,6 @@ test('TC-PBI-7.3 regis again', async ({ page }) => {
 
   const detailName = await page.locator('.detail-name');
   const detailNameText = await detailName.innerText();
-  console.log('detailNameText', detailNameText);
   await page.waitForTimeout(3000);
 
   expect(eventNameText).toEqual(detailNameText);
@@ -101,7 +96,6 @@ test('TC-PBI-7.3 regis again', async ({ page }) => {
   await page.getByRole('button', { name: 'Registor event' }).click();
 
   page.on('dialog', async (dialog) => {
-    console.log(`Dialog message: ${dialog.message()}`);
     expect(dialog.message()).toContain('Already Registered for the Event');
     // expect(dialog.message()).toContain('Thank you for registration');
     await dialog.accept();

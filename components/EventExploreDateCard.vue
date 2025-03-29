@@ -7,18 +7,18 @@ const props = defineProps<{
 
 <template>
   <div
-    class="group relative max-w-lg overflow-hidden rounded-xl shadow-lg duration-700 lg:min-w-[520px]"
+    class="group relative w-[320px] overflow-hidden rounded-xl shadow-lg duration-700 lg:min-w-[520px]"
   >
-    <!-- Background Image -->
     <div class="group relative duration-700">
-      <img :src="props?.eventDetail?.image" class="h-64 w-full object-cover" />
+      <img
+        :src="props?.eventDetail?.image"
+        class="h-52 w-full object-cover lg:h-64"
+      />
 
-      <!-- Blurred Overlay -->
       <div class="mask-gradient bg-black/50"></div>
 
       <div class="absolute bottom-4 left-4 z-50 text-white">
         <h2 class="t3 text-2xl font-bold">{{ props.eventDetail?.name }}</h2>
-        <!-- <p class="b4"> {{ useFormatDateTime(props?.eventDetail?.start_date, 'time') }}</p> -->
         <p class="b4">By {{ props.eventDetail?.owner }}</p>
         <p class="b4">At {{ props.eventDetail?.location }}</p>
         <div class="flex gap-2 pt-2">

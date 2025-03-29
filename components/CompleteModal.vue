@@ -19,7 +19,7 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
     class="fixed left-0 top-0 z-50 flex h-screen w-full items-center justify-center bg-black/40 duration-200"
   >
     <div
-      class="absolute flex w-1/4 max-w-[400px] flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md"
+      class="absolute flex w-3/4 max-w-[400px] flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md lg:w-1/4"
     >
       <div class="flex items-center gap-4">
         <div
