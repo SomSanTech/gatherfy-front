@@ -183,7 +183,7 @@ const filterTimeEventData = (time: string) => {
 
   filteredTicketData.value = filter;
 };
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 onMounted(async () => {
   try {

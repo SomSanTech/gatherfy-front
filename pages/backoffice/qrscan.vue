@@ -107,7 +107,7 @@ const filteredEvents = computed(() => {
   );
 });
 const { state, showPopup } = usePopup();
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 onMounted(async () => {
   await fetchData();

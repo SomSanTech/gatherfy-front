@@ -63,7 +63,7 @@ const generateregistrationGoalChartData = (
     ],
   };
 };
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 const colorRegistered = '#ffb661';
 const colorGoal = '#ff0000';

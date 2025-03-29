@@ -112,7 +112,7 @@ const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
 
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 onMounted(async () => {
   try {

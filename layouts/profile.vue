@@ -1,7 +1,7 @@
 <script setup>
 const route = useRoute();
 const error = useError();
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 const isErrorPage = computed(() => {
   return error.value !== null || route.path.includes('error');
 });

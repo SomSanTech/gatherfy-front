@@ -14,7 +14,7 @@ function parseJSONSafe(value: string | null) {
 }
 
 const user = ref();
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 onMounted(() => {
   // if (process.client) {
