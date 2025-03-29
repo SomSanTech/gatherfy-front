@@ -25,9 +25,7 @@ jobs:
         run: |
           touch .env
           echo "NUXT_PUBLIC_BASE_URL=${{ secrets.NUXT_PUBLIC_BASE_URL_QA }}" >> .env
-          # echo "NUXT_BASE_URL=${{secrets.NUXT_BASE_URL_QA}}" >> .env
           echo "MINIO_URL=${{ secrets.MINIO_URL }}" >> .env
-          echo ${{ secrets.NUXT_BASE_URL_QA }}
 
       - name: Build project
         run: npm run build
@@ -95,8 +93,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
         run: |
           sshpass -p "$REMOTE_PASSWORD" ssh -t -o StrictHostKeyChecking=no -p 22 -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            cd /home/somsan/Gatherfy/staging
-            tar -xzf ./front/build.tar.gz -C ./front/
+            cd /home/somsan/Gatherfy
+            tar -xzf ./staging/front/build.tar.gz -C ./staging/front/
 
             # docker stop gatherfy-web || true
             # docker rm gatherfy-web || true
