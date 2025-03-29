@@ -20,7 +20,6 @@
     "@ag-grid-community/vue3": "^32.3.3",
     "@nuxt/ui": "^2.21.0",
     "@popperjs/core": "^2.11.8",
-    "@vueuse/components": "^12.5.0",
     "@vueuse/core": "^12.5.0",
     "@zxing/browser": "^0.1.5",
     "apexcharts": "^4.1.0",

@@ -27,7 +27,7 @@ const subAction = ref('');
 const isShowSubTagPopup = ref(false);
 const accessToken = useCookie('accessToken');
 const { state, showPopup } = usePopup();
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 const isLoadRegis = ref<boolean>(false);
 const handleGoSignIn = () => {
   loginPopup.value = true;

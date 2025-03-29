@@ -36,7 +36,7 @@ const ageGenderChartData = ref();
 const ageGenderLabels = ref();
 const pieOfRegisChartRef = ref<HTMLCanvasElement | null>(null);
 const pieOfRegisChartData = ref();
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 const lineChartColorSet = [
   '#ff0000',
   '#DEDDD7',

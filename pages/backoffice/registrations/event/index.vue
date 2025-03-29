@@ -8,7 +8,7 @@ definePageMeta({
 });
 const eventsData = ref<Event[]>([]);
 const adminData = ref<User | null>(null);
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 const accessToken = useCookie('accessToken');
 const fetchData = async () => {

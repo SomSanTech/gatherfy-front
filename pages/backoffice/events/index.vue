@@ -8,7 +8,7 @@ definePageMeta({
   layout: 'backoffice',
 });
 const profileData = useCookie('profileData');
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 const eventsData = ref<Event[]>([]);
 const adminData = ref<UserProfile>();

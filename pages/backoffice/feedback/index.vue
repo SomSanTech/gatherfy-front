@@ -35,7 +35,6 @@ const eventsData = ref<Event[]>([]);
 const feedbackQuestion = ref<ExistingQuestion[]>([]);
 const finalQuestion = ref<(ExistingQuestion | DefaultQuestion)[]>([]);
 const answers = ref<(AnswerBody | FeedbackBody)[]>([]);
-const adminData = ref<UserProfile>();
 const feedbacksCount = ref();
 const previewFeedback = ref(false);
 const token = useCookie('accessToken');
@@ -158,12 +157,11 @@ async function downloadReport(eventId, eventName) {
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
 }
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 onMounted(async () => {
   try {
     isLoading.value = true;
-    adminData.value = profileData.value;
     await fetchData();
   } finally {
     isLoading.value = false;

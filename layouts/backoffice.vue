@@ -40,7 +40,7 @@ const isErrorPage = computed(() => {
 });
 
 const isSidebarOpen = ref(false); // ค่าดีฟอลต์ปิดอยู่
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 </script>
 
 <style scoped>

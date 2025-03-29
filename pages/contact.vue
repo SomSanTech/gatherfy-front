@@ -117,7 +117,7 @@ const checkInFetch = async (
 
   return { status, data };
 };
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 const handleScan = () => {
   qrCodeReader = new BrowserQRCodeReader();
 

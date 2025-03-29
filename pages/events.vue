@@ -81,7 +81,7 @@ const handleSortFilter = (sortByOption: any) => {
 const viewportWidth = computed(() => window.innerWidth);
 
 const isMobile = computed(() => viewportWidth.value <= 450);
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 const isSearching = ref(false);
 
 onMounted(async () => {

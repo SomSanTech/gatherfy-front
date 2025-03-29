@@ -8,7 +8,7 @@ definePageMeta({
 });
 const registrationsData = ref<Registration[]>([]);
 const adminData = ref<User | null>(null);
-const isLoading = useState('isLoading', () => true);
+const isLoading = useState('isLoading');
 
 const accessToken = useCookie('accessToken');
 
