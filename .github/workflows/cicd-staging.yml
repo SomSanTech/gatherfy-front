@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Archive build files
-        run: tar -czf build.tar.gz ./.output
+        run: tar -czf build.tar.gz -C . .output
 
       - name: Upload build files
         uses: actions/upload-artifact@v4
