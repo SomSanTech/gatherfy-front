@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRuntimeConfig } from '#app';
+
 import Arrow from '~/components/icons/Arrow.vue';
 import Cancle from '~/components/icons/Cancle.vue';
 import CheckCircle from '~/components/icons/CheckCircle.vue';
@@ -8,6 +10,9 @@ import type { Tag } from '~/models/tag';
 definePageMeta({
   layout: 'backoffice',
 });
+
+const config = useRuntimeConfig();
+
 const originalEvent = ref<EventDto | null>(null);
 const originalDateInput = ref();
 const error = useError();
@@ -90,7 +95,6 @@ async function fetchData() {
     originalEvent.value = JSON.parse(JSON.stringify(event.value));
     tags.value = (await fetchedTags.data) || [];
     selectedTags.value = event.value.tags;
-    console.log('selectedTags', selectedTags.value);
     currentDateTime();
     compareExistTags.value = selectedTags.value.map((item: any) => ({
       ...item,
@@ -100,8 +104,6 @@ async function fetchData() {
 
 async function currentDateTime() {
   if (event.value.ticket_start_date) {
-    console.log('event mee ja');
-
     dateInput.value.ticket_start_date = useFormatDateTime(
       event.value.ticket_start_date,
       'ISOdate'
@@ -206,13 +208,12 @@ function transformEventData(input) {
 }
 
 const errorMsg = ref();
+
 const fetchEventEdit = async () => {
-  console.log('fetchEventEdit called');
   try {
     if (validateForm() && originalEvent.value) {
       const changedFields = getChangedFields(originalEvent.value, event.value);
       if (Object.keys(changedFields).length === 0) {
-        console.log('No changes detected');
         return;
       }
       const getChangeTime = getChangeTimeed(
@@ -220,27 +221,26 @@ const fetchEventEdit = async () => {
         dateInput.value
       );
       if (Object.keys(changedFields).length === 0) {
-        console.log('No changes detected');
         return;
       } else {
         changedFields;
       }
       const updatedChangedFields = { ...changedFields, ...getChangeTime };
-      console.log('updatedChangedFields', updatedChangedFields);
-      console.log('getChangeTime', getChangeTime);
       const dataDTO = transformEventData(updatedChangedFields);
       const formattedTags = await getFormattedTags(selectedTags.value);
       dataDTO.tags = formattedTags;
 
-      console.log('dataDTO', dataDTO);
-
       const currentFileName = event.value.image.replace(
-        'http://cp24us1.sit.kmutt.ac.th:7070/thumbnails/',
+        `${config.public.minioUrl}/thumbnails/`,
         ''
       );
 
       if (uploadFileName.value) {
-        await useFetchDelete(`v1/files/delete/${currentFileName}`);
+        await useFetchWithAuth(
+          `v1/files/delete/${currentFileName}?bucket=thumbnails`,
+          'DELETE',
+          accessToken.value
+        );
         dataDTO.event_image = uploadFileName.value;
         await useFetchUpload(
           `v1/files/upload`,
@@ -250,25 +250,24 @@ const fetchEventEdit = async () => {
         );
       } else {
         dataDTO.event_image = currentFileName;
-        console.log('currentFileName2', changedFields);
       }
 
-      console.log('changedFields', dataDTO);
       concatDateTime();
       const fetchedData = await useFetchWithAuth(
         `v2/backoffice/events/${param}`,
         'PUT',
         accessToken.value,
-        dataDTO // ส่งเฉพาะค่าที่เปลี่ยนแปลง
+        dataDTO
       );
+
       if (fetchedData.errorData) {
         errorMsg.value = fetchedData.errorData;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      if (fetchedData) {
-        console.log('Update successful');
+      if (fetchedData.status === 200) {
+        fetchData();
       } else {
-        console.log('Update failed');
+        console.error('Update failed');
       }
     }
   } finally {
@@ -280,7 +279,6 @@ const fetchEventEdit = async () => {
 };
 
 // const fetchEventEdit = async () => {
-//   console.log('fetchEventEdit called');
 //   try {
 //     if (validateForm()) {
 //       const formattedTags = await getFormattedTags(selectedTags.value);
@@ -367,8 +365,6 @@ function renderIframe(content: string) {
   iframeSrc.value = srcMatch ? srcMatch[1] : '';
 }
 function handelFileUpload(file: Event) {
-  console.log('file', file);
-
   const target = file.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
@@ -426,14 +422,51 @@ watchEffect(() => {
     fetchData();
   }
 });
+
+async function downloadReport() {
+  const response = await fetch(
+    `${config.public.baseUrl}/api/v1/report/${event.value.eventId}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to download report');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  // ตั้งชื่อไฟล์จาก header "Content-Disposition"
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = `${event.value.name} response.xlsx`;
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="(.+)"/);
+    if (match) {
+      filename = match[1];
+    }
+  }
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
 </script>
 
 <template>
-  <div class="ml-80 flex h-fit w-screen bg-ghost-white">
+  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
     <div
-      class="mx-20 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg"
+      class="mx-5 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
-      <div class="p-12">
+      <div class="p-5 lg:p-12">
         <NuxtLink
           to="/backoffice/events"
           class="mb-5 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -443,15 +476,24 @@ watchEffect(() => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Event Detail</h1>
-          <NuxtLink
-            :to="{
-              name: `backoffice-feedback-id`,
-              params: { id: param },
-            }"
-            class="flex justify-end"
-          >
-            <BtnComp text="Manage Feedback" color="blue" />
-          </NuxtLink>
+          <div class="flex items-center justify-end gap-2">
+            <button
+              @click="downloadReport()"
+              class="b3 relative flex w-fit items-center gap-2 rounded-lg bg-[#16C098]/25 fill-[#008767] px-6 py-2 font-semibold text-[#008767] transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            >
+              <FileDownload class="h-5 w-5" />
+              Download Report
+            </button>
+            <NuxtLink
+              :to="{
+                name: `backoffice-feedback-id`,
+                params: { id: param },
+              }"
+              class="flex justify-end"
+            >
+              <BtnComp text="Manage Feedback" color="blue" />
+            </NuxtLink>
+          </div>
         </div>
         <div
           v-if="errorMsg"
@@ -612,74 +654,80 @@ watchEffect(() => {
                     required
                   />
                 </div>
-                <div class="">
-                  <p class="b1">Ticket Start Date</p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.ticket_start_date"
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.ticket_start_time"
-                    />
+                <div class="flex flex-col lg:flex-row lg:gap-14">
+                  <div class="shrink-0">
+                    <p class="b1">Ticket Start Date</p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.ticket_start_date"
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.ticket_start_time"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="">
+                    <p class="b1">Ticket End Date</p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.ticket_end_date"
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.ticket_end_time"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div class="">
-                  <p class="b1">Ticket End Date</p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.ticket_end_date"
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.ticket_end_time"
-                    />
+                <div class="col-start-1 flex flex-col lg:flex-row lg:gap-14">
+                  <div class="">
+                    <p class="b1">Event Start Date</p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.start_date"
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.start_time"
+                      />
+                    </div>
+                  </div>
+                  <div class="">
+                    <p class="b1">Event End Date</p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.end_date"
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
+                        required
+                        v-model="dateInput.end_time"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div class="col-start-1">
-                  <p class="b1">Event Start Date</p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.start_date"
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.start_time"
-                    />
-                  </div>
-                </div>
-                <div class="">
-                  <p class="b1">Event End Date</p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.end_date"
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/5 px-4 py-2 shadow-inner"
-                      required
-                      v-model="dateInput.end_time"
-                    />
-                  </div>
-                </div>
+
                 <div class="col-span-1 col-start-1">
                   <p class="b1">Capacity</p>
                   <input

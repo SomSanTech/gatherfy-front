@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Chart from 'chart.js/auto';
+
 const props = defineProps<{
   groupedByGender?: any;
   colors?: Record<string, string>;
@@ -14,11 +16,66 @@ watch(
   },
   { immediate: true }
 );
+const chartData = ref();
+const donutChartInstance = ref<Chart | null>(null);
+const generateChartData = (
+  groupByGender: Record<string, number>,
+  colors: any
+) => {
+  return {
+    labels: Object.keys(groupByGender),
+    datasets: [
+      {
+        label: 'Gender Distribution',
+        data: Object.values(groupByGender),
+        backgroundColor: Object.keys(groupByGender).map((key) => colors[key]),
+        borderRadius: 5,
+        hoverOffset: 20,
+      },
+    ],
+  };
+};
 
+const donutChartRef = ref<HTMLCanvasElement | null>(null);
+
+const initializeDonutChart = () => {
+  nextTick(() => {
+    if (donutChartRef.value) {
+      if (donutChartInstance.value) {
+        donutChartInstance.value.destroy();
+      }
+      new Chart(donutChartRef.value, {
+        type: 'doughnut',
+        data: chartData.value,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              // gap: 5,
+            },
+            title: {
+              display: false,
+              text: 'Chart.js Doughnut Chart',
+            },
+          },
+        },
+      });
+    }
+  });
+};
+watch(donutChartRef, (newValue) => {
+  if (newValue) {
+    initializeDonutChart();
+  }
+});
 onMounted(() => {
+  chartData.value = generateChartData(props.groupedByGender, props.colors);
+
   if (props.groupedByGender && props.colors) {
     conicGradientStyle.value = `conic-gradient(${generateConicGradient(props.groupedByGender, props.colors)})`;
   }
+  initializeDonutChart();
 });
 </script>
 
@@ -33,46 +90,9 @@ onMounted(() => {
     </div>
     <div
       v-else
-      class="flex h-full w-full flex-row items-center justify-center gap-5"
+      class="flex h-full w-full flex-row items-center justify-center gap-5 p-10"
     >
-      <div class="relative flex h-full w-full items-center justify-center">
-        <div
-          class="aspect-square w-3/4 rounded-full drop-shadow-lg"
-          :style="{ background: conicGradientStyle }"
-        ></div>
-        <div
-          class="absolute left-1/2 top-1/2 aspect-square w-2/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white drop-shadow-sm"
-        ></div>
-      </div>
-      <div class="w-2/3">
-        <ul class="m-0 list-none p-0" v-if="groupedByGender">
-          <li
-            v-for="(data, index) in Object.keys(groupedByGender).sort(
-              (a, b) => {
-                const genderOrder: Record<'Male' | 'Female' | 'Other', number> =
-                  {
-                    Male: 1,
-                    Female: 2,
-                    Other: 3,
-                  };
-                return (
-                  genderOrder[a as keyof typeof genderOrder] -
-                  genderOrder[b as keyof typeof genderOrder]
-                );
-              }
-            )"
-            :key="index"
-            class="b3 flex items-center gap-2"
-          >
-            <span
-              v-if="colors"
-              :style="{ backgroundColor: colors[data] }"
-              class="h-3 w-3 rounded-full drop-shadow-sm"
-            ></span>
-            {{ data }} [{{ groupedByGender[data] }}]
-          </li>
-        </ul>
-      </div>
+      <canvas ref="donutChartRef" class=""></canvas>
     </div>
   </div>
 </template>

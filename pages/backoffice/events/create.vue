@@ -113,7 +113,7 @@ const validateTagsInput = ref('');
 const validateFileInput = ref('');
 const profileData = useCookie<UserProfile>('profileData');
 const accessToken = useCookie('accessToken');
-const errorMsg = ref();
+
 async function fetchData() {
   const fetchedTags = await useFetchData(`v1/tags`, 'GET');
   if (fetchedTags.error) {
@@ -136,15 +136,9 @@ async function fetchEventCreate() {
       accessToken.value,
       event.value
     );
-
     let fetchedUpload;
-    console.log('fetchData status', fetchedData.status);
-    if (fetchedData.errorData) {
-      errorMsg.value = fetchedData.errorData;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+
     if (fetchedData.status === 200) {
-      console.log('dai ja');
       fetchedUpload = await useFetchUpload(
         `v1/files/upload`,
         fileToUpload.value,
@@ -163,8 +157,6 @@ async function fetchEventCreate() {
 }
 
 function validateForm() {
-  console.log('event', event.value);
-
   const checkField = {
     name: event.value.event_name.trim(),
     nameLength: event.value.event_name.trim().length <= 255,
@@ -214,7 +206,6 @@ function filterTag(value: string) {
     item.tag_title.toLowerCase().startsWith(value.toLowerCase())
   );
   filteredTag.value = filter;
-  console.log(filteredTag.value);
 }
 
 function onSelectTag(tag: Tag) {
@@ -288,7 +279,6 @@ onMounted(async () => {
   try {
     isLoading.value = true;
     await fetchData();
-    console.log(profileData.value);
     if (profileData.value) {
       event.value.event_owner = profileData.value.users_id;
     }
@@ -299,11 +289,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-fit w-screen bg-ghost-white">
+  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
     <div
-      class="mx-20 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg"
+      class="mx-5 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
-      <div class="p-12">
+      <div class="p-5 lg:p-12">
         <NuxtLink
           to="/backoffice/events"
           class="mb-5 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -313,17 +303,6 @@ onMounted(async () => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Create Event</h1>
-        </div>
-        <div
-          v-if="errorMsg"
-          class="b2 flex w-full shrink-0 flex-col gap-2 pt-4"
-        >
-          <p
-            v-for="e in errorMsg.details"
-            class="flex items-center gap-2 rounded-md bg-red-200 px-3 py-1 text-red-600"
-          >
-            <Cancle />{{ e }}
-          </p>
         </div>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
@@ -556,116 +535,120 @@ onMounted(async () => {
                     required
                   />
                 </div>
-                <div class="">
-                  <p class="b1">
-                    Ticket Start Date
+                <div class="flex flex-col lg:flex-row lg:gap-14">
+                  <div class="">
+                    <p class="b1">
+                      Ticket Start Date
+                      <span
+                        v-if="!validateInput.ticketStart"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{ validateInputErrText.ticketStart }}</span
+                      >
+                    </p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.ticket_start_date"
+                        required
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.ticket_start_time"
+                        required
+                      />
+                    </div>
                     <span
-                      v-if="!validateInput.ticketStart"
+                      v-if="!validateInput.ticketValid"
                       class="b3 italic text-burgundy"
                     >
-                      {{ validateInputErrText.ticketStart }}</span
+                      {{ validateInputErrText.ticketValid }}</span
                     >
-                  </p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.ticket_start_date"
-                      required
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.ticket_start_time"
-                      required
-                    />
                   </div>
-                  <span
-                    v-if="!validateInput.ticketValid"
-                    class="b3 italic text-burgundy"
-                  >
-                    {{ validateInputErrText.ticketValid }}</span
-                  >
-                </div>
-                <div class="">
-                  <p class="b1">
-                    Ticket End Date
-                    <span
-                      v-if="!validateInput.ticketEnd"
-                      class="b3 italic text-burgundy"
-                    >
-                      {{ validateInputErrText.ticketEnd }}</span
-                    >
-                  </p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.ticket_end_date"
-                      required
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.ticket_end_time"
-                      required
-                    />
+                  <div class="">
+                    <p class="b1">
+                      Ticket End Date
+                      <span
+                        v-if="!validateInput.ticketEnd"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{ validateInputErrText.ticketEnd }}</span
+                      >
+                    </p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.ticket_end_date"
+                        required
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.ticket_end_time"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-                <div class="col-start-1">
-                  <p class="b1">
-                    Event Start Date
+                <div class="col-start-1 flex flex-col lg:flex-row lg:gap-14">
+                  <div class="">
+                    <p class="b1">
+                      Event Start Date
+                      <span
+                        v-if="!validateInput.startDate"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{ validateInputErrText.startDate }}</span
+                      >
+                    </p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.start_date"
+                        required
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.start_time"
+                        required
+                      />
+                    </div>
                     <span
-                      v-if="!validateInput.startDate"
+                      v-if="!validateInput.dateValid"
                       class="b3 italic text-burgundy"
                     >
-                      {{ validateInputErrText.startDate }}</span
+                      {{ validateInputErrText.dateValid }}</span
                     >
-                  </p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.start_date"
-                      required
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.start_time"
-                      required
-                    />
                   </div>
-                  <span
-                    v-if="!validateInput.dateValid"
-                    class="b3 italic text-burgundy"
-                  >
-                    {{ validateInputErrText.dateValid }}</span
-                  >
-                </div>
-                <div class="">
-                  <p class="b1">
-                    Event End Date
-                    <span
-                      v-if="!validateInput.endDate"
-                      class="b3 italic text-burgundy"
-                    >
-                      {{ validateInputErrText.endDate }}</span
-                    >
-                  </p>
-                  <div class="my-4 flex gap-3">
-                    <input
-                      type="date"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.end_date"
-                      required
-                    />
-                    <input
-                      type="time"
-                      class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
-                      v-model="dateInput.end_time"
-                      required
-                    />
+                  <div class="">
+                    <p class="b1">
+                      Event End Date
+                      <span
+                        v-if="!validateInput.endDate"
+                        class="b3 italic text-burgundy"
+                      >
+                        {{ validateInputErrText.endDate }}</span
+                      >
+                    </p>
+                    <div class="my-4 flex gap-3">
+                      <input
+                        type="date"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.end_date"
+                        required
+                      />
+                      <input
+                        type="time"
+                        class="b2 rounded-lg border bg-lavender-gray/10 px-4 py-2 shadow-inner"
+                        v-model="dateInput.end_time"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 

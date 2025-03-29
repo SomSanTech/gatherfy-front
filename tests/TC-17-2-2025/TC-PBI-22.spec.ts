@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('pbi22.1', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -15,7 +15,7 @@ test('pbi22.1', async ({ page }) => {
 });
 
 test('pbi22.2', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -31,7 +31,7 @@ test('pbi22.2', async ({ page }) => {
   );
 });
 test('pbi22.3', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -47,7 +47,7 @@ test('pbi22.3', async ({ page }) => {
   );
 });
 test('pbi22.4', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 

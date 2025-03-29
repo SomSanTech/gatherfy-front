@@ -20,48 +20,52 @@ const someCalculation = Math.round(totalViews / totalEntries);
 
 <template>
   <div
-    :class="`overall ${format === 'row' ? 'grid grid-cols-4' : 'flex flex-grow'} h-full w-full gap-3`"
+    :class="`overall ${format === 'row' ? 'grid-cols-4 lg:grid' : 'flex flex-grow'} h-full w-full gap-3`"
   >
     <div
       v-if="format === 'row'"
-      class="col-span-1 flex h-24 w-full items-center justify-between rounded-[20px] bg-white p-3 px-6 drop-shadow-md"
+      class="bg-glass col-span-1 hidden h-fit w-full items-center justify-between rounded-[20px] p-3 lg:flex lg:h-full lg:px-6"
     >
       <p class="t3">Hi, {{ profileData?.username }}</p>
     </div>
     <div
-      :class="`${format === 'row' ? 'col-span-3 flex h-24' : 'flex flex-grow flex-col'} h-full gap-3`"
+      :class="`${format === 'row' ? 'col-span-3 flex h-24' : 'grid w-full grid-rows-3'} h-full gap-1 lg:gap-3`"
     >
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-col items-center justify-center text-center'} flex w-full flex-grow items-center justify-between gap-3 rounded-[20px] bg-white p-3 px-6 drop-shadow-md`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} flex h-full w-full flex-grow justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl lg:h-full`"
       >
-        <RegisPeople class="text-5xl" />
         <div>
-          <p class="t3">
-            {{ allRegistration }}
-          </p>
-          <p class="b3">Registrations</p>
+          <div class="flex flex-col gap-4">
+            <p class="b3">Registrations</p>
+            <p class="b1 text-2xl lg:text-5xl">
+              {{ allRegistration }}
+            </p>
+          </div>
         </div>
+        <RegisPeople class="self-start !fill-black/70 text-4xl" />
       </div>
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-col items-center justify-center text-center'} flex w-full items-center justify-between gap-3 rounded-[20px] bg-white p-3 px-6 drop-shadow-md`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} flex h-full w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl lg:h-full`"
       >
-        <AllViews class="text-5xl" />
-        <div>
-          <p class="t3 font-semibold">{{ sumOfViews }}</p>
+        <div class="flex flex-col gap-4">
           <p class="b3">Views</p>
+          <p class="b1 text-2xl lg:text-5xl">{{ sumOfViews }}</p>
         </div>
+        <AllViews class="!fill-black/70 text-4xl" />
       </div>
       <div
-        :class="`${format === 'row' ? 'flex-row' : 'flex-col items-center justify-center text-center'} flex w-full items-center justify-between gap-3 rounded-[20px] bg-white p-3 px-6 drop-shadow-md`"
+        :class="`${format === 'row' ? 'flex-row' : 'flex-row'} flex h-fit w-full justify-between gap-3 rounded-[20px] border border-white/90 bg-white/90 p-4 drop-shadow-md backdrop-blur-xl lg:h-full`"
       >
-        <AvgViews class="text-5xl" />
-        <div>
-          <p class="t3">
-            {{ someCalculation }}
+        <div class="flex flex-col gap-4">
+          <p class="b3">Views</p>
+          <p class="b3">
+            <span class="text-2xl lg:text-5xl">
+              {{ totalViews === 0 ? '0' : someCalculation }}
+            </span>
             <span class="b3 font-normal">per day</span>
           </p>
-          <p class="b3">Views</p>
         </div>
+        <AvgViews class="!fill-black/70 text-4xl" />
       </div>
     </div>
   </div>

@@ -4,23 +4,22 @@ import RegistrationList from '~/components/backoffice/RegistrationList.vue';
 
 // const scannedValue = ref<string | null>(null);
 
-const onDecode = (result: string) => {
-  scannedValue.value = result;
-};
+// const onDecode = (result: string) => {
+//   scannedValue.value = result;
+// };
 
-const onInit = (error: any) => {
-  if (error) {
-    console.error('QR code scanner initialization failed', error);
-  } else {
-    console.log('QR code scanner initialized');
-  }
-};
+// const onInit = (error: any) => {
+//   if (error) {
+//     console.error('QR code scanner initialization failed', error);
+//   } else {
+//     console.error('QR code scanner initialized');
+//   }
+// };
 definePageMeta({
   layout: 'backoffice',
 });
 const video = ref<HTMLVideoElement | null>(null);
 const scannedValue = ref<string | null>(null);
-const isLoading = ref(false);
 const apiResponse = ref<string | null>(null);
 let qrCodeReader: BrowserQRCodeReader;
 const selectedOption = ref();
@@ -38,12 +37,11 @@ const fetchData = async () => {
 const registrationsData = ref();
 const fetchRegisListData = async (eventId: string) => {
   const fetchedData = await useFetchWithAuth(
-    `v1/registrations/event/${eventId}`,
+    `v2/registrations/event/${eventId}`,
     'GET',
     accessToken.value
   );
   registrationsData.value = fetchedData.data || [];
-  console.log('registrationsData.value', registrationsData.value);
 };
 
 const selectedEventId = ref(0);
@@ -54,13 +52,10 @@ const handleSelectEvent = async () => {
   );
   if (selectedEvent) {
     selectedEventId.value = selectedEvent.eventId;
-    console.log('Selected Event ID:', selectedEvent.eventId);
-    console.log('Selected Event Name:', selectedEvent.eventName);
     // alert(
     //   `Selected Event ID: ${selectedEvent.eventId}, Name: ${selectedEvent.eventName}`
     // );
   }
-  console.log(selectedOption.value);
   // isLoading.value = true;
   await fetchRegisListData(selectedEvent.eventId);
   // } finally {
@@ -70,7 +65,6 @@ const handleSelectEvent = async () => {
 const decodeToken = (token: any): any => {
   const arrayToken = token.split('.');
   const tokenPayload = JSON.parse(atob(arrayToken[1]));
-  console.log('tokenPayload:', tokenPayload);
   return tokenPayload;
 };
 const config = useRuntimeConfig();
@@ -112,24 +106,22 @@ const filteredEvents = computed(() => {
     ) || []
   );
 });
+const { state, showPopup } = usePopup();
+const isLoading = useState('isLoading', () => true);
+
 onMounted(async () => {
   await fetchData();
+
   qrCodeReader = new BrowserQRCodeReader();
   qrCodeReader.decodeFromVideoDevice(
     null,
     video.value,
     async (result, error) => {
       if (result) {
-        scannedValue.value = result.getText(); // ดึงค่าจาก QR Code
+        scannedValue.value = result.getText();
         if (scannedValue.value) {
-          console.log('scannedValue', decodeToken(scannedValue.value));
           const decodedData = decodeToken(scannedValue.value);
           if (decodedData.eventId === selectedEventId.value) {
-            // apiResponse.value = scannedValue.value;
-            // console.log(scannedValue.value);
-            console.log('yes ja');
-
-            // ส่งคำขอ PUT ไปที่ backend พร้อม Authorization header
             const response = await checkInFetch(
               `v2/check-in`,
               'PUT',
@@ -138,49 +130,65 @@ onMounted(async () => {
                 qrToken: scannedValue.value,
               }
             );
-            console.log('response', response);
 
             if (response.status === 401) {
-              alert('QRCODE time out');
+              showPopup('QRCODE time out', 'error');
             } else {
-              alert('checked in');
+              showPopup('Checked in', 'complete');
             }
           } else {
             if (!selectedOption.value) {
-              alert(`Please select event first`);
+              showPopup('Please select event first', 'warn');
             } else {
-              alert(`QR code not match event ${selectedOption.value}`);
+              showPopup(
+                `QR code not match event ${selectedOption.value}`,
+                'warn'
+              );
             }
           }
         } else {
-          console.log('test');
         }
       }
-      // if (error) console.error(error);
     }
   );
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
 });
 
-// onBeforeUnmount(() => {
-//   qrCodeReader.reset(); // ปิดกล้องเมื่อออกจากหน้า
-// });
+onBeforeUnmount(() => {
+  // if (qrCodeReader) {
+  navigator.mediaDevices
+    .getUserMedia({ video: true })
+    .then((stream) => {
+      stream.getTracks().forEach((track) => track.stop()); // Stop the camera
+    })
+    .catch((err) => console.error('Error stopping camera:', err));
+  // }
+});
 </script>
 <template>
-  <div class="ml-80 h-screen w-full bg-ghost-white">
-    <div class="justify- flex h-full gap-12 px-5 text-center">
-      <div class="my-auto flex aspect-square h-fit w-[400px] shrink-0">
+  <CompleteModal
+    :isShowCompleteModal="state.isVisible"
+    :title="state.text"
+    :status="state.status"
+    @complete-action="state.isVisible = false"
+  />
+  <!-- <Loader v-if="isLoading" /> -->
+
+  <div class="h-screen w-full bg-[#EEEEEE] lg:ml-80">
+    <div
+      class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-12"
+    >
+      <div class="my-auto flex aspect-square h-fit shrink-0">
         <video
           ref="video"
           width="400"
           height="400"
           class="rounded-lg object-cover"
         ></video>
-        <!-- <p v-if="scannedValue">Scanned Value: {{ scannedValue }}</p> -->
-        <!-- <p v-if="apiResponse" class="mt-4 text-blue-600">
-          API Response: {{ apiResponse }}
-        </p> -->
       </div>
-      <div class="my-32 mr-10 w-full rounded-lg bg-white p-7 drop-shadow-lg">
+      <div class="bg-glass mb-5 h-2/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
           {{ selectedOption }}
@@ -210,7 +218,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-if="registrationsData" class="h-full w-full">
+        <div v-if="registrationsData" class="h-3/4 w-full overflow-y-auto">
           <div
             v-if="registrationsData.length === 0"
             class="b2 flex h-full w-full items-center justify-center"
@@ -220,7 +228,7 @@ onMounted(async () => {
           <div v-else class="overflow-y-auto">
             <div
               v-for="registration in registrationsData"
-              class="border-default-300 jus flex cursor-default items-center border-b transition-colors"
+              class="border-default-300 flex w-full cursor-default items-center border-b transition-colors"
             >
               <RegistrationList
                 :registration="registration"

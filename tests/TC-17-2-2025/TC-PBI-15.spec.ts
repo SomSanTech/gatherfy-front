@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('pbi15.1', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -17,7 +17,7 @@ test('pbi15.1', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Feedback' }).click();
   await page
-    .getByRole('row', { name: 'Ceramic Workshop 20 March' })
+    .getByRole('row', { name: 'Orm Korn‘s Graduation Gathering' })
     .getByRole('link')
     .first()
     .click();
@@ -28,7 +28,7 @@ test('pbi15.1', async ({ page }) => {
 });
 
 test('pbi15.2', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/us1');
 
   await page.waitForTimeout(3000);
 
@@ -44,7 +44,7 @@ test('pbi15.2', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Feedback' }).click();
   await page
-    .getByRole('row', { name: 'Ceramic Workshop 20 March' })
+    .getByRole('row', { name: 'Orm Korn‘s Graduation Gathering' })
     .getByRole('link')
     .first()
     .click();

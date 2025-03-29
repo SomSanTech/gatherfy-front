@@ -45,7 +45,7 @@ function ratingAnswer(index: number, rating: number) {
     class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm duration-500"
   >
     <div
-      class="relative max-h-[80%] w-[60%] overflow-auto rounded-xl border border-opacity-5 bg-white px-14 pt-12 shadow-lg"
+      class="relative max-h-[80%] w-3/4 overflow-auto rounded-xl border border-opacity-5 bg-white p-4 shadow-lg lg:w-[60%] lg:px-14 lg:pt-12"
     >
       <div
         @click="closePreview()"

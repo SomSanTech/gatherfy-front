@@ -13,7 +13,6 @@ const selectedStatus = ref(new Set());
 const tags = ref([]);
 const showFilter = ref();
 const sortFilter = ref('');
-const isLoading = ref(false);
 const isInitializing = ref(true);
 
 const handleDateUpdate = (newDate: Date) => {
@@ -55,7 +54,7 @@ const buildFilterUrl = () => {
 };
 
 const filterAndSearchEvents = async () => {
-  isLoading.value = true;
+  isSearching.value = true;
   try {
     let url;
     if (searchTerm.value) {
@@ -67,7 +66,7 @@ const filterAndSearchEvents = async () => {
   } catch (error) {
     console.error('Error fetching events:', error);
   } finally {
-    isLoading.value = false;
+    isSearching.value = false;
     isInitializing.value = false;
   }
 };
@@ -82,8 +81,10 @@ const handleSortFilter = (sortByOption: any) => {
 const viewportWidth = computed(() => window.innerWidth);
 
 const isMobile = computed(() => viewportWidth.value <= 450);
+const isLoading = useState('isLoading', () => true);
+const isSearching = ref(false);
+
 onMounted(async () => {
-  console.log(viewportWidth.value);
   if (isMobile.value) {
     showFilter.value = false;
   } else {
@@ -134,7 +135,9 @@ watch(
 </script>
 
 <template>
-  <div class="py-24">
+  <Loader v-if="isLoading" />
+
+  <div v-else class="py-24">
     <div class="mx-auto w-full px-5 lg:max-w-6xl lg:px-0">
       <h1 v-if="searchTerm" class="t1 font-semibold">
         {{ eventSearch?.length }} Events for "{{
@@ -165,12 +168,12 @@ watch(
           :selectedTags="[...selectedTags]"
           :selectedStatus="[...selectedStatus]"
         />
-        <div v-if="isLoading" class="flex w-full items-center justify-center">
-          <span class="loader"></span>
+        <div v-if="isSearching" class="flex w-full items-center justify-center">
+          <span class="load"></span>
         </div>
         <h1
           v-else-if="eventSearch?.length === 0"
-          class="no-event-search t3 mx-auto flex items-center justify-center font-semibold"
+          class="no-event-search t3 mx-auto flex items-center justify-center py-24 font-semibold"
         >
           Can't Find Events You're Looking For
         </h1>

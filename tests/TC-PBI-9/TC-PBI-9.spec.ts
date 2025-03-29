@@ -27,7 +27,6 @@ test('TC-PBI-9.1 admin edit status to check-in', async ({ page }) => {
   for (let i = 0; i < statusChoiceCount; ++i) {
     const choice = statusChoice.nth(i);
     const choiceText = await choice.innerText();
-    console.log('choiceText', await choiceText);
 
     if ((await choiceText) === 'Checked in') {
       await choice.click();
@@ -75,7 +74,6 @@ test('TC-PBI-9.2 admin edit status to Unattended', async ({ page }) => {
   for (let i = 0; i < statusChoiceCount; ++i) {
     const choice = statusChoice.nth(i);
     const choiceText = await choice.innerText();
-    console.log('choiceText', await choiceText);
 
     if ((await choiceText) === 'Unattended') {
       await choice.click();
@@ -124,7 +122,6 @@ test('TC-PBI-9.3 admin edit status to Unattended', async ({ page }) => {
   for (let i = 0; i < statusChoiceCount; ++i) {
     const choice = statusChoice.nth(i);
     const choiceText = await choice.innerText();
-    console.log('choiceText', await choiceText);
 
     if ((await choiceText) === 'Unattended') {
       await choice.click();

@@ -56,7 +56,7 @@ const sortByData = [
 
 <template>
   <div
-    class="flex items-center justify-between rounded-xl border border-black-1 p-1 lg:p-2 lg:pr-4"
+    class="flex items-center justify-between rounded-xl border border-black-1 p-1 px-3 lg:p-2 lg:pr-4"
   >
     <div
       :class="`flex gap-2 ${isShowSort ? 'pointer-events-none opacity-0' : ''}`"

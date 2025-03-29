@@ -16,7 +16,10 @@ interface Event {
   eventStartDate: Date;
 }
 
-const emit = defineEmits(['previewFeedback']);
+const emit = defineEmits(['previewFeedback', 'exportFeedback']);
+const exportFeedback = () => {
+  emit('exportFeedback', props.event?.eventId, props.event?.eventName);
+};
 </script>
 
 <template>
@@ -27,12 +30,15 @@ const emit = defineEmits(['previewFeedback']);
     {{ useFormatDateTime(event?.eventStartDate, 'date') }},
     {{ useFormatDateTime(event?.eventStartDate, 'time') }}
   </td>
-  <td class="b2 p-4 text-center align-middle">
+  <!-- <td class="b2 p-4 text-center align-middle">
     {{ responses }}
-  </td>
+  </td> -->
   <td>
-    <div class="flex justify-center gap-5 text-xl text-gray-600">
-      <div v-if="canEdit" class="flex items-center justify-center gap-2 p-4">
+    <div class="flex justify-center gap-0 text-xl text-gray-600 lg:gap-2">
+      <div
+        v-if="canEdit"
+        class="flex items-center justify-center gap-2 p-1 lg:p-4"
+      >
         <NuxtLink
           class="go-to-feedback"
           :to="{
@@ -42,10 +48,10 @@ const emit = defineEmits(['previewFeedback']);
           <PenEdit class="t3" />
         </NuxtLink>
       </div>
-      <div v-else class="flex items-center justify-center gap-2 p-4">
+      <div v-else class="flex items-center justify-center gap-2 p-1 lg:p-4">
         <PenEdit class="t3 cursor-not-allowed text-cool-gray" />
       </div>
-      <div class="flex items-center justify-center gap-2 p-4">
+      <div class="flex items-center justify-center gap-2 p-1 lg:p-4">
         <NuxtLink
           class="go-to-response"
           :to="{
@@ -57,9 +63,15 @@ const emit = defineEmits(['previewFeedback']);
       </div>
       <div
         @click="$emit('previewFeedback', event?.eventId)"
-        class="flex items-center justify-center gap-2 p-4"
+        class="flex items-center justify-center gap-2 p-1 lg:p-4"
       >
         <View class="t3 cursor-pointer" />
+      </div>
+      <div
+        @click="exportFeedback"
+        class="flex items-center justify-center gap-2 fill-gray-600 p-1 lg:p-4"
+      >
+        <FileDownload class="t3 cursor-pointer" />
       </div>
     </div>
   </td>

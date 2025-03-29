@@ -7,6 +7,9 @@ import type {
   FeedbackBody,
 } from '~/models/feedback';
 
+definePageMeta({
+  layout: 'profile',
+});
 const tickets = ref();
 const accessToken = useCookie('accessToken');
 const profileData = useCookie('profileData');
@@ -43,6 +46,7 @@ const generateQRCode = async (eventId: string) => {
   isStartCountDown.value = true;
   startCountdown();
 };
+const isZoomed = ref(false);
 const feedBackErrorResponse = ref();
 function closePreview() {
   previewFeedback.value = false;
@@ -80,14 +84,12 @@ const onReviewFeedback = async (eventId: string) => {
     previewFeedback.value = true;
   }
   document.body.style.overflow = 'hidden';
-  console.log(feedbackQuestion.value);
   for (const item of feedbackQuestion.value) {
     addAnswerField(item.questionId, parseInt(eventId));
   }
   for (const item of defaultQuestion) {
     addFeedbackField(parseInt(eventId), profileData.value?.users_id);
   }
-  console.log(answers.value);
 };
 
 async function submitFeedback() {
@@ -97,7 +99,6 @@ async function submitFeedback() {
     accessToken.value,
     answers.value[answers.value.length - 1]
   );
-  console.log(feedbackResponse);
   if (feedbackResponse.status === 200) {
     const feedbackId = feedbackResponse.data.feedbackId; // Assuming `feedbackId` is in the response
     for (let i = 0; i < feedbackQuestion.value.length; i++) {
@@ -181,28 +182,31 @@ const filterTimeEventData = (time: string) => {
   }
 
   filteredTicketData.value = filter;
-  console.log(time);
-
-  console.log('filteredTicketData.value', filteredTicketData.value);
 };
+const isLoading = useState('isLoading', () => true);
 
 onMounted(async () => {
-  const response = await useFetchWithAuth(
-    'v1/tickets',
-    'GET',
-    accessToken.value
-  );
-  tickets.value = response.data;
-  const feedbacked = await useFetchWithAuth(
-    'v1/feedbacked',
-    'GET',
-    accessToken.value
-  );
-  if ('data' in feedbacked) {
-    userAnswerFeedbackHistory.value = feedbacked.data;
-  }
+  try {
+    const response = await useFetchWithAuth(
+      'v1/tickets',
+      'GET',
+      accessToken.value
+    );
+    tickets.value = response.data;
+    const feedbacked = await useFetchWithAuth(
+      'v1/feedbacked',
+      'GET',
+      accessToken.value
+    );
+    if ('data' in feedbacked) {
+      userAnswerFeedbackHistory.value = feedbacked.data;
+    }
 
-  filterTimeEventData(selectedEventTime.value);
+    filterTimeEventData(selectedEventTime.value);
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 watch(selectedEventTime, (newValue) => {
@@ -233,17 +237,9 @@ function formatTimeRange(start, end) {
 </script>
 
 <template>
-  <div class="mx-auto my-28 flex w-screen max-w-6xl gap-9 px-8 lg:px-28">
-    <!-- <div
-      class="flex w-[280px]  flex-col gap-2 rounded-xl border border-black/70 p-4 py-8"
-    >
-      <button class="b2 w-full rounded-md bg-red-200 p-2 text-center">
-        My Profile
-      </button>
-      <button class="b2 w-full rounded-md bg-red-200 p-2 text-center">
-        My Ticket
-      </button>
-    </div> -->
+  <Loader v-if="isLoading" />
+
+  <div v-else class="flex w-full gap-9 px-8 lg:px-0">
     <div class="w-full">
       <p class="t3 pb-2">My Ticket</p>
       <ExploreBar
@@ -382,12 +378,19 @@ function formatTimeRange(start, end) {
                         </div>
 
                         <div
+                          @click="isZoomed = !isZoomed"
                           v-if="qrValues[ticket.eventId] && !isResendDisabled"
-                          class="rounded-g bg-white p-2"
+                          class="rounded-g cursor-pointer bg-white p-2 transition-transform duration-300 ease-in-out"
+                          :class="{
+                            'fixed inset-0 z-50 flex items-center justify-center bg-black/50':
+                              isZoomed,
+                            '': !isZoomed,
+                            'scale-105': isZoomed,
+                          }"
                         >
                           <qrcode-vue
                             :value="qrValues[ticket.eventId]"
-                            :size="100"
+                            :size="isZoomed ? 300 : 100"
                           />
                         </div>
                       </div>

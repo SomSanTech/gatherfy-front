@@ -2,6 +2,7 @@
 const props = defineProps<{
   text?: string;
   color?: string;
+  isLoading?: boolean;
 }>();
 
 const btnColor = computed(() => {
@@ -10,7 +11,7 @@ const btnColor = computed(() => {
   } else if (props.color === 'outline-red') {
     return ' border-2 border-burgundy hover:bg-burgundy text-burgundy hover:text-light-grey';
   } else if (props.color === 'black') {
-    return 'bg-black-1 hover:bg-dark-grey text-light-grey';
+    return 'bg-black/90 hover:bg-dark-grey text-light-grey';
   } else if (props.color === 'green') {
     return 'bg-[#16C098]/25 text-[#008767]';
   } else if (props.color === 'status-red') {
@@ -27,8 +28,9 @@ const btnColor = computed(() => {
 
 <template>
   <button
-    :class="`btn b3 w-fit rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
+    :class="`btn b3 flex w-fit items-center gap-2 rounded-md px-6 py-2 font-semibold duration-200 ${btnColor}`"
   >
     <p v-html="text"></p>
+    <div v-if="isLoading" class="load h-3 w-3"></div>
   </button>
 </template>

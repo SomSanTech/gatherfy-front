@@ -109,7 +109,6 @@ const createQuestion = async () => {
     );
     if (fetchedData.errorData) {
       errorMessage.value = await fetchedData.errorData;
-      console.log('test222', errorMessage.value);
     }
 
     await Promise.all(formattedQuestions);
@@ -133,7 +132,7 @@ async function editQuestion(difference: EditQuestion[]) {
 
     if (fetchedData.errorData) {
       errorMessage.value = await fetchedData.errorData;
-      console.log('test222', errorMessage.value);
+      'test222', errorMessage.value;
     }
 
     await Promise.all(formattedQuestions);
@@ -180,7 +179,6 @@ async function toSave() {
       'questionText',
       'questionType'
     );
-    console.log(difference);
     if (newQuestions.value.length >= 1 && difference.length !== 0) {
       await createQuestion();
       await editQuestion(difference);
@@ -191,8 +189,6 @@ async function toSave() {
     }
 
     if (errorMessage.value) {
-      console.log('error ja');
-
       throw new Error(errorMessage.value);
     }
   } catch {
@@ -270,7 +266,6 @@ function removeField(indexName: string, questionId: number) {
 
 async function confirmRemoveField(indexName: string, confirm: boolean) {
   const array = indexName.split('-');
-  console.log(questionIdConfirmDelete.value);
 
   if (array[0] === 'existing' && confirm) {
     deleteCompleted.value = true;
@@ -350,11 +345,11 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-fit w-screen bg-ghost-white">
+  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
     <div
-      class="mx-20 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg"
+      class="mx-4 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
-      <div class="p-12">
+      <div class="p-3 lg:p-12">
         <NuxtLink
           :to="{
             name: `backoffice-events-id`,

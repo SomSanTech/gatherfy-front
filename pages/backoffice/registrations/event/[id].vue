@@ -14,7 +14,7 @@ const accessToken = useCookie('accessToken');
 
 const fetchData = async () => {
   const fetchedData = await useFetchWithAuth(
-    `v1/registrations/event/${param}`,
+    `v2/registrations/event/${param}`,
     'GET',
     accessToken.value
   );
@@ -32,9 +32,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="ml-80 flex h-full w-screen bg-ghost-white">
-    <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
-      <div class="p-12">
+  <div class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80 lg:h-screen">
+    <div
+      class="mx-4 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
+    >
+      <div class="p-3 lg:p-12">
         <NuxtLink
           to="/backoffice/registrations/event"
           class="mb-5 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"

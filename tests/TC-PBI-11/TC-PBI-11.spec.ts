@@ -13,7 +13,6 @@ test('TC-PBI-11.1 admin see 200 year dashboard', async ({ page }) => {
   await page.waitForTimeout(3000);
 
   const currentUrl = await page.url();
-  console.log('currentUrl', currentUrl);
   await expect(currentUrl).toContain('/backoffice/dashboard/3');
 
   await expect(page.locator('.dash-event-name')).toContainText(

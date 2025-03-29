@@ -1,10 +1,116 @@
 <script setup lang="ts">
-import { useRuntimeConfig } from '#app';
 import { vOnClickOutside } from '@vueuse/components';
 import {
   GoogleSignInButton,
   type CredentialResponse,
 } from 'vue3-google-signin';
+
+const credentials = ref<string | null>(null);
+
+const handleLoginSuccesses = async (response: CredentialResponse) => {
+  const { credential } = response;
+  credentials.value = credential;
+  await signInWithGoogle();
+};
+
+const handleLoginErrores = () => {
+  console.error('Login failed');
+};
+
+const isTokenExpired = (token: string) => {
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const exp = payload.exp * 1000;
+  return Date.now() > exp;
+};
+
+const { state, showPopup } = usePopup();
+const handleCompleteGGSignUp = () => {
+  state.isVisible = false;
+  loginPopup.value = !loginPopup.value;
+};
+const isSelectRolePopUp = ref(false);
+const handleSelectRole = async () => {
+  const response = await useFetchData('v1/signup/google', 'POST', {
+    token: credentials.value,
+    role: selectedRole.value,
+  });
+
+  if (response.status === 200) {
+    isSelectRolePopUp.value = !isSelectRolePopUp.value;
+    showPopup('Sign up with Google success please go Sing in', 'complete');
+  }
+};
+const signInWithGoogle = async () => {
+  if (credentials.value && !isTokenExpired(credentials.value)) {
+    const response = await useFetchWithAuth(
+      'v1/login/google',
+      'POST',
+      credentials.value
+    );
+
+    if (response.status !== 200) {
+      isSelectRolePopUp.value = !isSelectRolePopUp.value;
+    } else {
+      const accessToken = useCookie('accessToken', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+      if ('data' in response) accessToken.value = response.data.accessToken;
+
+      const refreshToken = useCookie('refreshToken', {
+        httpOnly: false,
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      if ('data' in response) refreshToken.value = response.data.refreshToken;
+
+      const roleCookie = useCookie('roleCookie', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+
+      roleCookie.value = decodeToken(accessToken.value)?.role;
+
+      const profileData = useCookie('profileData', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60,
+      });
+      if ('data' in response) {
+        if (response.data.accessToken) {
+          const userProfileData = await useFetchWithAuth(
+            'v1/profile',
+            'GET',
+            response.data.accessToken
+          );
+          if ('data' in userProfileData) {
+            profileData.value = userProfileData.data;
+          }
+        }
+      }
+
+      if (roleCookie.value === 'Attendee') {
+        router.push('/');
+      } else {
+        router.push('/backoffice');
+      }
+
+      const regisData = await useFetchWithAuth(
+        'v1/tickets',
+        'GET',
+        accessToken.value
+      );
+      if ('data' in regisData) {
+        userRegisHistory.value = regisData.data;
+      }
+    }
+    loginPopup.value = !loginPopup.value;
+    isHavePopupOpen.value = false;
+  } else {
+  }
+};
+
 const loginPopup = useState('loginPopup');
 const isHavePopupOpen = useState('isHavePopupOpen');
 const isSignup = useState('isSignup');
@@ -46,7 +152,6 @@ const checkField = ref<{ [key: string]: boolean }>({
   birthday: true,
 });
 const shouldShake = ref(false);
-const role = useState('role');
 const isWaitAuthen = ref<boolean>(false);
 const loginStatus = ref<boolean>(true);
 const fieldErrorMessages = {
@@ -65,6 +170,9 @@ const fieldErrorMessages = {
 const isAlreadySignup = ref<boolean>(false);
 
 const changeToSignUp = () => {
+  signUpErrorResponse.value = null;
+  username.value = '';
+  password.value = '';
   checkField.value = {
     testPass: true,
     confirmPassword: true,
@@ -78,6 +186,18 @@ const changeToSignUp = () => {
     role: true,
     birthday: true,
   };
+  signupData.value = {
+    firstname: '',
+    lastname: '',
+    username: '',
+    gender: '',
+    email: '',
+    phone: '',
+    image: 'test.png',
+    role: '',
+    birthday: '',
+    password: '',
+  };
   isSignup.value = !isSignup.value;
 };
 
@@ -88,7 +208,6 @@ const togglePasswordVisibility = () => {
 const decodeToken = (token: any): any => {
   const arrayToken = token.split('.');
   const tokenPayload = JSON.parse(atob(arrayToken[1]));
-  console.log('tokenPayload:', tokenPayload);
   return tokenPayload;
 };
 
@@ -100,7 +219,7 @@ const checkPasswordPattern = () => {
   const hasUppercase = /[A-Z]/.test(password.value);
   const hasLowercase = /[a-z]/.test(password.value);
   const hasNumber = /[0-9]/.test(password.value);
-  const hasSpecialChar = /[@#$%^&+=!]/.test(password.value);
+  const hasSpecialChar = /[@#$%^&+=.*!]/.test(password.value);
   const isMinLength = password.value.length >= 8;
 
   if (hasUppercase) {
@@ -170,11 +289,9 @@ const validateFields = () => {
     checkField.value[key] = Boolean(value);
   });
 
-  console.log(checkField.value);
-
   const hasError = Object.values(checkField.value).includes(false);
 
-  if (hasError) {
+  if (hasError && isSignup.value) {
     triggerShake();
   }
 
@@ -187,6 +304,11 @@ const isSignInCookie = useCookie('is_user_sign_in');
 const handleAuthen = async () => {};
 const signUpErrorResponse = ref();
 const userRegisHistory = useState('userRegisHistory');
+
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
 const handleSignin = async () => {
   isClickSignBtn.value = true;
   isWaitAuthen.value = true;
@@ -206,8 +328,11 @@ const handleSignin = async () => {
         password: password.value,
       };
 
-      const fetchedData = await useFetchData(`v1/login`, 'POST', dataSend);
-      console.log('fetchedData.data', fetchedData.data);
+      const fetchedData = await useFetchData<LoginResponse>(
+        `v1/login`,
+        'POST',
+        dataSend
+      );
 
       if (fetchedData.status === 200) {
         isWaitAuthen.value = false;
@@ -222,20 +347,11 @@ const handleSignin = async () => {
 
         const refreshToken = useCookie('refreshToken', {
           httpOnly: false,
-          maxAge: 60 * 60,
+          maxAge: 60 * 60 * 24 * 7,
         });
         refreshToken.value = fetchedData.data.refreshToken;
 
-        // const userProfileData = await useFetchWithAuth(
-        //   'v1/profile',
-        //   'GET',
-        //   accessToken.value
-        // );
-
-        // userProfile.value = userProfileData.data;
-
-        role.value = decodeToken(accessToken.value)?.role;
-        console.log(role);
+        // role.value = decodeToken(accessToken.value)?.role;
         const roleCookie = useCookie('roleCookie', {
           httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
@@ -255,7 +371,9 @@ const handleSignin = async () => {
             'GET',
             fetchedData.data.accessToken
           );
-          profileData.value = userProfileData.data;
+          if ('data' in userProfileData) {
+            profileData.value = userProfileData.data;
+          }
         }
 
         if (roleCookie.value === 'Attendee') {
@@ -264,23 +382,19 @@ const handleSignin = async () => {
           router.push('/backoffice');
         }
 
-        // const userRegisData = useCookie('user_regis_history', {
-        //   default: () => [],
-        // });
-
         const regisData = await useFetchWithAuth(
           'v1/tickets',
           'GET',
           accessToken.value
         );
-        userRegisHistory.value = regisData.data;
+        if ('data' in regisData) {
+          userRegisHistory.value = regisData.data;
+        }
 
-        console.log('Access Token:', accessToken.value);
         loginPopup.value = false;
         isHavePopupOpen.value = false;
         isUserSignIn.value = true;
         isSignInCookie.value = 'yes';
-        console.log('isUserSignIn:', isUserSignIn.value);
       } else {
         loginStatus.value = false;
         isWaitAuthen.value = false;
@@ -291,7 +405,7 @@ const handleSignin = async () => {
       isWaitAuthen.value = false;
     }
   } else if (isSignup.value) {
-    console.log(signupData.value);
+    signUpErrorResponse.value = null;
     if (!validateFields()) {
       signupData.value.birthday = birthday.value + 'T00:00:00';
       const response = await useFetchData(
@@ -299,13 +413,11 @@ const handleSignin = async () => {
         'POST',
         signupData.value
       );
-      console.log('response', response.data);
-      if (response.errorData) {
+      if ('errorData' in response) {
         isWaitAuthen.value = false;
-        console.log('response.errorData', response.errorData);
         signUpErrorResponse.value = response.errorData;
       }
-      if (!response.errorData) {
+      if (!('errorData' in response)) {
         localStorage.setItem('email', signupData.value.email);
         // loginPopup.value = !loginPopup.value;
         isWaitAuthen.value = false;
@@ -380,25 +492,24 @@ watch(
   { immediate: true }
 );
 
-// handle success event
-const handleLoginSuccess = (response: CredentialResponse) => {
-  const { credential } = response;
-  console.log('Access Token', credential);
-  console.log(response);
-};
-
-// handle an error event
-const handleLoginError = () => {
-  console.error('Login failed');
-};
+// interface CredentialResponse {
+//   credential: string;
+//   select_by: string;
+// }
+// const userCredential = ref<string | null>(null);
 </script>
 
 <template>
+  <CompleteModal
+    :isShowCompleteModal="state.isVisible"
+    :title="state.text"
+    @complete-action="handleCompleteGGSignUp"
+  />
   <div v-if="loginPopup" class="fixed z-50 h-screen w-full">
     <div
       v-on-click-outside="handleLoginPopup"
       :class="{ 'animate-shake': shouldShake }"
-      class="absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-10 shadow-lg"
+      class="absolute left-1/2 top-1/2 z-50 flex min-w-[320px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-7 shadow-lg lg:min-w-[420px] lg:p-10"
     >
       <div v-if="!isSignup" class="text-center">
         <p class="t3">Welcome!</p>
@@ -422,37 +533,6 @@ const handleLoginError = () => {
           <Cancle /> {{ er }}
         </p>
       </div>
-      <!-- <GoogleSignInButton
-        @success="handleLoginSuccess"
-        @error="handleLoginError"
-      ></GoogleSignInButton> -->
-      <!-- <div class="flex w-full justify-between gap-3">
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          A
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          B
-        </button>
-        <button
-          class="flex h-10 w-full items-center justify-center rounded-lg border-[1px] border-black/20"
-        >
-          C
-        </button>
-      </div>
-
-      <div class="flex w-full gap-2">
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-        <p class="b3 text-black/60">OR</p>
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-      </div> -->
 
       <div class="flex flex-col gap-3">
         <div class="flex gap-3">
@@ -707,10 +787,10 @@ const handleLoginError = () => {
               <p class="font-semibold">Join Event</p>
             </button>
             <button
-              @click="selectRole('Organization')"
+              @click="selectRole('Organizer')"
               class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
               :class="
-                selectedRole === 'Organization'
+                selectedRole === 'Organizer'
                   ? 'border-[2px] border-burgundy'
                   : 'border-[1px] border-black/20'
               "
@@ -732,27 +812,106 @@ const handleLoginError = () => {
         </div>
       </div>
 
-      <div v-if="!isSignup" class="flex items-center justify-between">
+      <!-- <div v-if="!isSignup" class="flex items-center justify-between">
         <div class="flex items-center gap-1">
           <input type="checkbox" />
           <p class="b2">Remember me</p>
         </div>
         <p class="b2 underline">Forgot password?</p>
-      </div>
+      </div> -->
       <button
         @click="handleSignin"
-        class="b1 flex w-full items-center justify-center rounded-lg bg-dark-grey py-2 text-white"
+        class="b1 mt-2 flex w-full items-center justify-center rounded-lg bg-dark-grey py-2 text-white"
       >
         <p>{{ isSignup ? 'Sign Up' : 'Sign in now' }}</p>
 
         <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
       </button>
 
-      <p class="b2 text-center">
-        {{ isSignup ? 'Already' : 'Don’t' }} have an account?
-        <button class="font-semibold" @click="changeToSignUp">
-          {{ isSignup ? 'Sign In' : 'Sign Up' }}
+      <div class="flex w-full gap-2">
+        <div
+          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+        ></div>
+        <p class="b3 text-black/60">OR</p>
+        <div
+          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+        ></div>
+      </div>
+      <div class="group relative h-full w-full">
+        <GoogleSignInButton
+          width="340px"
+          ux_mode="redirect"
+          class="b3 absolute right-0 w-max opacity-0"
+          @success="handleLoginSuccesses"
+          @error="handleLoginErrores"
+        ></GoogleSignInButton>
+        <button
+          class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-blue-700"
+        >
+          <Google class="fill-white" />
+          Continue with Google
         </button>
+      </div>
+      <div>
+        <p class="b2 text-center">
+          {{ isSignup ? 'Already' : 'Don’t' }} have an account?
+          <button class="font-semibold" @click="changeToSignUp">
+            {{ isSignup ? 'Sign In' : 'Sign Up' }}
+          </button>
+        </p>
+      </div>
+
+      <!-- <p v-if="userCredential" class="mt-4 text-sm text-green-600">
+        Login Success! Token: {{ userCredential }}
+      </p> -->
+    </div>
+  </div>
+  <div v-if="isSelectRolePopUp" class="fixed z-50 h-screen w-full">
+    <div
+      class="b2 absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col items-center justify-center gap-4 rounded-xl bg-white p-10 shadow-lg"
+    >
+      <p class="b2 text-center">Please select your role before continue</p>
+      <p class="b2 pb-2 text-center">What would you like to do?</p>
+      <div class="flex w-full justify-between gap-2">
+        <button
+          @click="selectRole('Attendee')"
+          class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+          :class="
+            selectedRole === 'Attendee'
+              ? 'border-[2px] border-burgundy'
+              : 'border-[1px] border-black/20'
+          "
+        >
+          <div
+            class="b3 absolute bg-white p-2 text-center opacity-0 duration-500 group-hover:opacity-100"
+          >
+            For users who want to explore and join existing events.
+          </div>
+          <p class="font-semibold">Join Event</p>
+        </button>
+        <button
+          @click="selectRole('Organizer')"
+          class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+          :class="
+            selectedRole === 'Organizer'
+              ? 'border-[2px] border-burgundy'
+              : 'border-[1px] border-black/20'
+          "
+        >
+          <div
+            class="b3 absolute bg-white p-2 text-center opacity-0 duration-500 group-hover:opacity-100"
+          >
+            For users who want to create and manage their own events.
+          </div>
+          <p class="font-semibold">Create event</p>
+        </button>
+      </div>
+      <BtnComp color="black" @click="handleSelectRole" text="submit" />
+      <p
+        v-if="!checkField['role'] && isClickSignBtn && isSignup"
+        class="b4 text-red-600"
+      >
+        {{ fieldErrorMessages['role'] }}
       </p>
     </div>
   </div>
