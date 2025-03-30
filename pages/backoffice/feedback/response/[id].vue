@@ -18,7 +18,8 @@ const feedbackData = ref<Feedback[]>([]);
 const questionData = ref<ExistingQuestion[]>([]);
 const filterFeedbackData = ref<Feedback[]>([]);
 const answerData = ref<GroupedAnswers>({});
-const isLoading = ref(true);
+const isLoading = useState('isLoading');
+
 const activeStar = ref();
 const rating = ref([5, 4, 3, 2, 1]);
 const adminData = ref<User | null>(null);
@@ -141,7 +142,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
+  <div class="flex w-screen bg-mist-grey lg:ml-80">
     <div
       v-if="isLoading"
       class="my-16 flex h-screen w-full items-center justify-center"

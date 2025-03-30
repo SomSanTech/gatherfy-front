@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
   />
   <!-- <Loader v-if="isLoading" /> -->
 
-  <div class="h-screen w-full bg-[#EEEEEE] lg:ml-80">
+  <div class="h-screen w-full bg-mist-grey lg:ml-80">
     <div
       class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-12"
     >

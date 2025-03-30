@@ -5,6 +5,7 @@ export const useAuth = () => {
   const profileData = useCookie('profileData');
   const isSessionTimeOuts = useState('isSessionTimeOut');
   const isUserSignInCookie = useCookie('is_user_sign_in');
+  // const isCookieConsent = useCookie('cookie_consent');
 
   const isClickOK = useState('isClickOk', () => false);
   const isHavePopupOpen = useState('isHavePopupOpen', () => false);
@@ -54,6 +55,7 @@ export const useAuth = () => {
     refreshToken.value = null;
     role.value = null;
     profileData.value = null;
+    // isCookieConsent.value = null;
     isUserSignInCookie.value = null;
     router.push('/').then(() => {
       window.location.reload();
@@ -66,6 +68,8 @@ export const useAuth = () => {
     role.value = null;
     profileData.value = null;
     isUserSignInCookie.value = null;
+    // isCookieConsent.value = null;
+
     isSessionTimeOuts.value = false;
     isHavePopupOpen.value = false;
 

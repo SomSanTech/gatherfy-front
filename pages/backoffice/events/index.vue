@@ -72,7 +72,7 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex w-screen bg-[#EEEEEE] lg:ml-80">
+  <div v-else class="flex w-screen bg-mist-grey lg:ml-80">
     <div class="bg-glass mx-5 mb-16 mt-32 h-fit w-full rounded-3xl lg:mx-20">
       <div class="p-5 lg:p-12">
         <div class="grid grid-cols-2">

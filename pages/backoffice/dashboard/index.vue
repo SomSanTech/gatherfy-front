@@ -507,7 +507,7 @@ watch(pieOfRegisChartRef, (newValue) => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="w-full bg-[#EEEEEE] pb-24">
+  <div v-else class="w-full bg-mist-grey pb-24">
     <div
       v-if="eventsData.length === 0"
       class="error-msg flex h-screen w-full items-center justify-center"

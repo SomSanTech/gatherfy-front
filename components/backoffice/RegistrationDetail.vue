@@ -18,7 +18,7 @@ const selectedEventTimeStyle = {
 };
 const statusStyle = {
   success: {
-    style: 'bg-[#16C098]/25 text-[#008767]',
+    style: 'bg-green-light/25 text-green-dark',
     text: 'Status has been updated',
   },
   failed: {

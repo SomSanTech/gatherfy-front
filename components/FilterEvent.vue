@@ -42,7 +42,7 @@ const updateDate = (newDate: Date) => {
 
 <template>
   <div
-    class="hidden h-fit w-fit flex-col gap-4 divide-y-[1px] divide-grey rounded-xl border border-black-1 bg-white p-4 lg:flex"
+    class="hidden h-fit w-fit flex-col gap-4 divide-y-[1px] divide-grey rounded-xl border border-dark bg-white p-4 lg:flex"
   >
     <div class="flex w-full flex-col gap-[9px]">
       <p class="b1">Tags</p>

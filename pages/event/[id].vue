@@ -224,9 +224,6 @@ watchEffect(() => {
 function removeWidthHeightAttributes(htmlString) {
   if (htmlString) return htmlString.replace(/\s(width|height)="\d+"/g, '');
 }
-function clearWidthHeightValues(htmlString) {
-  return htmlString.replace(/(width|height)="\d+"/g, '$1=""');
-}
 </script>
 <template>
   <CompleteModal
@@ -256,7 +253,7 @@ function clearWidthHeightValues(htmlString) {
               <img
                 :src="event?.image"
                 alt=""
-                class="detail-img h-full w-full object-cover"
+                class="detail-img h-full w-full object-cover lg:min-w-[320px]"
               />
             </div>
             <div class="flex w-fit flex-col justify-center gap-3">

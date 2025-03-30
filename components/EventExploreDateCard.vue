@@ -7,7 +7,7 @@ const props = defineProps<{
 
 <template>
   <div
-    class="group relative w-[320px] overflow-hidden rounded-xl shadow-lg duration-700 lg:min-w-[520px]"
+    class="group relative w-[320px] overflow-hidden rounded-xl shadow-lg duration-700 lg:w-[520px]"
   >
     <div class="group relative duration-700">
       <img
@@ -24,11 +24,7 @@ const props = defineProps<{
         <div class="flex gap-2 pt-2">
           <div v-for="tag in eventDetail?.tags" class="">
             <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
-              <button
-                class="b4 rounded-md bg-white/80 px-3 py-1 text-black shadow-md backdrop-blur-md hover:bg-white"
-              >
-                {{ tag.tag_title }}
-              </button>
+              <BtnComp :text="tag.tag_title" :is-bold="false" size="small" />
             </NuxtLink>
           </div>
         </div>
