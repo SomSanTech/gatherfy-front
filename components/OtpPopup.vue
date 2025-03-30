@@ -5,14 +5,12 @@ const otpLength = 6;
 const otpValues = ref<string[]>(Array(otpLength).fill(''));
 const otpInputs = ref<Array<HTMLInputElement | null>>([]);
 
-// ฟังก์ชันเปลี่ยนโฟกัสไปช่องถัดไป
 const handleInput = (index: number) => {
   if (otpValues.value[index] && index < otpLength - 1) {
     otpInputs.value[index + 1]?.focus();
   }
 };
 
-// ฟังก์ชันกด Backspace แล้วย้อนกลับไปช่องก่อนหน้า
 const handleBackspace = (index: number, event: KeyboardEvent) => {
   if (event.key === 'Backspace' && !otpValues.value[index] && index > 0) {
     otpInputs.value[index - 1]?.focus();
@@ -34,26 +32,28 @@ const verifyOTP = async () => {
     return;
   }
   if (response.status === 200) {
+    localStorage.setItem('isOTPPopup', 'false');
     isOTPPopup.value = false;
-    isSignup.value = !isSignup.value;
+    localStorage.removeItem('email');
+    isSignup.value = false;
     loginPopup.value = true;
+    otpValues.value = [];
   }
 };
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${minutes}:${secs < 10 ? '0' : ''}${secs}`; // แสดงรูปแบบ mm:ss
+  return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-const countdown = ref(300); // ⏳ เปลี่ยนจาก 30 เป็น 300 วินาที (5 นาที)
+const countdown = ref(300);
 const isResendDisabled = ref(true);
-let countdownInterval: number | null = null;
+let countdownInterval = null;
 
-// ฟังก์ชันเริ่มนับถอยหลัง
 const startCountdown = () => {
   isResendDisabled.value = true;
-  countdown.value = 300; // รีเซ็ตกลับไป 5 นาที
+  countdown.value = 300;
 
   countdownInterval = setInterval(() => {
     countdown.value--;
@@ -68,12 +68,11 @@ const resendOTP = async () => {
     const response = await useFetchCreateUpdate('v1/resend-otp', 'POST', {
       email: email.value,
     });
-    startCountdown(); // เริ่มนับถอยหลังใหม่
+    startCountdown();
   }
 };
 const isOTPPopup = useState('isOTPPopup');
 const email = ref();
-// Autofocus ช่องแรกเมื่อเปิด
 onMounted(() => {
   email.value = localStorage.getItem('email') || '';
   otpInputs.value[0]?.focus();
@@ -90,7 +89,7 @@ onMounted(() => {
       class="z-50 flex min-w-[420px] flex-col gap-4 rounded-xl bg-white p-8 shadow-lg"
     >
       <h2 class="text-center text-xl font-semibold">Enter OTP</h2>
-      <p class="text-center text-gray-600">We've sent an OTP to your phone.</p>
+      <p class="text-center text-gray-600">We've sent an OTP to your email</p>
 
       <div class="flex justify-center gap-2">
         <input
@@ -108,7 +107,7 @@ onMounted(() => {
 
       <button
         @click="verifyOTP"
-        class="mt-4 w-full rounded-lg bg-burgundy/80 p-2 text-white hover:bg-burgundy"
+        class="b3 mt-4 w-full rounded-lg bg-burgundy p-2 text-white hover:bg-burgundy-dark"
       >
         Verify OTP
       </button>

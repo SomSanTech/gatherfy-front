@@ -37,7 +37,7 @@ const autoGenerateSlug = ref('');
 const validateTagsInput = ref('');
 const statusStyle = {
   success: {
-    style: 'bg-[#16C098]/25 text-[#008767]',
+    style: 'bg-green-light/25 text-green-dark',
     text: 'Status has been updated',
   },
   failed: {
@@ -466,7 +466,7 @@ async function downloadReport() {
 </script>
 
 <template>
-  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
+  <div class="flex h-fit w-screen bg-mist-grey lg:ml-80">
     <div
       class="mx-5 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
@@ -483,7 +483,7 @@ async function downloadReport() {
           <div class="flex items-center justify-end gap-2">
             <button
               @click="downloadReport()"
-              class="b3 relative flex w-fit items-center gap-2 rounded-lg bg-[#16C098]/25 fill-[#008767] px-6 py-2 font-semibold text-[#008767] transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              class="b3 relative flex w-fit items-center gap-2 rounded-lg bg-green-light/25 fill-green-dark px-6 py-2 font-semibold text-green-dark transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
               <FileDownload class="h-5 w-5" />
               Download Report
@@ -799,7 +799,7 @@ async function downloadReport() {
     :class="
       saveAlert ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
     "
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-xl bg-[#16C098]/25 px-20 py-3 text-[#008767] duration-500"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-xl bg-green-light/25 px-20 py-3 text-green-dark duration-500"
     role="alert"
   >
     <p class="b2">Your change are saved</p>

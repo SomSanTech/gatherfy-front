@@ -12,12 +12,14 @@ const props = defineProps<{
     :class="`event-card shrink-0 drop-shadow-md duration-300 ${isVertical ? 'w-[150px] lg:w-[260px]' : 'w-[186px] hover:scale-105 hover:drop-shadow-2xl lg:w-[275px]'}`"
   >
     <div class="relative">
-      <button
+      <BtnComp
         v-if="new Date(eventDetail?.end_date).getTime() < new Date().getTime()"
-        class="event-card-tag b4 absolute left-2 top-2 z-10 rounded-md bg-burgundy/80 px-2 py-1 text-white backdrop-blur-lg"
-      >
-        Event Ended
-      </button>
+        text="Event Ended"
+        :is-bold="false"
+        size="small"
+        color="red"
+        class="absolute left-2 top-2 z-10"
+      />
       <img
         :src="eventDetail?.image"
         alt=""
@@ -27,11 +29,12 @@ const props = defineProps<{
       <div class="absolute bottom-2 left-2 flex gap-1">
         <div v-for="tag in eventDetail?.tags">
           <NuxtLink :to="{ name: 'events', query: { tag: tag.tag_title } }">
-            <button
-              class="event-card-tag b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
-            >
-              {{ tag.tag_title }}
-            </button>
+            <BtnComp
+              :text="tag.tag_title"
+              :is-bold="false"
+              size="mini"
+              class=""
+            />
           </NuxtLink>
         </div>
       </div>

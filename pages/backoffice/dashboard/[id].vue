@@ -515,7 +515,7 @@ watch(selectedViewOption, (newValue) => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
+  <div v-else class="flex h-full w-screen bg-mist-grey lg:ml-80">
     <div class="my-24 flex w-full flex-col gap-4 px-5 lg:mx-20 lg:px-0">
       <NuxtLink
         to="/backoffice/dashboard"

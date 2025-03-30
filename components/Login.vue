@@ -119,7 +119,6 @@ const selectedGender = ref('female');
 const birthday = ref();
 const username = ref('');
 const password = ref('');
-const userProfile = useState('userProfile');
 const signupData = ref({
   firstname: '',
   lastname: '',
@@ -300,7 +299,6 @@ const isUserSignIn = useState('isUserSignIn');
 const isOTPPopup = useState('isOTPPopup');
 const isSignInCookie = useCookie('is_user_sign_in');
 
-const handleAuthen = async () => {};
 const signUpErrorResponse = ref();
 const userRegisHistory = useState('userRegisHistory');
 
@@ -435,9 +433,12 @@ const handleSignin = async () => {
         // changeToSignUp();
         password.value = '';
         username.value = '';
-        isAlreadySignup.value = true;
         // isUserSignIn.value = true
+
         isOTPPopup.value = true;
+
+        localStorage.setItem('isOTPPopup', 'true');
+        isAlreadySignup.value = true;
         loginPopup.value = false;
         isHavePopupOpen.value = false;
       }
@@ -504,10 +505,10 @@ watch(
     :title="state.text"
     @complete-action="handleCompleteGGSignUp"
   />
-  <div v-if="loginPopup" class="fixed z-50 h-screen w-full">
+  <div v-if="loginPopup" class="fixed top-0 z-50 w-full">
     <div
-      :class="{ 'animate-shake': shouldShake }"
-      class="absolute left-1/2 top-1/2 z-50 flex min-w-[320px] -translate-x-1/2 -translate-y-2/3 flex-col gap-4 rounded-xl bg-white p-7 shadow-lg lg:min-w-[420px] lg:p-10"
+      :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-10' : 'top-1/2 translate-y-1/2'}`"
+      class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-7 shadow-lg lg:min-w-[420px] lg:p-10"
     >
       <button @click="handleLoginPopup" class="absolute right-5 top-5">
         <Cancle />
@@ -829,7 +830,7 @@ watch(
         <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
       </button>
 
-      <div class="flex w-full gap-2">
+      <div v-if="!isSignup" class="flex w-full gap-2">
         <div
           class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
         ></div>
@@ -838,7 +839,7 @@ watch(
           class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
         ></div>
       </div>
-      <div class="group relative h-full w-full">
+      <div v-if="!isSignup" class="group relative h-full w-full">
         <GoogleSignInButton
           width="340px"
           ux_mode="redirect"
@@ -847,7 +848,7 @@ watch(
           @error="handleLoginErrores"
         ></GoogleSignInButton>
         <button
-          class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-blue-700"
+          class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-burgundy"
         >
           <Google class="fill-white" />
           Continue with Google

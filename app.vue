@@ -8,7 +8,14 @@ useHead({
   link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
 });
 const isLoggingOut = useState('isLoggingOut', () => false);
-const isOTPPopup = useState('isOTPPopup');
+const isOTPPopup = useState('isOTPPopup', () => {
+  // Check if running on the client-side
+  if (process.client) {
+    return localStorage.getItem('isOTPPopup') === 'true';
+  }
+  return false; // Default value for SSR
+});
+
 const route = useRoute();
 const isBackoffice = ref(route.fullPath.includes('backoffice'));
 const isSessionTimeOuts = useState('isSessionTimeOut');
@@ -17,16 +24,23 @@ const isSignInCookie = useCookie('is_user_sign_in');
 const isHavePopupOpen = useState('isHavePopupOpen', () => false);
 const isClickOK = useState('isClickOk');
 const isLoading = useState('isLoading', () => true);
+// const showBanner = useState('showCookieBanner')
+const { state, showPopup } = usePopup();
 
 onMounted(() => {
+  if (process.client) {
+    isOTPPopup.value = localStorage.getItem('isOTPPopup') === 'true';
+  }
   const observer = new MutationObserver(() => {
     if (isLoggingOut.value) return;
     if (!isClickOK.value) {
       if (
-        !document.cookie.includes('refreshToken=') &&
+        !document.cookie.includes('refreshToken') &&
         isSignInCookie.value === 'yes'
       ) {
+        showPopup('Your session has expired. Please sign in again.', 'warn');
         isSessionTimeOuts.value = true;
+        state.isVisible = true;
         isHavePopupOpen.value = true;
       }
     }
@@ -58,13 +72,24 @@ watch(
 </script>
 <template>
   <div class="relative mx-auto w-full">
-    <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-black/20' : ''"></div>
+    <AcceptCookie />
+
+    <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-dark/20' : ''"></div>
     <Nav v-if="!isBackoffice && !isLoading" class="fixed top-0 z-40 w-full" />
     <Login />
     <OtpPopup />
-    <div
+    <CompleteModal
+      :isShowCompleteModal="state.isVisible"
+      :title="state.text"
+      :status="state.status"
+      @complete-action="
+        handleSessionExpire();
+        state.isVisible = false;
+      "
+    />
+    <!-- <div
       class="absolute left-1/2 top-[600px] z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-[100%] flex-col gap-4 rounded-xl bg-white p-10 text-center shadow-lg"
-      v-if="isSessionTimeOuts"
+      v-if="true"
     >
       <p class="b1">Session expired pls sign in again</p>
       <button
@@ -73,7 +98,7 @@ watch(
       >
         OK
       </button>
-    </div>
+    </div> -->
     <div>
       <NuxtLayout>
         <NuxtPage />

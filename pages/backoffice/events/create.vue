@@ -85,7 +85,7 @@ const validateInputErrText = ref({
 
 const statusStyle = {
   success: {
-    style: 'bg-[#16C098]/25 text-[#008767]',
+    style: 'bg-green-light/25 text-green-dark',
     text: 'Status has been updated',
   },
   failed: {
@@ -319,7 +319,7 @@ onMounted(async () => {
     :title="state.text"
     @complete-action="state.isVisible = false"
   />
-  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
+  <div class="flex h-fit w-screen bg-mist-grey lg:ml-80">
     <div
       class="mx-5 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
@@ -764,7 +764,7 @@ onMounted(async () => {
                 <input
                   type="submit"
                   value="Save"
-                  class="b3 w-fit rounded-md bg-[#16C098]/25 px-6 py-2 font-semibold text-[#008767] duration-200"
+                  class="b3 w-fit rounded-md bg-green-light/25 px-6 py-2 font-semibold text-green-dark duration-200"
                 />
               </div>
             </div>

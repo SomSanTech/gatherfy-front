@@ -8,7 +8,6 @@ const router = useRouter();
 const searchKw = ref('');
 const loginPopup = useState('loginPopup');
 
-const isUserSignIn = useState('isUserSignIn');
 const isOpenProfilePopup = ref(false);
 const isHavePopupOpen = useState('isHavePopupOpen');
 function openLoginPopup() {

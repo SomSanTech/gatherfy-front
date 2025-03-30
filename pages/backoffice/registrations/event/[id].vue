@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex w-screen bg-[#EEEEEE] lg:ml-80">
+  <div class="flex w-screen bg-mist-grey lg:ml-80">
     <div
       class="mx-4 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >

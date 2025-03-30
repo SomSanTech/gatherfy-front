@@ -13,13 +13,18 @@ export default {
     extend: {
       colors: {
         burgundy: '#D71515',
+        'burgundy-dark': '#A61010',
+        'red-light': '#F25C5C',
+        'bright-blue': '#0085DB',
+        'green-light': '#16C098',
+        'green-dark': '#008767',
         'light-grey': '#F6F6F6',
+        'mist-grey': '#EEEEEE',
         grey: '#D0D0D0 ',
-        'dark-grey': '#3A393D ',
-        'black-1': '#1F1E22',
-        'ghost-white': '#fafbff',
-        'cool-gray': '#9197B3',
         'lavender-gray': '#B5B7C0',
+        'cool-gray': '#9197B3',
+        'dark-grey': '#3A393D ',
+        dark: '#1F1E22',
       },
       animation: {
         shake: 'shake 0.5s ease-in-out',

@@ -20,7 +20,8 @@ definePageMeta({
 const route = useRoute();
 const param = route.params.id;
 const error = useError();
-const isLoading = ref(true);
+const isLoading = useState('isLoading');
+
 const event = ref();
 const isChangeStatusComplete = ref();
 const indexDeleteQuestion = ref();
@@ -51,7 +52,7 @@ const selectedEventTimeStyle = {
 };
 const statusStyle = {
   success: {
-    style: 'bg-[#16C098]/25 text-[#008767]',
+    style: 'bg-green-light/25 text-green-dark',
     text: 'Status has been updated',
   },
   failed: {
@@ -345,7 +346,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
+  <div class="flex h-fit w-screen bg-mist-grey lg:ml-80">
     <div
       class="mx-4 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
@@ -506,7 +507,7 @@ watchEffect(() => {
             </div>
             <div
               @click="addField"
-              class="b3 my-8 flex cursor-pointer items-center justify-center gap-3 rounded-md bg-[#0085DB]/15 px-6 py-2 font-semibold text-[#0085DB] duration-150 hover:bg-[#0085DB]/75 hover:text-white"
+              class="b3 my-8 flex cursor-pointer items-center justify-center gap-3 rounded-md bg-bright-blue/15 px-6 py-2 font-semibold text-bright-blue duration-150 hover:bg-bright-blue/75 hover:text-white"
             >
               <p>Add Question</p>
               <BubbleQuestion class="b1" />
@@ -543,7 +544,7 @@ watchEffect(() => {
     :class="
       saveCompleted ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
     "
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-xl bg-[#16C098]/25 px-20 py-3 text-[#008767] duration-500"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-xl bg-green-light/25 px-20 py-3 text-green-dark duration-500"
     role="alert"
   >
     <p class="b2">Your change are saved</p>

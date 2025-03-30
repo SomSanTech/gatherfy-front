@@ -24,12 +24,13 @@ const goBack = () => {
         <p class="error-text pb-4 pl-4 font-['Poppins'] text-2xl">
           The page you are looking for cannot be found
         </p>
-        <button
+        <BtnComp
           @click="goBack"
-          class="ml-4 mt-10 animate-bounce rounded-md bg-burgundy px-4 py-1 font-['Poppins'] text-xl text-white"
-        >
-          BACK TO HOME
-        </button>
+          text="BACK TO HOME"
+          color="red"
+          :is-bold="false"
+          class="ml-4 animate-bounce"
+        />
       </div>
     </div>
   </NuxtLayout>
