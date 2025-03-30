@@ -5,7 +5,7 @@ useHead({
   script: [
     { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
   ],
-  link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+  link: [{ rel: 'icon', type: 'image/x-icon', href: '/us1/favicon.ico' }],
 });
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup', () => {
