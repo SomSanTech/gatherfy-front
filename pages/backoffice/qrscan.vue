@@ -191,7 +191,6 @@ onBeforeUnmount(() => {
       <div class="bg-glass mb-5 h-2/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
-          {{ selectedOption }}
           <div class="flex items-center gap-3">
             <label for="dropdown" class="b2 font-semibold">Select Event </label>
             <select

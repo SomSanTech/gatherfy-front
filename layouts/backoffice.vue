@@ -5,7 +5,7 @@
     <SideBar />
     <slot />
   </div> -->
-  <div class="relative flex">
+  <div class="relative flex min-h-screen">
     <!-- Burger Button -->
     <button
       @click="isSidebarOpen = !isSidebarOpen"

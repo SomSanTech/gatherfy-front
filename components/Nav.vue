@@ -81,7 +81,7 @@ const profileData = useCookie<UserProfile>('profileData');
               v-if="profileData?.users_image"
               :src="profileData?.users_image"
               alt=""
-              class="signed-profile h-8 w-8 rounded-full"
+              class="signed-profile h-8 w-8 rounded-full object-cover"
             />
             <div
               v-else

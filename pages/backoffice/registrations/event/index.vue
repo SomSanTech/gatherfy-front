@@ -35,9 +35,9 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80 lg:h-screen">
+  <div v-else class="flex w-screen bg-[#EEEEEE] lg:ml-80">
     <div
-      class="mx-4 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
+      class="mx-4 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
       <div class="p-3 lg:p-12">
         <h1 class="t1">Registrations by event</h1>

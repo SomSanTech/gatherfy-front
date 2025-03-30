@@ -53,7 +53,7 @@ const props = defineProps<{
       >
         <PenEdit />
       </NuxtLink>
-      <Trash />
+      <!-- <Trash /> -->
     </div>
   </td>
 </template>
