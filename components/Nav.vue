@@ -103,7 +103,7 @@ const profileData = useCookie<UserProfile>('profileData');
                 @click.stop
                 class="profile-btn flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
               >
-                <UserProfile class="h-5 w-5 text-gray-600" />
+                <UserProfile class="h-5 w-5 fill-gray-600 text-gray-600" />
                 <span>My Profile</span>
               </button>
             </NuxtLink>
@@ -112,7 +112,7 @@ const profileData = useCookie<UserProfile>('profileData');
                 @click.stop
                 class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
               >
-                <Ticket class="h-5 w-5 text-gray-600" />
+                <Ticket class="h-5 w-5 stroke-gray-600 text-gray-600" />
                 <span>My Tickets</span>
               </button>
             </NuxtLink>
@@ -121,7 +121,7 @@ const profileData = useCookie<UserProfile>('profileData');
                 @click.stop
                 class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
               >
-                <Contact class="h-5 w-5 text-gray-600" />
+                <Contact class="h-5 w-5 fill-gray-600 text-gray-600" />
                 <span>My Contact</span>
               </button>
             </NuxtLink>
@@ -134,7 +134,7 @@ const profileData = useCookie<UserProfile>('profileData');
                 @click.stop
                 class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
               >
-                <Bookmark class="h-5 w-5 text-gray-600" />
+                <Bookmark class="h-5 w-5 fill-gray-600 text-gray-600" />
                 <span>Manage Event</span>
               </button>
             </NuxtLink>
