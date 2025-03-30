@@ -47,13 +47,13 @@ const formatTime = (seconds: number) => {
   return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-const countdown = ref(300);
+const countdown = ref(180);
 const isResendDisabled = ref(true);
 let countdownInterval = null;
 
 const startCountdown = () => {
   isResendDisabled.value = true;
-  countdown.value = 300;
+  countdown.value = 180;
 
   countdownInterval = setInterval(() => {
     countdown.value--;
