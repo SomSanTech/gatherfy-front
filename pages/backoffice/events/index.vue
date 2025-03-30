@@ -72,8 +72,8 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex h-full w-screen bg-[#EEEEEE] lg:ml-80">
-    <div class="bg-glass mx-5 mb-16 mt-32 w-full rounded-3xl lg:mx-20">
+  <div v-else class="flex w-screen bg-[#EEEEEE] lg:ml-80">
+    <div class="bg-glass mx-5 mb-16 mt-32 h-fit w-full rounded-3xl lg:mx-20">
       <div class="p-5 lg:p-12">
         <div class="grid grid-cols-2">
           <h1 class="t1">Event list</h1>

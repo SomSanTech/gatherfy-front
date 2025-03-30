@@ -18,7 +18,7 @@ const fetchData = async () => {
     'GET',
     accessToken.value
   );
-  registrationsData.value = fetchedData.data || [];
+  if ('data' in fetchedData) registrationsData.value = fetchedData.data || [];
   // registrationsData.value =  [];
 };
 
@@ -38,9 +38,11 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="ml-80 flex h-full w-screen bg-[#EEEEEE]">
-    <div class="mx-20 mb-16 mt-32 w-full rounded-3xl bg-white drop-shadow-lg">
-      <div class="p-12">
+  <div v-else class="flex w-screen bg-[#EEEEEE] lg:ml-80">
+    <div
+      class="mx-3 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
+    >
+      <div class="p-3 lg:p-12">
         <h1 class="back-regis-title t1">All Registrations</h1>
 
         <div
@@ -92,7 +94,10 @@ onMounted(() => {
               v-for="registration in registrationsData"
               class="regis-list border-default-300 cursor-default border-b transition-colors"
             >
-              <RegistrationList :registration="registration" />
+              <RegistrationList
+                @deleteRegis="handleDeleteRegis"
+                :registration="registration"
+              />
             </tr>
           </tbody>
         </table>

@@ -564,7 +564,7 @@ watch(pieOfRegisChartRef, (newValue) => {
                 <span class="text-8xl"> {{ eventsData.length }}</span> Event
               </p>
             </div>
-            <div class="bg-glass row-span-2 rounded-[20px] p-12">
+            <div class="bg-glass row-span-2 h-full rounded-[20px] p-12">
               <h1 class="b1 pb-2 font-semibold">
                 Registration and Check-in Proportion
               </h1>
