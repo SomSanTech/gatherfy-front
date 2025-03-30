@@ -84,12 +84,13 @@ const profileData = useCookie<UserProfile>('profileData');
             />
             <div
               v-else
-              class="flex h-full w-full items-center justify-center rounded-full bg-black/80"
+              class="flex h-full w-full items-center justify-center rounded-full bg-grey"
             >
-              <img
+              <!-- <img
                 src="/favicon.ico"
-                class="relative h-5 w-5 shrink-0 rounded-full object-cover"
-              />
+                class="relativerounded-full object-cover"
+              /> -->
+              <UserProfileImg class="h-3 w-3 shrink-0" />
             </div>
           </div>
           <div

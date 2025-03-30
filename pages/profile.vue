@@ -560,12 +560,9 @@ onMounted(async () => {
 
           <div
             v-if="!previewImage && !userProfile?.users_image"
-            class="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-black/90 object-cover lg:h-40 lg:w-40"
+            class="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-grey object-cover lg:h-40 lg:w-40"
           >
-            <img
-              src="/favicon.ico"
-              class="relative h-28 w-28 shrink-0 rounded-full object-cover"
-            />
+            <UserProfileImg class="h-5 w-5 shrink-0" />
           </div>
           <img
             v-if="previewImage"

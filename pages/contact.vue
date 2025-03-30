@@ -221,12 +221,9 @@ onMounted(async () => {
             />
             <div
               v-else
-              class="flex h-[500px] w-full min-w-[220px] items-center justify-center bg-black/90 lg:min-w-[280px]"
+              class="flex h-[500px] w-full min-w-[220px] items-center justify-center bg-grey lg:min-w-[280px]"
             >
-              <img
-                src="/favicon.ico"
-                class="relative h-60 w-60 shrink-0 object-cover"
-              />
+              <UserProfileImg class="h-40 w-40 shrink-0" />
             </div>
             <div class="mask-gradient-profile"></div>
             <div class="mask-gradient-profile"></div>
@@ -280,7 +277,7 @@ onMounted(async () => {
               <div class="mt-3 w-full">
                 <button
                   @click="handleShareContact"
-                  class="b3 w-full rounded-lg bg-white px-4 py-2 text-black hover:bg-blue-600"
+                  class="b3 w-full rounded-lg bg-white px-4 py-2 text-black hover:bg-burgundy"
                 >
                   Share contact
                 </button>
