@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   app: {
     baseURL: process.env.NUXT_BASE_URL,
     head: {
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/us1/favicon.ico' }],
     },
   },
 
