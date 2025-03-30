@@ -843,16 +843,16 @@ watch(
         <GoogleSignInButton
           width="340px"
           ux_mode="redirect"
-          class="b3 absolute right-0 w-max opacity-0"
+          class="b3 absolute right-0 w-max opacity-100"
           @success="handleLoginSuccesses"
           @error="handleLoginErrores"
         ></GoogleSignInButton>
-        <button
+        <!-- <button
           class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-burgundy"
         >
           <Google class="fill-white" />
           Continue with Google
-        </button>
+        </button> -->
       </div>
       <div>
         <p class="b2 text-center">
