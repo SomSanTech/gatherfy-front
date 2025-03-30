@@ -26,8 +26,8 @@ const route = useRoute();
           @click.stop
           :class="
             route.fullPath.includes('ticket')
-              ? 'bg-burgundy fill-white text-white'
-              : 'hover:bg-gray-100'
+              ? 'bg-burgundy fill-white stroke-white text-white'
+              : 'stroke-gray-600 hover:bg-gray-100'
           "
           class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all"
         >

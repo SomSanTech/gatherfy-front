@@ -33,9 +33,11 @@ watchEffect(() => {
         <NuxtLink to="/">
           <div
             :class="
-              route.fullPath.includes('Home') ? 'bg-burgundy text-white' : ''
+              route.fullPath.includes('Home')
+                ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
             "
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+            class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <Home class="t3" />
             <p class="b2 font-medium">Home</p>
@@ -45,10 +47,10 @@ watchEffect(() => {
           <div
             :class="
               route.fullPath.includes('dashboard')
-                ? 'bg-burgundy text-white'
-                : ''
+                ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
             "
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+            class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <Dashboard class="t3" />
             <p class="b2 font-medium">Dashboard</p>
@@ -57,9 +59,11 @@ watchEffect(() => {
         <NuxtLink to="/backoffice/events">
           <div
             :class="
-              route.fullPath.includes('events') ? 'bg-burgundy text-white' : ''
+              route.fullPath.includes('events')
+                ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
             "
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+            class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <Calendar class="t3" />
             <p class="b2 font-medium">Events</p>
@@ -114,15 +118,15 @@ watchEffect(() => {
             :class="{ hidden: !isOpen }"
             role="region"
           >
-            <div class="ps-2 pt-2">
+            <div class="flex flex-col gap-2 ps-2 pt-2">
               <NuxtLink to="/backoffice/registrations/event">
                 <div
                   :class="
                     route.fullPath === '/backoffice/registrations/event'
-                      ? 'bg-burgundy text-white'
-                      : ''
+                      ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                      : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
                   "
-                  class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
+                  class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm duration-200"
                 >
                   <EventRegis class="t3" />
                   <p class="b2 font-medium">Event Registration</p>
@@ -132,10 +136,10 @@ watchEffect(() => {
                 <div
                   :class="
                     route.fullPath === '/backoffice/registrations'
-                      ? 'bg-burgundy text-white'
-                      : ''
+                      ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                      : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
                   "
-                  class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm text-gray-600 hover:bg-gray-100"
+                  class="flex items-center gap-x-3.5 rounded-lg px-2.5 py-3 text-sm duration-200"
                 >
                   <User class="t3" />
                   <p class="b2 font-medium">All Registration</p>
@@ -148,10 +152,10 @@ watchEffect(() => {
           <div
             :class="
               route.fullPath.includes('feedback')
-                ? 'bg-burgundy text-white'
-                : ''
+                ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
             "
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+            class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <Feedback class="t3" />
             <p class="b2 font-medium">Feedback</p>
@@ -160,27 +164,16 @@ watchEffect(() => {
         <NuxtLink to="/backoffice/qrscan">
           <div
             :class="
-              route.fullPath.includes('qrscan') ? 'bg-burgundy text-white' : ''
+              route.fullPath.includes('qrscan')
+                ? 'bg-burgundy fill-white text-white hover:fill-black hover:text-black'
+                : 'fill-gray-600 text-gray-600 hover:bg-burgundy hover:fill-white hover:text-white'
             "
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
+            class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <QrcodeScan class="t3" />
             <p class="b2 font-medium">Scan QR Code</p>
           </div>
         </NuxtLink>
-        <!-- <div class="b3">General</div>
-        <NuxtLink
-          :to="{
-            name: `backoffice-feedback-notification`,
-          }"
-        >
-          <div
-            class="flex items-center gap-3 rounded-lg p-4 px-2 text-gray-600 duration-200 hover:bg-burgundy hover:text-white"
-          >
-            <Feedback class="t3" />
-            <p class="b2 font-medium">Feedback</p>
-          </div>
-        </NuxtLink> -->
       </div>
     </div>
 
