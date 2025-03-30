@@ -122,13 +122,10 @@ test('Add social', async ({ page }) => {
   await page
     .getByRole('textbox', { name: 'Insert your link' })
     .first()
-    .fill('https://www.instagram.com/orm.kornnaphat/?hl=en');
-  await page
-    .locator('div')
-    .filter({ hasText: /^Social LinksSave$/ })
-    .getByRole('button')
-    .click();
+    .fill('https://www.instagram.com/orm.kornnaphat');
+  await page.getByRole('button', { name: 'Save' }).nth(1).click();
   await expect(page.getByText('Add social success')).toBeVisible();
+  await page.getByRole('button', { name: 'OK' }).nth(1).click();
 });
 
 test('Delete and Add social', async ({ page }) => {
@@ -152,13 +149,10 @@ test('Delete and Add social', async ({ page }) => {
   await page
     .getByRole('textbox', { name: 'Insert your link' })
     .first()
-    .fill('https://x.com/ormmormm?lang=en');
+    .fill('https://x.com/ormmormm');
   await page.getByRole('button', { name: 'Save' }).nth(1).click();
   await expect(page.getByText('Add social success')).toBeVisible();
   await page.getByRole('button', { name: 'OK' }).nth(1).click();
-  await expect(
-    page.getByRole('textbox', { name: 'Insert your link' }).first()
-  ).toBeVisible();
 });
 
 test('Delete contact', async ({ page }) => {

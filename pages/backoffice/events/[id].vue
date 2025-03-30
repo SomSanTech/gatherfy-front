@@ -242,12 +242,16 @@ const fetchEventEdit = async () => {
           accessToken.value
         );
         dataDTO.event_image = uploadFileName.value;
-        await useFetchUpload(
+        const uploadThumbnailRes = await useFetchUpload(
           `v1/files/upload`,
           fileToUpload.value,
           'thumbnails',
           accessToken.value
         );
+
+        if ('fileName' in uploadThumbnailRes) {
+          dataDTO.event_image = uploadThumbnailRes.fileName;
+        }
       } else {
         dataDTO.event_image = currentFileName;
       }

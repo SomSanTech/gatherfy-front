@@ -211,13 +211,16 @@ const editProfile = async () => {
             'DELETE',
             accessToken.value
           );
-          userProfileEdited.value.image = uploadFileName.value;
-          await useFetchUpload(
+          const uploadProfileResponse = await useFetchUpload(
             `v1/files/upload`,
             fileToUpload.value,
             'profiles',
             accessToken.value
           );
+
+          if ('fileName' in uploadProfileResponse) {
+            userProfileEdited.value.image = uploadProfileResponse.fileName;
+          }
         } else {
           userProfileEdited.value.image = currentFileName;
         }

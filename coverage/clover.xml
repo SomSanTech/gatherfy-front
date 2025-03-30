@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1743279552884" clover="3.2.0">
-  <project timestamp="1743279552884" name="All files">
+<coverage generated="1743282006997" clover="3.2.0">
+  <project timestamp="1743282006997" name="All files">
     <metrics statements="24" coveredstatements="14" conditionals="12" coveredconditionals="5" methods="2" coveredmethods="1" elements="38" coveredelements="20" complexity="0" loc="24" ncloc="24" packages="1" files="1" classes="1"/>
     <file name="useFetchData.ts" path="D:\me\vs-project\gatherfy-front\composables\useFetchData.ts">
       <metrics statements="24" coveredstatements="14" conditionals="12" coveredconditionals="5" methods="2" coveredmethods="1"/>

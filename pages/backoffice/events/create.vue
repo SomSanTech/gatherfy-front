@@ -122,6 +122,7 @@ async function fetchData() {
     tags.value = fetchedTags.data || [];
   }
 }
+const { state, showPopup } = usePopup();
 
 async function fetchEventCreate() {
   const formattedTags = getFormattedTags(selectedTags.value);
@@ -129,28 +130,52 @@ async function fetchEventCreate() {
   concatDateTime();
 
   if (!validateForm()) {
-    event.value.event_image = uploadFileName.value;
-    const fetchedData = await useFetchWithAuth(
-      `v2/backoffice/events`,
-      'POST',
-      accessToken.value,
-      event.value
+    const uploadThumbnailRes = await useFetchUpload(
+      `v1/files/upload`,
+      fileToUpload.value,
+      'thumbnails',
+      accessToken.value
     );
-    let fetchedUpload;
 
-    if (fetchedData.status === 200) {
-      fetchedUpload = await useFetchUpload(
-        `v1/files/upload`,
-        fileToUpload.value,
-        'thumbnails',
-        accessToken.value
+    if ('fileName' in uploadThumbnailRes) {
+      event.value.event_image = uploadThumbnailRes.fileName;
+
+      const fetchedData = await useFetchWithAuth(
+        `v2/backoffice/events`,
+        'POST',
+        accessToken.value,
+        event.value
       );
-    }
-    if (fetchedData.data && fetchedUpload) {
-      router.push('/backoffice/events');
+      if (fetchedData.status === 200) {
+        router.push('/backoffice/events');
+      } else {
+        isChangeStatusComplete.value = false;
+      }
     } else {
-      isChangeStatusComplete.value = false;
+      showPopup('Upload thumnail fail try again', 'error');
     }
+    // event.value.event_image = uploadFileName.value;
+    // const fetchedData = await useFetchWithAuth(
+    //   `v2/backoffice/events`,
+    //   'POST',
+    //   accessToken.value,
+    //   event.value
+    // );
+    // let fetchedUpload;
+
+    // if (fetchedData.status === 200) {
+    //   fetchedUpload = await useFetchUpload(
+    //     `v1/files/upload`,
+    //     fileToUpload.value,
+    //     'thumbnails',
+    //     accessToken.value
+    //   );
+    // }
+    // if (fetchedData.data && fetchedUpload) {
+    //   router.push('/backoffice/events');
+    // } else {
+    //   isChangeStatusComplete.value = false;
+    // }
   } else {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -289,6 +314,11 @@ onMounted(async () => {
 </script>
 
 <template>
+  <CompleteModal
+    :isShowCompleteModal="state.isVisible"
+    :title="state.text"
+    @complete-action="state.isVisible = false"
+  />
   <div class="flex h-fit w-screen bg-[#EEEEEE] lg:ml-80">
     <div
       class="mx-5 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
@@ -427,8 +457,8 @@ onMounted(async () => {
                       <Cancle
                         class="m-1 rounded-full duration-150 hover:bg-burgundy hover:text-white"
                         @click="
-                          onDeleteSelectedTag(index),
-                            (isDropdownVisible = false)
+                          (onDeleteSelectedTag(index),
+                          (isDropdownVisible = false))
                         "
                       />
                     </div>
