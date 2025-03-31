@@ -64,7 +64,6 @@ test('Edit user profile', async ({ page }) => {
   await expect(page.locator('[id="__nuxt"]')).toContainText(
     'Update profile success'
   );
-  await page.getByRole('button', { name: 'OK' }).nth(1).click();
 });
 
 test('Change password fail', async ({ page }) => {
@@ -125,7 +124,6 @@ test('Add social', async ({ page }) => {
     .fill('https://www.instagram.com/orm.kornnaphat');
   await page.getByRole('button', { name: 'Save' }).nth(1).click();
   await expect(page.getByText('Add social success')).toBeVisible();
-  await page.getByRole('button', { name: 'OK' }).nth(1).click();
 });
 
 test('Delete and Add social', async ({ page }) => {
@@ -152,7 +150,6 @@ test('Delete and Add social', async ({ page }) => {
     .fill('https://x.com/ormmormm');
   await page.getByRole('button', { name: 'Save' }).nth(1).click();
   await expect(page.getByText('Add social success')).toBeVisible();
-  await page.getByRole('button', { name: 'OK' }).nth(1).click();
 });
 
 test('Delete contact', async ({ page }) => {
