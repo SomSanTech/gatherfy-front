@@ -491,12 +491,6 @@ watch(
   },
   { immediate: true }
 );
-
-// interface CredentialResponse {
-//   credential: string;
-//   select_by: string;
-// }
-// const userCredential = ref<string | null>(null);
 </script>
 
 <template>
@@ -508,7 +502,7 @@ watch(
   <div v-if="loginPopup" class="fixed top-0 z-50 w-full">
     <div
       :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-10' : 'top-1/2 translate-y-1/2'}`"
-      class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-7 shadow-lg lg:min-w-[420px] lg:p-10"
+      class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-7 shadow-lg lg:min-w-[320px] lg:p-10"
     >
       <button @click="handleLoginPopup" class="absolute right-5 top-5">
         <Cancle />
@@ -839,11 +833,11 @@ watch(
           class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
         ></div>
       </div>
-      <div v-if="!isSignup" class="group relative h-full w-full">
+      <div v-if="!isSignup" class="h-full w-full">
         <GoogleSignInButton
-          width="340px"
+          width="300"
           ux_mode="redirect"
-          class="b3 absolute right-0 w-max opacity-100"
+          class="flex min-w-full items-center justify-center"
           @success="handleLoginSuccesses"
           @error="handleLoginErrores"
         ></GoogleSignInButton>
@@ -862,10 +856,6 @@ watch(
           </button>
         </p>
       </div>
-
-      <!-- <p v-if="userCredential" class="mt-4 text-sm text-green-600">
-        Login Success! Token: {{ userCredential }}
-      </p> -->
     </div>
   </div>
   <div v-if="isSelectRolePopUp" class="fixed z-50 h-screen w-full">
