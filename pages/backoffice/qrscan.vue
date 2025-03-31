@@ -134,6 +134,13 @@ onMounted(async () => {
             if (response.status === 401) {
               showPopup('QRCODE time out', 'error');
             } else {
+              const selectedEvent = eventsData.value.find(
+                (event: any) => event.eventName === selectedOption.value
+              );
+              if (selectedEvent) {
+                selectedEventId.value = selectedEvent.eventId;
+                await fetchRegisListData(selectedEvent.eventId);
+              }
               showPopup('Checked in', 'complete');
             }
           } else {

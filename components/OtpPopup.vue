@@ -18,6 +18,7 @@ const handleBackspace = (index: number, event: KeyboardEvent) => {
 };
 const loginPopup = useState('loginPopup');
 
+const { state, showPopup } = usePopup();
 const isSignup = useState('isSignup');
 
 const verifyOTP = async () => {
@@ -36,7 +37,8 @@ const verifyOTP = async () => {
     isOTPPopup.value = false;
     localStorage.removeItem('email');
     isSignup.value = false;
-    loginPopup.value = true;
+    // loginPopup.value = true;
+    showPopup('Verify OTP success please Sign in', 'complete');
     otpValues.value = [];
   }
 };
@@ -71,6 +73,7 @@ const resendOTP = async () => {
     startCountdown();
   }
 };
+
 const isOTPPopup = useState('isOTPPopup');
 const email = ref();
 onMounted(() => {
@@ -81,6 +84,15 @@ onMounted(() => {
 </script>
 
 <template>
+  <CompleteModal
+    :isShowCompleteModal="state.isVisible"
+    :title="state.text"
+    :status="state.status"
+    @complete-action="
+      state.isVisible = false;
+      loginPopup = true;
+    "
+  />
   <div
     v-if="isOTPPopup"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"

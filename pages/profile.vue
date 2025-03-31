@@ -804,6 +804,11 @@ onMounted(async () => {
           </div>
         </div>
         <div
+          :class="
+            userProfile.auth_provider === 'google'
+              ? 'cursor-not-allowed bg-grey/40 opacity-30'
+              : ''
+          "
           class="g-[#E9E9E9]/40 flex w-full flex-col justify-between gap-5 rounded-xl border border-zinc-500/10 p-8 shadow-md shadow-zinc-300/30"
         >
           <div>
@@ -813,12 +818,22 @@ onMounted(async () => {
                 type="password"
                 placeholder="current password"
                 v-model="currentPassword"
+                :class="
+                  userProfile.auth_provider === 'google'
+                    ? 'cursor-not-allowed'
+                    : ''
+                "
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               />
               <input
                 type="password"
                 placeholder="new password"
                 v-model="newPassword"
+                :class="
+                  userProfile.auth_provider === 'google'
+                    ? 'cursor-not-allowed'
+                    : ''
+                "
                 class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
               />
               <div v-if="newPassword.length > 0" class="b4">
