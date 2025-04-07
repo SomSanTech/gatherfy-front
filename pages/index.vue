@@ -166,10 +166,72 @@ watch(selectedEventTime, (newValue) => {
   <div
     v-else
     :class="isLoading ? 'opacity-0' : 'opacity-100'"
-    class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0"
+    class="relative mx-auto my-28 px-5 lg:my-24 lg:px-0"
   >
+    <div class="relative mx-24 flex h-[90vh] items-center justify-center gap-5">
+      <div class="flex gap-10 overflow-x-auto">
+        <div v-for="data in bannerEventData">
+          <div class="relative flex h-full w-full items-end gap-10 rounded-2xl">
+            <div class="bg-blak/20 bottom-3 left-3 w-1/3 rounded-lg px-4 py-4">
+              <h1 class="event-name t1 line-clamp-2 !font-normal text-black">
+                {{ data?.name }}
+              </h1>
+              <p>{{ useFormatDateTime(new Date(data?.start_date), 'date') }}</p>
+              <!-- <p>{{ data?.description }}</p> -->
+              <div class="b3 mt-4 flex gap-2">
+                <BtnComp color="black" :is-bold="false" text="Join now" />
+              </div>
+            </div>
+            <div
+              class="relative flex h-full min-w-[450px] max-w-[450px] flex-col justify-end"
+            >
+              <div class="flex gap-1 pb-1">
+                <div v-for="tag in data?.tags">
+                  <NuxtLink
+                    :to="{ name: 'events', query: { tag: tag.tag_title } }"
+                  >
+                    <button class="b4 rounded-sm">
+                      {{ tag.tag_title }}
+                    </button>
+                  </NuxtLink>
+                </div>
+              </div>
+              <img
+                :src="data?.image"
+                alt=""
+                class="h-[600px] min-w-[450px] max-w-[450px] shrink-0 object-cover"
+              />
+              <div class="py-3">
+                <!-- <h1 class="event-name t3 line-clamp-2 !font-normal text-black">
+                  {{ data?.name }}
+                </h1>
+                <p>
+                  {{ useFormatDateTime(new Date(data?.start_date), 'date') }}
+                </p> -->
+                <p>At {{ data?.location }}</p>
+              </div>
+              <!-- <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-end justify-end gap-2 self-end">
+        <button
+          class="header-btn-prev left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+          @click="handleSampleEvent('prev')"
+        >
+          <ArrowIcon class="" />
+        </button>
+        <button
+          @click="handleSampleEvent('next')"
+          class="header-btn-next right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+        >
+          <ArrowIcon class="rotate-180" />
+        </button>
+      </div>
+    </div>
     <!-- Header Event Banner -->
-    <div class="relative">
+    <!-- <div class="relative">
       <button
         class="header-btn-prev absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
         @click="handleSampleEvent('prev')"
@@ -220,10 +282,10 @@ watch(selectedEventTime, (newValue) => {
       >
         <ArrowIcon class="rotate-180" />
       </button>
-    </div>
+    </div> -->
 
     <!-- Recommend Event section -->
-    <div class="w-full py-7 lg:pt-16">
+    <div class="mx-auto w-full py-7 lg:max-w-6xl lg:pt-16">
       <h1 class="t2">Recommend Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
@@ -419,7 +481,7 @@ watch(selectedEventTime, (newValue) => {
       </div>
     </div>
     <!-- Event List section -->
-    <div id="time-list" class="w-full py-7">
+    <div id="time-list" class="mx-auto w-full py-7 lg:max-w-6xl">
       <ExploreBar
         :is-show-sort="false"
         @handle-select-time="handleSelectTime"
@@ -447,7 +509,7 @@ watch(selectedEventTime, (newValue) => {
               }}
             </p>
           </div>
-          <div id="time-list-card" v-else class="flex h-full w-full gap-3">
+          <div id="time-list-card" v-else class="flex h-full w-full gap-3 py-4">
             <div v-for="event in filteredTimeData">
               <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
                 <EventListCard :eventDetail="event" :isVertical="true" />
@@ -462,7 +524,7 @@ watch(selectedEventTime, (newValue) => {
     </div>
 
     <!-- Tags section -->
-    <div class="py-7">
+    <div class="mx-auto py-7 lg:max-w-6xl">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
         <div v-for="tag in tagsData" :key="tag.tag_id" class="group">
@@ -494,7 +556,7 @@ watch(selectedEventTime, (newValue) => {
     </div>
 
     <!-- Explore Date section -->
-    <div id="explore-date" class="w-full py-7">
+    <div id="explore-date" class="mx-auto w-full py-7 lg:max-w-6xl">
       <h1 class="explore-title t2 py-3">Explore by date</h1>
       <div class="flex w-full gap-8">
         <div class="w-full">

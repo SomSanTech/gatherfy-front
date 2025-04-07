@@ -8,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div
+  <!-- <div
     :class="`event-card shrink-0 drop-shadow-md duration-300 ${isVertical ? 'w-[150px] lg:w-[260px]' : 'w-[186px] hover:scale-105 hover:drop-shadow-2xl lg:w-[275px]'}`"
   >
     <div class="relative">
@@ -53,5 +53,46 @@ const props = defineProps<{
         At {{ eventDetail?.location }}
       </p>
     </div>
+  </div> -->
+  <div
+    class="relative flex h-[420px] w-[260px] flex-shrink-0 items-end gap-4 rounded-xl duration-200 hover:scale-105"
+  >
+    <!-- ซ้าย -->
+    <div
+      class="absolute bottom-0 left-0 z-10 flex h-1/4 flex-col justify-center rounded-b-xl bg-zinc-200/80 p-3 backdrop-blur-md"
+    >
+      <div class="pb- absolute -top-7 flex flex-wrap gap-1">
+        <NuxtLink
+          v-for="tag in eventDetail?.tags"
+          :key="tag.tag_title"
+          :to="{ name: 'events', query: { tag: tag.tag_title } }"
+        >
+          <button
+            class="b4 rounded-sm bg-white px-1 !text-[10px] drop-shadow-sm"
+          >
+            {{ tag.tag_title }}
+          </button>
+        </NuxtLink>
+      </div>
+      <p v-if="eventDetail?.start_date" class="event-card-date b4">
+        {{ useFormatDateTime(new Date(eventDetail?.start_date), 'date') }}
+      </p>
+      <h1 class="event-name b3 line-clamp-[2] font-semibold">
+        {{ eventDetail?.name }}
+      </h1>
+      <p class="event-card-location b4 line-clamp-1">
+        At {{ eventDetail?.location }}
+      </p>
+      <!-- <div class="b3 mt-4 flex gap-2">
+        <BtnComp color="black" :is-bold="false" text="Join now" />
+      </div> -->
+    </div>
+
+    <!-- รูป -->
+    <img
+      :src="eventDetail?.image"
+      alt=""
+      class="h-full w-full rounded-xl object-cover"
+    />
   </div>
 </template>
