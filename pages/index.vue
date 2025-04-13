@@ -158,6 +158,51 @@ watch(selectedEventTime, (newValue) => {
     filterTimeEventData(newValue);
   }
 });
+
+const scrollContainer = ref(null);
+let intervalId = null;
+let scrollDirection = 1; // 1 = ขวา, -1 = ซ้าย
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    const el = scrollContainer.value;
+    if (el) {
+      el.scrollLeft += 2 * scrollDirection;
+
+      // ถึงขวาสุด → เปลี่ยนเป็นเลื่อนกลับ
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
+        scrollDirection = -1;
+      }
+      // ถึงซ้ายสุด → เปลี่ยนเป็นเลื่อนไปขวา
+      if (el.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+    }
+  }, 20);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+const pauseScroll = () => clearInterval(intervalId);
+const resumeScroll = () => {
+  intervalId = setInterval(() => {
+    const el = scrollContainer.value;
+    if (el) {
+      el.scrollLeft += 2 * scrollDirection;
+
+      // ถึงขวาสุด → เปลี่ยนเป็นเลื่อนกลับ
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
+        scrollDirection = -1;
+      }
+      // ถึงซ้ายสุด → เปลี่ยนเป็นเลื่อนไปขวา
+      if (el.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+    }
+  }, 20);
+};
 </script>
 
 <template>
@@ -168,7 +213,53 @@ watch(selectedEventTime, (newValue) => {
     :class="isLoading ? 'opacity-0' : 'opacity-100'"
     class="relative mx-auto my-28 px-5 lg:my-24 lg:px-0"
   >
-    <div class="relative mx-24 flex h-[90vh] items-center justify-center gap-5">
+    <div class="justify- flex- relative flex h-[90vh] items-end gap-5 pb-20">
+      <div class="flex items-end justify-end text-start text-[200px]">
+        <ArrowDown class="-rotate-90" />Explore event
+      </div>
+      <div
+        ref="scrollContainer"
+        @mouseenter="pauseScroll"
+        @mouseleave="resumeScroll"
+        class="hide-scrollbar flex gap-10 overflow-x-auto scroll-smooth"
+      >
+        <div v-for="data in bannerEventData">
+          <div class="relative flex h-full w-full items-end gap-10 rounded-2xl">
+            <div class="relative flex h-full flex-col justify-end">
+              <div class="absolute h-full w-full bg-black/20"></div>
+              <img
+                :src="data?.image"
+                alt=""
+                class="h-[500px] min-w-[500px] max-w-[500px] shrink-0 object-cover"
+              />
+              <div
+                class="absolute left-3 top-3 h-1/4 w-1/4 rounded-br-xl bg-zinc-200/20 p-3 backdrop-blur-sm"
+              >
+                <p class="b3 !text-7xl text-white">
+                  15 <span class="b2">Jan</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="flex items-end justify-end gap-2 self-end">
+        <button
+          class="header-btn-prev left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+          @click="handleSampleEvent('prev')"
+        >
+          <ArrowIcon class="" />
+        </button>
+        <button
+          @click="handleSampleEvent('next')"
+          class="header-btn-next right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+        >
+          <ArrowIcon class="rotate-180" />
+        </button>
+      </div> -->
+    </div>
+    <!--  -->
+    <!-- <div class="relative mx-24 flex h-[90vh] items-center justify-center gap-5">
       <div class="flex gap-10 overflow-x-auto">
         <div v-for="data in bannerEventData">
           <div class="relative flex h-full w-full items-end gap-10 rounded-2xl">
@@ -177,7 +268,6 @@ watch(selectedEventTime, (newValue) => {
                 {{ data?.name }}
               </h1>
               <p>{{ useFormatDateTime(new Date(data?.start_date), 'date') }}</p>
-              <!-- <p>{{ data?.description }}</p> -->
               <div class="b3 mt-4 flex gap-2">
                 <BtnComp color="black" :is-bold="false" text="Join now" />
               </div>
@@ -202,15 +292,9 @@ watch(selectedEventTime, (newValue) => {
                 class="h-[600px] min-w-[450px] max-w-[450px] shrink-0 object-cover"
               />
               <div class="py-3">
-                <!-- <h1 class="event-name t3 line-clamp-2 !font-normal text-black">
-                  {{ data?.name }}
-                </h1>
-                <p>
-                  {{ useFormatDateTime(new Date(data?.start_date), 'date') }}
-                </p> -->
+        
                 <p>At {{ data?.location }}</p>
               </div>
-              <!-- <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div> -->
             </div>
           </div>
         </div>
@@ -229,7 +313,7 @@ watch(selectedEventTime, (newValue) => {
           <ArrowIcon class="rotate-180" />
         </button>
       </div>
-    </div>
+    </div> -->
     <!-- Header Event Banner -->
     <!-- <div class="relative">
       <button
@@ -604,5 +688,13 @@ watch(selectedEventTime, (newValue) => {
 <style>
 .shw {
   text-shadow: 1px 1px 6px rgb(0 0 0 / 45%);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 </style>
