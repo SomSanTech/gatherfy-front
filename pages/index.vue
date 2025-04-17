@@ -11,7 +11,7 @@ import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
 import ExploreBar from '~/components/ExploreBar.vue';
-
+import scrollama from 'scrollama';
 const today = ref(new Date());
 
 const eventData = ref<Event[]>([]);
@@ -31,9 +31,14 @@ const fetchData = async () => {
   recommendedData.value = fetchRecommendedData.data || [];
   const currentDate = new Date().getTime();
   bannerEventData.value = eventData.value
-    .filter((event) => new Date(event.end_date).getTime() > currentDate)
-    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+    .filter((event) => new Date(event.ticket_end_date).getTime() > currentDate)
+    .sort(
+      (a: string, b: string) =>
+        new Date(a.ticket_start_date) - new Date(b.ticket_start_date)
+    )
     .slice(0, 5);
+
+  console.log('bannerEventData.value', bannerEventData.value);
 };
 
 const handleReccomEvent = (type: string) => {
@@ -113,6 +118,7 @@ const handleSelectTime = (time: string) => {
 };
 
 const isLoading = useState('isLoading');
+const isScroll = useState('isScroll');
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -203,6 +209,43 @@ const resumeScroll = () => {
     }
   }, 20);
 };
+const reccomRef = ref();
+const scrollToRecommendEvent = () => {
+  reccomRef.value?.scrollIntoView({ behavior: 'smooth' });
+};
+
+let scroller;
+
+onMounted(() => {
+  if (process.client) {
+    setTimeout(() => {
+      const steps = document.getElementById('reccom');
+      console.log('Step count:', steps); // debug
+      scroller = scrollama();
+
+      scroller
+        .setup({
+          step: '.step',
+          offset: 0.8, // halfway of viewport
+          debug: false,
+        })
+        .onStepEnter((response) => {
+          isScroll.value = false;
+          console.log('enter');
+        })
+        .onStepExit((response) => {
+          isScroll.value = true;
+          console.log('out');
+        });
+
+      window.addEventListener('resize', scroller.resize);
+    }, 1000);
+  }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', scroller.resize);
+});
 </script>
 
 <template>
@@ -211,53 +254,77 @@ const resumeScroll = () => {
   <div
     v-else
     :class="isLoading ? 'opacity-0' : 'opacity-100'"
-    class="relative mx-auto my-28 px-5 lg:my-24 lg:px-0"
+    class="y-28 lg:y-24 relative mx-auto px-5 lg:px-0"
   >
-    <div class="justify- flex- relative flex h-[90vh] items-end gap-5 pb-20">
-      <div class="flex items-end justify-end text-start text-[200px]">
-        <ArrowDown class="-rotate-90" />Explore event
-      </div>
+    <!--  -->
+    <div
+      id="reccom"
+      class="step justify- flex- bg-dak relative flex h-screen items-end gap-5 pb-20 pl-5 text-dark"
+    >
+      <transition name="fade-slide">
+        <div
+          v-if="!isScroll"
+          class="flex cursor-pointer gap-5"
+          @click="scrollToRecommendEvent"
+        >
+          <ArrowDown class="translate-y-5 -rotate-90 self-end text-[160px]" />
+          <p class="text-start text-[100px]">Explore event</p>
+        </div>
+      </transition>
       <div
         ref="scrollContainer"
         @mouseenter="pauseScroll"
         @mouseleave="resumeScroll"
         class="hide-scrollbar flex gap-10 overflow-x-auto scroll-smooth"
       >
-        <div v-for="data in bannerEventData">
-          <div class="relative flex h-full w-full items-end gap-10 rounded-2xl">
-            <div class="relative flex h-full flex-col justify-end">
-              <div class="absolute h-full w-full bg-black/20"></div>
-              <img
-                :src="data?.image"
-                alt=""
-                class="h-[500px] min-w-[500px] max-w-[500px] shrink-0 object-cover"
-              />
-              <div
-                class="absolute left-3 top-3 h-1/4 w-1/4 rounded-br-xl bg-zinc-200/20 p-3 backdrop-blur-sm"
-              >
-                <p class="b3 !text-7xl text-white">
-                  15 <span class="b2">Jan</span>
-                </p>
+        <div v-for="data in bannerEventData" class="cursor-pointer">
+          <NuxtLink :to="{ name: 'event-id', params: { id: data?.slug } }">
+            <div
+              class="relative flex h-full w-full items-end gap-10 rounded-2xl drop-shadow-xl"
+            >
+              <div class="relative flex h-full flex-col justify-end">
+                <div
+                  class="pointer-events-none absolute h-full w-full bg-black/20"
+                ></div>
+                <img
+                  :src="data?.image"
+                  alt=""
+                  :class="[
+                    'h-[500px] shrink-0 object-cover transition-all duration-1000',
+                    isScroll
+                      ? 'min-w-[1000px] max-w-[1000px]'
+                      : 'min-w-[500px] max-w-[500px]',
+                  ]"
+                />
+                <div
+                  class="absolute left-3 top-3 aspect-square h-1/4 rounded-br-3xl rounded-tl-3xl bg-white/20 p-3 backdrop-blur-sm"
+                >
+                  <p class="b3 !text-7xl text-white">
+                    15 <span class="b1 absolute bottom-3 right-3">Jan</span>
+                  </p>
+                </div>
+
+                <div
+                  class="absolute bottom-3 right-3 h-fit w-fit max-w-[75%] rounded-br-2xl rounded-tl-2xl bg-white/20 p-3 text-end backdrop-blur-sm"
+                >
+                  <p
+                    style="
+                      -webkit-line-clamp: 2;
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                    "
+                    class="b3 overflow-hidden !text-3xl text-white"
+                  >
+                    {{ data.name }}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </div>
-      <!-- <div class="flex items-end justify-end gap-2 self-end">
-        <button
-          class="header-btn-prev left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
-          @click="handleSampleEvent('prev')"
-        >
-          <ArrowIcon class="" />
-        </button>
-        <button
-          @click="handleSampleEvent('next')"
-          class="header-btn-next right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
-        >
-          <ArrowIcon class="rotate-180" />
-        </button>
-      </div> -->
     </div>
+
     <!--  -->
     <!-- <div class="relative mx-24 flex h-[90vh] items-center justify-center gap-5">
       <div class="flex gap-10 overflow-x-auto">
@@ -369,7 +436,10 @@ const resumeScroll = () => {
     </div> -->
 
     <!-- Recommend Event section -->
-    <div class="mx-auto w-full py-7 lg:max-w-6xl lg:pt-16">
+    <div
+      ref="reccomRef"
+      class="mx-auto min-h-[100px] w-full py-7 lg:max-w-6xl lg:pt-24"
+    >
       <h1 class="t2">Recommend Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
@@ -696,5 +766,24 @@ const resumeScroll = () => {
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+img.expand {
+  @apply min-w-[1100px] max-w-[1100px] transition-all duration-500;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.2s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(40px);
+}
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

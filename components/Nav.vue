@@ -138,6 +138,15 @@ const profileData = useCookie<UserProfile>('profileData');
                 <span>Manage Event</span>
               </button>
             </NuxtLink>
+            <NuxtLink to="/favorite" class="w-full">
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <FavOutline class="h-5 w-5 fill-gray-600 text-gray-600" />
+                <span>My Favorites</span>
+              </button>
+            </NuxtLink>
             <!-- Divider -->
             <div class="my-1 h-px w-full bg-gray-200"></div>
 

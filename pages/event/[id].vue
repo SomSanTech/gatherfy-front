@@ -7,17 +7,15 @@ import UserProfileIcon from '~/components/icons/UserProfile.vue';
 import Organisation from '~/components/icons/Organisation.vue';
 import Subscribe from '~/components/icons/Subscribe.vue';
 import type { UserProfile } from '~/models/userProfile';
+import FavOutline from '~/components/icons/FavOutline.vue';
 
 const route = useRoute();
 const error = useError();
 const param = route.params.id;
 const isOpenPopup = ref(false);
 const event = ref();
-const plsLoginPopUp = ref(false);
 const userProfile = useCookie<UserProfile>('profileData');
 const loginPopup = useState('loginPopup');
-const isSignInCookie = useCookie('is_user_sign_in');
-const token = useCookie('accessToken');
 const checkIsAlreadyRegis = ref(false);
 const userSubscribeTagData = ref([]);
 const isHavePopupOpen = useState('isHavePopupOpen');
@@ -29,16 +27,12 @@ const accessToken = useCookie('accessToken');
 const { state, showPopup } = usePopup();
 const isLoading = useState('isLoading');
 const isLoadRegis = ref<boolean>(false);
+
 const handleGoSignIn = () => {
   loginPopup.value = true;
   isHavePopupOpen.value = true;
-  plsLoginPopUp.value = false;
 };
-const router = useRouter();
 
-const goBack = () => {
-  router.back();
-};
 const regis = async () => {
   if (event.value) {
     isLoadRegis.value = true;
@@ -46,7 +40,7 @@ const regis = async () => {
     const regsitered = await useFetchWithAuth(
       `v2/registrations`,
       'POST',
-      token.value,
+      accessToken.value,
       {
         eventId: event.value.eventId,
       }
@@ -82,14 +76,10 @@ const fetchData = async () => {
 };
 
 const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
-  const isEndSaleTicket =
-    new Date(ticketEndDate).getTime() < new Date().getTime();
-
   if (userProfile.value && !isEventAvaliable) {
     isOpenPopup.value = true;
   } else {
-    showPopup('Please login first', 'warn');
-    plsLoginPopUp.value = true;
+    handleGoSignIn();
   }
 };
 
@@ -105,7 +95,7 @@ const handleCompleteModal = () => {
 };
 const handleSubscribeTag = async (tagId: number) => {
   if (!userProfile.value) {
-    showPopup('Please login first', 'warn');
+    handleGoSignIn();
   } else {
     if (!checkIsAlreadySubTag(tagId)) {
       subAction.value = 'follow';
@@ -128,8 +118,9 @@ const handleSubscribeTag = async (tagId: number) => {
         userSubscribeTagData.value = subscribeTagData.data;
         isShowSubTagPopup.value = true;
         showPopup(
-          'Thank you for subscribing to this event tag! Stay tuned for updates and announcements',
-          'complete'
+          'Thank you for subscribing to this event tag! ',
+          'complete',
+          'Stay tuned for updates and announcements'
         );
       }
 
@@ -163,6 +154,42 @@ const handleSubscribeTag = async (tagId: number) => {
       if (response.error) {
         showPopup('Can not unsubscribed try again later', 'error');
       }
+    }
+  }
+};
+const favEvent = ref();
+const getFavEvent = async () => {
+  const favData = await useFetchWithAuth(
+    'v1/favorites',
+    'GET',
+    accessToken.value
+  );
+  if ('data' in favData) favEvent.value = favData.data;
+};
+const handleFavEvent = async () => {
+  if (!userProfile.value) {
+    handleGoSignIn();
+  } else {
+    let isFav = favEvent.value.find((f) => f.eventId === event.value.eventId);
+    console.log(isFav);
+
+    let fav;
+    if (isFav) {
+      fav = await useFetchWithAuth(
+        `v1/favorites/${event.value.eventId}`,
+        'DELETE',
+        accessToken.value
+      );
+    } else {
+      fav = await useFetchWithAuth('v1/favorites', 'POST', accessToken.value, {
+        eventId: event.value.eventId,
+      });
+    }
+    if (fav.status === 200) {
+      getFavEvent();
+      console.log('favData', fav);
+    } else {
+      showPopup('Can not fav this event try again later', 'error');
     }
   }
 };
@@ -201,6 +228,8 @@ onMounted(async () => {
         if ('error' in subscribeTagData)
           console.error('Fetch failed:', subscribeTagData.error);
       }
+
+      getFavEvent();
     }
   } finally {
     isLoading.value = false;
@@ -230,6 +259,7 @@ function removeWidthHeightAttributes(htmlString) {
     :isShowCompleteModal="state.isVisible"
     :title="state.text"
     :status="state.status"
+    :sub-title="state.subTitle"
     @complete-action="handleCompleteModal"
   />
   <Loader v-if="isLoading" />
@@ -333,6 +363,18 @@ function removeWidthHeightAttributes(htmlString) {
                           : 'Registor event'
                   "
                 />
+                <button @click="handleFavEvent" class="rounded-md bg-white p-2">
+                  <FavFill
+                    v-if="
+                      favEvent &&
+                      favEvent.find((a) => {
+                        return a.eventId === event.eventId;
+                      })
+                    "
+                    class="text-xl text-burgundy"
+                  />
+                  <FavOutline v-else class="fill-dark text-xl text-dark" />
+                </button>
               </div>
             </div>
           </div>

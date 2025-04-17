@@ -374,7 +374,7 @@ const handleSignin = async () => {
         }
 
         if (roleCookie.value === 'Attendee') {
-          router.push('/');
+          // router.push('/');
         } else {
           router.push('/backoffice');
         }
@@ -499,365 +499,380 @@ watch(
     :title="state.text"
     @complete-action="handleCompleteGGSignUp"
   />
-  <div v-if="loginPopup" class="fixed top-0 z-50 w-full">
-    <div
-      :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-10' : 'top-1/2 translate-y-1/2'}`"
-      class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-7 shadow-lg lg:min-w-[320px] lg:p-10"
-    >
-      <button @click="handleLoginPopup" class="absolute right-5 top-5">
-        <Cancle />
-      </button>
-      <div v-if="!isSignup" class="text-center">
-        <p class="t3">Welcome!</p>
-        <p :class="isAlreadySignup ? 'b1 text-green-600' : 'b1 text-gray-600'">
-          {{
-            isAlreadySignup
-              ? 'Sign up successful! Please log in to continue.'
-              : 'Please enter your details to sign in.'
-          }}
-        </p>
-      </div>
-      <div v-else class="text-center">
-        <p class="t3 text-center">Create an account!</p>
-        <p class="b1 text-gray-600">Sign up and join with us.</p>
-      </div>
-      <div class="b3 text-red-600" v-if="signUpErrorResponse">
-        <p
-          v-for="er in signUpErrorResponse.details"
-          class="flex items-center gap-1"
-        >
-          <Cancle /> {{ er }}
-        </p>
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <div class="flex gap-3">
-          <div class="w-full">
-            <input
-              v-if="isSignup"
-              type="text"
-              v-model="signupData.firstname"
-              placeholder="First name"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <p
-              v-if="!checkField['firstname'] && isClickSignBtn && isSignup"
-              class="b4 text-red-600"
-            >
-              {{ fieldErrorMessages['firstname'] }}
-            </p>
-          </div>
-          <div class="w-full">
-            <input
-              v-if="isSignup"
-              type="text"
-              v-model="signupData.lastname"
-              placeholder="Last name"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <p
-              v-if="!checkField['lastname'] && isClickSignBtn && isSignup"
-              class="b4 text-red-600"
-            >
-              {{ fieldErrorMessages['lastname'] }}
-            </p>
-          </div>
-        </div>
-        <input
-          v-if="isSignup"
-          type="text"
-          v-model="signupData.email"
-          placeholder="Email"
-          class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-        />
-        <p
-          v-if="!checkField['email'] && isClickSignBtn && isSignup"
-          class="b4 text-red-600"
-        >
-          {{ fieldErrorMessages['email'] }}
-        </p>
-        <input
-          v-if="isSignup"
-          type="text"
-          v-model="signupData.phone"
-          placeholder="Phone"
-          class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-        />
-        <p
-          v-if="!checkField['phone'] && isClickSignBtn && isSignup"
-          class="b4 text-red-600"
-        >
-          {{ fieldErrorMessages['phone'] }}
-        </p>
-        <div>
-          <p v-if="!isSignup" class="b2 font pb-1 font-semibold">
-            Username or Email
+  <transition
+    enter-active-class="transition duration-200 ease-out"
+    enter-from-class="-translate-y-[500px] opacity-0"
+    enter-to-class="translate-y-0 opacity-100"
+    leave-active-class="transition duration-200 ease-in"
+    leave-from-class="translate-y-0 opacity-100"
+    leave-to-class="-translate-y-[500px] opacity-0"
+  >
+    <div v-show="loginPopup" class="fixed z-50 w-full">
+      <div
+        :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-10' : 'top-1/2 translate-y-1/2'}`"
+        class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-7 shadow-lg lg:min-w-[320px] lg:p-10"
+      >
+        <button @click="handleLoginPopup" class="absolute right-5 top-5">
+          <Cancle />
+        </button>
+        <div v-if="!isSignup" class="text-center">
+          <p class="t3">Welcome!</p>
+          <p
+            :class="isAlreadySignup ? 'b1 text-green-600' : 'b1 text-gray-600'"
+          >
+            {{
+              isAlreadySignup
+                ? 'Sign up successful! Please log in to continue.'
+                : 'Please enter your details to sign in.'
+            }}
           </p>
+        </div>
+        <div v-else class="text-center">
+          <p class="t3 text-center">Create an account!</p>
+          <p class="b1 text-gray-600">Sign up and join with us.</p>
+        </div>
+        <div class="b3 text-red-600" v-if="signUpErrorResponse">
+          <p
+            v-for="er in signUpErrorResponse.details"
+            class="flex items-center gap-1"
+          >
+            <Cancle /> {{ er }}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex gap-3">
+            <div class="w-full">
+              <input
+                v-if="isSignup"
+                type="text"
+                v-model="signupData.firstname"
+                placeholder="First name"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <p
+                v-if="!checkField['firstname'] && isClickSignBtn && isSignup"
+                class="b4 text-red-600"
+              >
+                {{ fieldErrorMessages['firstname'] }}
+              </p>
+            </div>
+            <div class="w-full">
+              <input
+                v-if="isSignup"
+                type="text"
+                v-model="signupData.lastname"
+                placeholder="Last name"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <p
+                v-if="!checkField['lastname'] && isClickSignBtn && isSignup"
+                class="b4 text-red-600"
+              >
+                {{ fieldErrorMessages['lastname'] }}
+              </p>
+            </div>
+          </div>
           <input
+            v-if="isSignup"
             type="text"
-            :placeholder="!isSignup ? 'Username or Email' : 'Username'"
-            v-model="username"
+            v-model="signupData.email"
+            placeholder="Email"
             class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
           />
           <p
-            v-if="!checkField['username'] && isClickSignBtn"
+            v-if="!checkField['email'] && isClickSignBtn && isSignup"
             class="b4 text-red-600"
           >
-            {{ fieldErrorMessages['username'] }}
+            {{ fieldErrorMessages['email'] }}
           </p>
-        </div>
-        <div>
-          <p v-if="!isSignup" class="b2 font pb-1 font-semibold">Password</p>
-          <div class="relative">
-            <input
-              @keypress.enter="handleSignin"
-              :type="showPassword ? 'text' : 'password'"
-              v-model="password"
-              placeholder="Enter your password"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <button
-              type="button"
-              @click="togglePasswordVisibility"
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-xl"
-            >
-              <HidePassword v-if="showPassword" />
-              <ShowPassword v-else />
-            </button>
-          </div>
-          <div v-if="!loginStatus && !isSignup" class="b4 text-red-500">
-            wrong username or password
-          </div>
-          <div v-if="password.length > 0 && isSignup" class="b4">
-            <div
-              class="flex items-center"
-              :class="
-                patternCheck['minLength'] ? 'text-green-700' : 'text-red-500'
-              "
-            >
-              <Check v-if="patternCheck['minLength']" /><Cancle v-else /> At
-              least 8 characters
-            </div>
-            <div
-              class="flex items-center"
-              :class="
-                patternCheck['uppercase'] ? 'text-green-700' : 'text-red-500'
-              "
-            >
-              <Check v-if="patternCheck['uppercase']" /><Cancle v-else />At
-              least one uppercase letter (A–Z)
-            </div>
-            <div
-              class="flex items-center"
-              :class="
-                patternCheck['lowercase'] ? 'text-green-700' : 'text-red-500'
-              "
-            >
-              <Check v-if="patternCheck['lowercase']" /><Cancle v-else />At
-              least one lowercase letter (a–z)
-            </div>
-            <div
-              class="flex items-center"
-              :class="
-                patternCheck['number'] ? 'text-green-700' : 'text-red-500'
-              "
-            >
-              <Check v-if="patternCheck['number']" /><Cancle v-else />At least
-              one number (0–9)
-            </div>
-            <div
-              class="flex items-center"
-              :class="
-                patternCheck['specialChar'] ? 'text-green-700' : 'text-red-500'
-              "
-            >
-              <Check v-if="patternCheck['specialChar']" /><Cancle v-else />At
-              least one special character (@, #, $, %, ^, &, +, =, ., *, etc.)
-            </div>
-          </div>
+          <input
+            v-if="isSignup"
+            type="text"
+            v-model="signupData.phone"
+            placeholder="Phone"
+            class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+          />
           <p
-            v-if="!checkField['password'] && isClickSignBtn"
+            v-if="!checkField['phone'] && isClickSignBtn && isSignup"
             class="b4 text-red-600"
           >
-            {{ fieldErrorMessages['password'] }}
+            {{ fieldErrorMessages['phone'] }}
           </p>
-          <p
-            v-if="
-              !checkField['testPass'] &&
-              isClickSignBtn &&
-              isSignup &&
-              password.length > 0
-            "
-            class="b4 text-red-600"
-          >
-            {{ fieldErrorMessages['testPass'] }}
-          </p>
-        </div>
-        <div v-if="isSignup">
-          <div class="relative">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              v-model="confirmPassword"
-              placeholder="Confirm your password"
-              class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
-            />
-            <button
-              type="button"
-              @click="togglePasswordVisibility"
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-xl"
-            >
-              <HidePassword v-if="showPassword" />
-              <ShowPassword v-else />
-            </button>
-          </div>
-          <p
-            v-if="!checkField['confirmPassword'] && isClickSignBtn && isSignup"
-            class="b4 text-red-600"
-          >
-            {{ fieldErrorMessages['confirmPassword'] }}
-          </p>
-          <p
-            v-if="
-              !checkField['testPass'] &&
-              isClickSignBtn &&
-              isSignup &&
-              confirmPassword.length > 0
-            "
-            class="b4 text-red-600"
-          >
-            {{ fieldErrorMessages['testPass'] }}
-          </p>
-        </div>
-        <div class="flex gap-2" v-if="isSignup">
-          <div class="w-full">
-            <select
-              id="gender"
-              v-model="selectedGender"
-              class="b2 rounded-lg border-[1px] border-black/20 p-2"
-            >
-              <option disabled value="">Please select your gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer-not-to-say">Prefer not to say</option>
-            </select>
-            <p
-              v-if="!checkField['gender'] && isClickSignBtn && isSignup"
-              class="b4 text-red-600"
-            >
-              {{ fieldErrorMessages['gender'] }}
+          <div>
+            <p v-if="!isSignup" class="b2 font pb-1 font-semibold">
+              Username or Email
             </p>
-          </div>
-          <div class="w-full">
             <input
-              id="birthday"
-              type="date"
-              v-model="birthday"
+              type="text"
+              :placeholder="!isSignup ? 'Username or Email' : 'Username'"
+              v-model="username"
               class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
             />
             <p
-              v-if="!checkField['birthday'] && isClickSignBtn && isSignup"
+              v-if="!checkField['username'] && isClickSignBtn"
               class="b4 text-red-600"
             >
-              {{ fieldErrorMessages['birthday'] }}
+              {{ fieldErrorMessages['username'] }}
+            </p>
+          </div>
+          <div>
+            <p v-if="!isSignup" class="b2 font pb-1 font-semibold">Password</p>
+            <div class="relative">
+              <input
+                @keypress.enter="handleSignin"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="password"
+                placeholder="Enter your password"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <button
+                type="button"
+                @click="togglePasswordVisibility"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-xl"
+              >
+                <HidePassword v-if="showPassword" />
+                <ShowPassword v-else />
+              </button>
+            </div>
+            <div v-if="!loginStatus && !isSignup" class="b4 text-red-500">
+              wrong username or password
+            </div>
+            <div v-if="password.length > 0 && isSignup" class="b4">
+              <div
+                class="flex items-center"
+                :class="
+                  patternCheck['minLength'] ? 'text-green-700' : 'text-red-500'
+                "
+              >
+                <Check v-if="patternCheck['minLength']" /><Cancle v-else /> At
+                least 8 characters
+              </div>
+              <div
+                class="flex items-center"
+                :class="
+                  patternCheck['uppercase'] ? 'text-green-700' : 'text-red-500'
+                "
+              >
+                <Check v-if="patternCheck['uppercase']" /><Cancle v-else />At
+                least one uppercase letter (A–Z)
+              </div>
+              <div
+                class="flex items-center"
+                :class="
+                  patternCheck['lowercase'] ? 'text-green-700' : 'text-red-500'
+                "
+              >
+                <Check v-if="patternCheck['lowercase']" /><Cancle v-else />At
+                least one lowercase letter (a–z)
+              </div>
+              <div
+                class="flex items-center"
+                :class="
+                  patternCheck['number'] ? 'text-green-700' : 'text-red-500'
+                "
+              >
+                <Check v-if="patternCheck['number']" /><Cancle v-else />At least
+                one number (0–9)
+              </div>
+              <div
+                class="flex items-center"
+                :class="
+                  patternCheck['specialChar']
+                    ? 'text-green-700'
+                    : 'text-red-500'
+                "
+              >
+                <Check v-if="patternCheck['specialChar']" /><Cancle v-else />At
+                least one special character (@, #, $, %, ^, &, +, =, ., *, etc.)
+              </div>
+            </div>
+            <p
+              v-if="!checkField['password'] && isClickSignBtn"
+              class="b4 text-red-600"
+            >
+              {{ fieldErrorMessages['password'] }}
+            </p>
+            <p
+              v-if="
+                !checkField['testPass'] &&
+                isClickSignBtn &&
+                isSignup &&
+                password.length > 0
+              "
+              class="b4 text-red-600"
+            >
+              {{ fieldErrorMessages['testPass'] }}
+            </p>
+          </div>
+          <div v-if="isSignup">
+            <div class="relative">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                v-model="confirmPassword"
+                placeholder="Confirm your password"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <button
+                type="button"
+                @click="togglePasswordVisibility"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-xl"
+              >
+                <HidePassword v-if="showPassword" />
+                <ShowPassword v-else />
+              </button>
+            </div>
+            <p
+              v-if="
+                !checkField['confirmPassword'] && isClickSignBtn && isSignup
+              "
+              class="b4 text-red-600"
+            >
+              {{ fieldErrorMessages['confirmPassword'] }}
+            </p>
+            <p
+              v-if="
+                !checkField['testPass'] &&
+                isClickSignBtn &&
+                isSignup &&
+                confirmPassword.length > 0
+              "
+              class="b4 text-red-600"
+            >
+              {{ fieldErrorMessages['testPass'] }}
+            </p>
+          </div>
+          <div class="flex gap-2" v-if="isSignup">
+            <div class="w-full">
+              <select
+                id="gender"
+                v-model="selectedGender"
+                class="b2 rounded-lg border-[1px] border-black/20 p-2"
+              >
+                <option disabled value="">Please select your gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+              <p
+                v-if="!checkField['gender'] && isClickSignBtn && isSignup"
+                class="b4 text-red-600"
+              >
+                {{ fieldErrorMessages['gender'] }}
+              </p>
+            </div>
+            <div class="w-full">
+              <input
+                id="birthday"
+                type="date"
+                v-model="birthday"
+                class="b2 w-full rounded-lg border-[1px] border-black/20 p-2"
+              />
+              <p
+                v-if="!checkField['birthday'] && isClickSignBtn && isSignup"
+                class="b4 text-red-600"
+              >
+                {{ fieldErrorMessages['birthday'] }}
+              </p>
+            </div>
+          </div>
+          <div v-if="isSignup" class="b2">
+            <p class="b2 pb-2 text-center">What would you like to do?</p>
+            <div class="flex w-full justify-between gap-2">
+              <button
+                @click="selectRole('Attendee')"
+                class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+                :class="
+                  selectedRole === 'Attendee'
+                    ? 'border-[2px] border-burgundy'
+                    : 'border-[1px] border-black/20'
+                "
+              >
+                <div
+                  class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+                >
+                  For users who want to explore and join existing events.
+                </div>
+                <p class="font-semibold">Join Event</p>
+              </button>
+              <button
+                @click="selectRole('Organizer')"
+                class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
+                :class="
+                  selectedRole === 'Organizer'
+                    ? 'border-[2px] border-burgundy'
+                    : 'border-[1px] border-black/20'
+                "
+              >
+                <div
+                  class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
+                >
+                  For users who want to create and manage their own events.
+                </div>
+                <p class="font-semibold">Create event</p>
+              </button>
+            </div>
+            <p
+              v-if="!checkField['role'] && isClickSignBtn && isSignup"
+              class="b4 text-red-600"
+            >
+              {{ fieldErrorMessages['role'] }}
             </p>
           </div>
         </div>
-        <div v-if="isSignup" class="b2">
-          <p class="b2 pb-2 text-center">What would you like to do?</p>
-          <div class="flex w-full justify-between gap-2">
-            <button
-              @click="selectRole('Attendee')"
-              class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
-              :class="
-                selectedRole === 'Attendee'
-                  ? 'border-[2px] border-burgundy'
-                  : 'border-[1px] border-black/20'
-              "
-            >
-              <div
-                class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
-              >
-                For users who want to explore and join existing events.
-              </div>
-              <p class="font-semibold">Join Event</p>
-            </button>
-            <button
-              @click="selectRole('Organizer')"
-              class="group relative flex w-full items-center justify-center rounded-lg p-2 py-10"
-              :class="
-                selectedRole === 'Organizer'
-                  ? 'border-[2px] border-burgundy'
-                  : 'border-[1px] border-black/20'
-              "
-            >
-              <div
-                class="absolute bg-white text-center opacity-0 duration-500 group-hover:opacity-100"
-              >
-                For users who want to create and manage their own events.
-              </div>
-              <p class="font-semibold">Create event</p>
-            </button>
-          </div>
-          <p
-            v-if="!checkField['role'] && isClickSignBtn && isSignup"
-            class="b4 text-red-600"
-          >
-            {{ fieldErrorMessages['role'] }}
-          </p>
-        </div>
-      </div>
 
-      <!-- <div v-if="!isSignup" class="flex items-center justify-between">
+        <!-- <div v-if="!isSignup" class="flex items-center justify-between">
         <div class="flex items-center gap-1">
           <input type="checkbox" />
           <p class="b2">Remember me</p>
         </div>
         <p class="b2 underline">Forgot password?</p>
       </div> -->
-      <button
-        @click="handleSignin"
-        class="b1 mt-2 flex w-full items-center justify-center rounded-lg bg-dark-grey py-2 text-white"
-      >
-        <p>{{ isSignup ? 'Sign Up' : 'Sign in now' }}</p>
+        <button
+          @click="handleSignin"
+          class="b1 mt-2 flex w-full items-center justify-center rounded-lg bg-dark-grey py-2 text-white"
+        >
+          <p>{{ isSignup ? 'Sign Up' : 'Sign in now' }}</p>
 
-        <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
-      </button>
+          <div :class="isWaitAuthen ? 'load ml-3 w-4' : ''"></div>
+        </button>
 
-      <div v-if="!isSignup" class="flex w-full gap-2">
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-        <p class="b3 text-black/60">OR</p>
-        <div
-          class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
-        ></div>
-      </div>
-      <div v-if="!isSignup" class="h-full w-full">
-        <GoogleSignInButton
-          width="300"
-          ux_mode="redirect"
-          class="flex min-w-full items-center justify-center"
-          @success="handleLoginSuccesses"
-          @error="handleLoginErrores"
-        ></GoogleSignInButton>
-        <!-- <button
+        <div v-if="!isSignup" class="flex w-full gap-2">
+          <div
+            class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+          ></div>
+          <p class="b3 text-black/60">OR</p>
+          <div
+            class="w-full -translate-y-1/2 border-b-[1px] border-b-black/20"
+          ></div>
+        </div>
+        <div v-if="!isSignup" class="h-full w-full">
+          <GoogleSignInButton
+            width="300"
+            ux_mode="redirect"
+            class="flex min-w-full items-center justify-center"
+            @success="handleLoginSuccesses"
+            @error="handleLoginErrores"
+          ></GoogleSignInButton>
+          <!-- <button
           class="b2 pointer-events-none flex w-full items-center justify-center gap-3 rounded-lg border-[1px] border-dark-grey/70 py-2 text-dark-grey transition duration-300 hover:bg-gray-800 group-hover:border-burgundy"
         >
           <Google class="fill-white" />
           Continue with Google
         </button> -->
+        </div>
+        <div>
+          <p class="b2 text-center">
+            {{ isSignup ? 'Already' : 'Don’t' }} have an account?
+            <button class="font-semibold" @click="changeToSignUp">
+              {{ isSignup ? 'Sign In' : 'Sign Up' }}
+            </button>
+          </p>
+        </div>
       </div>
-      <div>
-        <p class="b2 text-center">
-          {{ isSignup ? 'Already' : 'Don’t' }} have an account?
-          <button class="font-semibold" @click="changeToSignUp">
-            {{ isSignup ? 'Sign In' : 'Sign Up' }}
-          </button>
-        </p>
-      </div>
-    </div>
-  </div>
+    </div></transition
+  >
   <div v-if="isSelectRolePopUp" class="fixed z-50 h-screen w-full">
     <div
       class="b2 absolute left-1/2 top-1/2 z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-2/3 flex-col items-center justify-center gap-4 rounded-xl bg-white p-10 shadow-lg"

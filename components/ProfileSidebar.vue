@@ -49,6 +49,20 @@ const route = useRoute();
           <span>My Contact</span>
         </button>
       </NuxtLink>
+      <NuxtLink to="/favorite" class="w-full">
+        <button
+          @click.stop
+          :class="
+            route.fullPath.includes('favorite')
+              ? 'bg-burgundy fill-white stroke-white text-white'
+              : 'stroke-gray-600 hover:bg-gray-100'
+          "
+          class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all"
+        >
+          <FavOutline class="h-5 w-5 text-gray-600" />
+          <span>My Favorites</span>
+        </button>
+      </NuxtLink>
     </div>
   </div>
 </template>

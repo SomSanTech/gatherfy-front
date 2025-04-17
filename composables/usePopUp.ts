@@ -5,15 +5,18 @@ export function usePopup() {
     isVisible: false,
     text: '',
     status: '',
+    subTitle: '',
   });
 
   function showPopup(
     message: string,
-    status: 'complete' | 'confirm' | 'error' | 'warn'
+    status: 'complete' | 'confirm' | 'error' | 'warn',
+    subTitle?: string
   ) {
     state.text = message;
     state.status = status;
     state.isVisible = true;
+    state.subTitle = subTitle;
   }
 
   function hidePopup() {

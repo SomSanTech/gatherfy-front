@@ -19,7 +19,7 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
     class="fixed left-0 top-0 z-50 flex h-screen w-full items-center justify-center bg-dark/40 duration-200"
   >
     <div
-      class="absolute flex w-3/4 max-w-[400px] flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md lg:w-1/4"
+      class="absolute flex w-3/4 max-w-[500px] flex-col items-center justify-center gap-4 text-wrap rounded-lg bg-white p-6 drop-shadow-md lg:w-1/3"
     >
       <div class="flex items-center gap-4">
         <div
@@ -32,9 +32,9 @@ const emits = defineEmits(['completeAction', 'cancleAction']);
         </div>
         <div class="w-full">
           <div class="b2 break-words font-semibold">{{ title }}</div>
-          <!-- <p class="b3 break-words">
+          <p class="b3 break-words">
             {{ subTitle }}
-          </p> -->
+          </p>
         </div>
       </div>
       <div class="flex w-fit gap-2">
