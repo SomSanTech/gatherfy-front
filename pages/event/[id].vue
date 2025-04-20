@@ -435,6 +435,14 @@ function removeWidthHeightAttributes(htmlString) {
               </div>
             </div>
           </div>
+          <div class="flex flex-col gap-2 lg:gap-5">
+            <p class="t3 font-semibold">Organized by</p>
+            <div
+              class="flex w-full items-center justify-center rounded-lg border border-dark-grey/60 py-12 text-center"
+            >
+              {{ event?.owner }}
+            </div>
+          </div>
         </div>
       </div>
     </div>

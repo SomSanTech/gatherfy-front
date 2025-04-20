@@ -58,20 +58,27 @@ onMounted(async () => {
     <div v-if="!favEvent || favEvent.length === 0">no fav</div>
     <div class="flex flex-wrap gap-3">
       <div
+        v-if="favEvent"
         v-for="event in favEvent.sort(
-          (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         )"
       >
-        <EventListCard
-          @handle-fav="handleFavEvent"
-          :event-detail="event"
-          :is-square="true"
-          :isFav="
-            favEvent.find((a) => {
-              return a.eventId === event.eventId;
-            })
-          "
-        />
+        <NuxtLink
+          v-if="event?.slug"
+          :to="{ name: 'event-id', params: { id: event?.slug } }"
+        >
+          <EventListCard
+            @handle-fav="handleFavEvent"
+            :event-detail="event"
+            :is-square="true"
+            :isFav="
+              favEvent.find((a) => {
+                return a.eventId === event.eventId;
+              })
+            "
+          />
+        </NuxtLink>
       </div>
     </div>
   </div>

@@ -246,6 +246,20 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', scroller.resize);
 });
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 </script>
 
 <template>
@@ -300,7 +314,10 @@ onBeforeUnmount(() => {
                   class="absolute left-3 top-3 aspect-square h-1/4 rounded-br-3xl rounded-tl-3xl bg-white/20 p-3 backdrop-blur-sm"
                 >
                   <p class="b3 !text-7xl text-white">
-                    15 <span class="b1 absolute bottom-3 right-3">Jan</span>
+                    {{ new Date(data?.start_date).getDate() }}
+                    <span class="b1 absolute bottom-3 right-3">{{
+                      monthNames[new Date(data?.start_date).getMonth()]
+                    }}</span>
                   </p>
                 </div>
 

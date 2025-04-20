@@ -13,6 +13,21 @@ const emits = defineEmits(['handleFav']);
 const handleFav = (id) => {
   emits('handleFav', id);
 };
+
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 </script>
 
 <template>
@@ -67,15 +82,16 @@ const handleFav = (id) => {
     class="relative flex flex-shrink-0 items-end gap-4 rounded-xl duration-200 hover:scale-105"
   >
     <div
+      v-if="eventDetail?.start_date"
       class="absolute left-3 top-3 flex w-10 flex-col items-center justify-center"
     >
       <div
         class="b4 w-full rounded-t-md bg-dark text-center !text-[10px] text-light-grey"
       >
-        Nov
+        {{ monthNames[new Date(eventDetail?.start_date).getMonth()] }}
       </div>
       <div class="b4 w-full rounded-b-md bg-white py-1 text-center text-sm">
-        12
+        {{ new Date(eventDetail?.start_date).getDate() }}
       </div>
     </div>
     <button
