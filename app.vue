@@ -25,11 +25,14 @@ const handleSessionExpire = useAuth().handleSessionExpire;
 const isSignInCookie = useCookie('is_user_sign_in');
 const isHavePopupOpen = useState('isHavePopupOpen', () => false);
 const isClickOK = useState('isClickOk');
+const isScroll = useState('isScroll', () => false);
 const isLoading = useState('isLoading', () => true);
 // const showBanner = useState('showCookieBanner')
 const { state, showPopup } = usePopup();
 
 onMounted(() => {
+  console.log(route.fullPath);
+
   if (process.client) {
     isOTPPopup.value = localStorage.getItem('isOTPPopup') === 'true';
   }
@@ -77,7 +80,11 @@ watch(
     <AcceptCookie />
 
     <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-dark/20' : ''"></div>
-    <Nav v-if="!isBackoffice && !isLoading" class="fixed top-0 z-40 w-full" />
+    <Nav
+      :class="`${route.fullPath === '/' ? (isScroll ? '' : '-translate-y-20') : ''}`"
+      v-if="!isBackoffice && !isLoading"
+      class="fixed top-0 z-40 w-full transition-all duration-700"
+    />
     <Login />
     <OtpPopup />
     <CompleteModal

@@ -1,10 +1,33 @@
 <script setup lang="ts">
 import type { Event } from '~/models/event';
-
+const route = useRoute();
 const props = defineProps<{
   eventDetail: Event;
   isVertical?: boolean;
+  isFav?: boolean;
+  isSquare?: boolean;
 }>();
+
+const emits = defineEmits(['handleFav']);
+
+const handleFav = (id) => {
+  emits('handleFav', id);
+};
+
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 </script>
 
 <template>
@@ -55,40 +78,54 @@ const props = defineProps<{
     </div>
   </div> -->
   <div
-    class="relative flex h-[420px] w-[260px] flex-shrink-0 items-end gap-4 rounded-xl duration-200 hover:scale-105"
+    :class="`${isSquare ? 'aspect-square w-[260px]' : 'h-[400px] w-[260px]'}`"
+    class="relative flex flex-shrink-0 items-end gap-4 rounded-xl duration-200 hover:scale-105"
   >
-    <!-- ซ้าย -->
     <div
-      class="absolute bottom-0 left-0 z-10 flex h-1/4 flex-col justify-center rounded-b-xl bg-zinc-200/80 p-3 backdrop-blur-md"
+      v-if="eventDetail?.start_date"
+      class="absolute left-3 top-3 flex w-10 flex-col items-center justify-center"
     >
-      <div class="pb- absolute -top-7 flex flex-wrap gap-1">
+      <div
+        class="b4 w-full rounded-t-md bg-dark text-center !text-[10px] text-light-grey"
+      >
+        {{ monthNames[new Date(eventDetail?.start_date).getMonth()] }}
+      </div>
+      <div class="b4 w-full rounded-b-md bg-white py-1 text-center text-sm">
+        {{ new Date(eventDetail?.start_date).getDate() }}
+      </div>
+    </div>
+    <button
+      v-if="route.fullPath === '/favorite'"
+      @click="handleFav(eventDetail.eventId)"
+      class="absolute right-3 top-3 rounded-md bg-white p-2"
+    >
+      <FavFill v-if="isFav" class="text-xl text-burgundy" />
+      <FavOutline v-else class="fill-dark text-xl text-dark" />
+    </button>
+    <div class="mask-gradient rounded-b-xl bg-dark"></div>
+
+    <div class="absolute z-40 p-4 text-white">
+      <h2 class="t3 line-clamp-2 text-2xl font-bold">
+        {{ eventDetail?.name }}
+      </h2>
+      <p v-if="eventDetail.owner" class="b4">By {{ eventDetail?.owner }}</p>
+      <p v-if="eventDetail.location" class="b4 line-clamp-2">
+        At {{ eventDetail?.location }}
+      </p>
+      <div class="pb- absolute -top-3 flex flex-wrap gap-1">
         <NuxtLink
           v-for="tag in eventDetail?.tags"
           :key="tag.tag_title"
           :to="{ name: 'events', query: { tag: tag.tag_title } }"
         >
           <button
-            class="b4 rounded-sm bg-white px-1 !text-[10px] drop-shadow-sm"
+            class="b4 rounded-sm bg-white px-1 !text-[10px] text-dark drop-shadow-sm"
           >
             {{ tag.tag_title }}
           </button>
         </NuxtLink>
       </div>
-      <p v-if="eventDetail?.start_date" class="event-card-date b4">
-        {{ useFormatDateTime(new Date(eventDetail?.start_date), 'date') }}
-      </p>
-      <h1 class="event-name b3 line-clamp-[2] font-semibold">
-        {{ eventDetail?.name }}
-      </h1>
-      <p class="event-card-location b4 line-clamp-1">
-        At {{ eventDetail?.location }}
-      </p>
-      <!-- <div class="b3 mt-4 flex gap-2">
-        <BtnComp color="black" :is-bold="false" text="Join now" />
-      </div> -->
     </div>
-
-    <!-- รูป -->
     <img
       :src="eventDetail?.image"
       alt=""
