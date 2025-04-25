@@ -9,7 +9,9 @@ export default defineNuxtConfig({
 
   // compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-
+  ui: {
+    colorMode: false,
+  },
   css: ['~/assets/main.css'],
 
   postcss: {
@@ -50,6 +52,10 @@ export default defineNuxtConfig({
     },
   },
 
-  plugins: ['~/plugins/preline.client.ts', '~/plugins/error-handler.ts'],
+  plugins: [
+    '~/plugins/preline.client.ts',
+    '~/plugins/error-handler.ts',
+    '~/plugins/google-signin.ts',
+  ],
   compatibilityDate: '2025-03-29',
 });

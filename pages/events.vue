@@ -179,6 +179,7 @@ watch(
         </h1>
         <EventList
           v-else
+          :is-show-filter="showFilter"
           :events="eventSearch"
           :class="{ 'w-full': !showFilter, 'w-[calc(100%-200px)]': showFilter }"
         />

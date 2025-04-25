@@ -56,7 +56,7 @@ onMounted(async () => {
   <Loader v-if="isLoading" />
   <div v-else class="relative w-full px-8 duration-300 lg:px-0">
     <div v-if="!favEvent || favEvent.length === 0">no fav</div>
-    <div class="flex flex-wrap gap-3">
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div
         v-if="favEvent"
         v-for="event in favEvent.sort(

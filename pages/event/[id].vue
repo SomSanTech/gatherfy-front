@@ -32,10 +32,20 @@ const handleGoSignIn = () => {
   loginPopup.value = true;
   isHavePopupOpen.value = true;
 };
+function toLocalISOString(date: Date): string {
+  const offsetMs = date.getTimezoneOffset() * 60000;
+  const localDate = new Date(date.getTime() - offsetMs);
+  return localDate.toISOString().slice(0, 19); // ตัด 'Z' และ milliseconds ทิ้ง
+}
 
 const regis = async () => {
   if (event.value) {
     isLoadRegis.value = true;
+    const formattedDate = selectedDate.value
+      ? toLocalISOString(selectedDate.value)
+      : null;
+
+    console.log(formattedDate);
 
     const regsitered = await useFetchWithAuth(
       `v2/registrations`,
@@ -43,6 +53,7 @@ const regis = async () => {
       accessToken.value,
       {
         eventId: event.value.eventId,
+        regisDate: formattedDate,
       }
     );
 
@@ -56,7 +67,7 @@ const regis = async () => {
         userRegisHistory.value = regisData.data;
       }
       isShowSuccessRegisPopup.value = true;
-      showPopup('Registor success', 'complete');
+      showPopup('Register success', 'complete');
     }
     if ('error' in regsitered) {
       showPopup(`${regsitered.error}`, 'warn');
@@ -83,13 +94,26 @@ const handleRegisPopup = (isEventAvaliable: boolean, ticketEndDate: string) => {
   }
 };
 
+// const checkIsAlreadySubTag = (tagId: number) => {
+//   let compareResult = false;
+//   if (accessToken.value) {
+//     if (userSubscribeTagData.value)
+//       compareResult = userSubscribeTagData.value?.tagId.includes(tagId);
+//   }
+//   return compareResult;
+// };
+
 const checkIsAlreadySubTag = (tagId: number) => {
   let compareResult = false;
-  if (accessToken.value) {
-    compareResult = userSubscribeTagData.value?.tagId.includes(tagId);
+  if (accessToken.value && userSubscribeTagData.value) {
+    const tagIds = userSubscribeTagData.value.tagId;
+    if (Array.isArray(tagIds)) {
+      compareResult = tagIds.includes(tagId);
+    }
   }
   return compareResult;
 };
+
 const handleCompleteModal = () => {
   state.isVisible = false;
 };
@@ -193,12 +217,41 @@ const handleFavEvent = async () => {
     }
   }
 };
+const availableDates = ref();
 
+const selectedDate = ref<Date | null>(null);
+function generateDatesInRange(start: Date, end: Date): Date[] {
+  const dates: Date[] = [];
+  const current = new Date(start);
+
+  // Set time to 00:00:00 to avoid hour mismatch
+  current.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  while (current <= end) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
+function selectDate(date: Date) {
+  selectedDate.value = date;
+  console.log(selectedDate.value);
+}
+function formatDate(date: Date) {
+  return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, '0')}/${date.getFullYear()}`;
+}
 onMounted(async () => {
   isLoading.value = true;
   try {
     await fetchData();
     if (event.value) {
+      availableDates.value = generateDatesInRange(
+        new Date(event.value.start_date),
+        new Date(event.value.end_date)
+      );
       await useFetchCreateUpdate(
         `v1/countView/${event.value?.eventId}`,
         'POST'
@@ -267,9 +320,10 @@ function removeWidthHeightAttributes(htmlString) {
   <div v-else class="relative w-full">
     <div class="my-16 w-full lg:my-24">
       <!-- header -->
+
       <div
         :style="{ backgroundImage: `url(${event?.image})` }"
-        class="w-screen bg-opacity-75 bg-cover bg-center backdrop-blur-md"
+        class="w-full bg-opacity-75 bg-cover bg-center backdrop-blur-md"
       >
         <div
           class="relative z-10 bg-black bg-opacity-30 p-10 backdrop-blur-md lg:py-32"
@@ -351,16 +405,29 @@ function removeWidthHeightAttributes(htmlString) {
                       event.ticket_end_date
                     )
                   "
-                  :text="
+                  :color="
                     checkIsAlreadyRegis
-                      ? 'You’re already registered for this event'
+                      ? 'gray'
                       : new Date(event?.ticket_start_date).getTime() >
                           new Date().getTime()
-                        ? 'Comming soon'
+                        ? 'gray'
                         : new Date(event?.ticket_end_date).getTime() <
                             new Date().getTime()
-                          ? 'Sale close'
-                          : 'Registor event'
+                          ? 'gray'
+                          : ''
+                  "
+                  :text="
+                    checkIsAlreadyRegis
+                      ? 'You’re registered'
+                      : new Date(event?.ticket_start_date).getTime() >
+                          new Date().getTime()
+                        ? 'Opening soon'
+                        : new Date(event?.ticket_end_date).getTime() <
+                            new Date().getTime()
+                          ? 'Registration closed'
+                          : event?.status === 'full'
+                            ? 'Fully booked'
+                            : 'Register now'
                   "
                 />
                 <button @click="handleFavEvent" class="rounded-md bg-white p-2">
@@ -447,9 +514,10 @@ function removeWidthHeightAttributes(htmlString) {
       </div>
     </div>
     <!-- Regis popup -->
+    <!-- isOpenPopup -->
     <div
       v-show="isOpenPopup"
-      class="regis-popup fixed right-1/2 top-1/2 z-50 w-3/4 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-xl bg-white p-5 shadow-2xl lg:w-[600px] lg:p-7"
+      class="regis-popup fixed right-1/2 top-1/2 z-50 max-h-[500px] w-3/4 -translate-y-1/2 translate-x-1/2 overflow-y-auto rounded-xl bg-white p-5 shadow-2xl lg:w-[600px] lg:p-7"
     >
       <button
         @click="isOpenPopup = false"
@@ -464,13 +532,13 @@ function removeWidthHeightAttributes(htmlString) {
             <h1 class="regis-name t3 py-2 text-2xl font-semibold">
               {{ event?.name }}
             </h1>
-            <div class="b2 flex items-center gap-2 py-1">
+            <!-- <div class="b2 flex items-center gap-2 py-1">
               <Calendar />
               <p v-if="event?.start_date && event?.end_date" class="regis-date">
                 {{ useFormatDateTime(event?.start_date, 'date') }} -
                 {{ useFormatDateTime(event?.end_date, 'date') }}
               </p>
-            </div>
+            </div> -->
             <div class="regis-time b2 flex items-center gap-2 py-1">
               <Clock />
               <p v-if="event?.start_date && event?.end_date">
@@ -478,17 +546,39 @@ function removeWidthHeightAttributes(htmlString) {
                 {{ useFormatDateTime(event?.end_date, 'time') }}
               </p>
             </div>
-            <div class="mt-2 flex items-center gap-2">
+            <div class="flex items-center gap-2 py-1">
               <UserProfileIcon class="b1" />
               <p class="regis-user b2">
-                <span class="mr-3 font-semibold">{{
+                <span class="mr-2 font-semibold">{{
                   userProfile?.username
                 }}</span
-                ><br class="lg:hidden" />{{ userProfile?.users_email }}
+                ><br class="lg:hidden" /><span class="text-dark-grey">
+                  {{ userProfile?.users_email }}
+                </span>
               </p>
             </div>
+            <div class="mt-3">
+              <p class="b3 flex items-center gap-2 font-semibold">
+                <Calendar /> Select date
+              </p>
+              <div class="grid grid-cols-2 gap-2 py-2">
+                <button
+                  v-for="date in availableDates"
+                  :key="date"
+                  @click="selectDate(date)"
+                  :class="[
+                    'rounded-lg border px-3 py-2 text-sm transition',
+                    selectedDate?.toDateString() === date.toDateString()
+                      ? 'bg-ble-600 border-burgundy text-gray-800'
+                      : 'border-gray-300 bg-white text-gray-800 hover:bg-gray-100',
+                  ]"
+                >
+                  {{ useFormatDateTime(date, 'date') }}
+                </button>
+              </div>
+            </div>
             <div
-              class="mt-4 flex items-start gap-2 rounded-lg bg-burgundy/20 p-4 text-sm text-burgundy"
+              class="mt-2 flex items-start gap-2 rounded-lg bg-burgundy/20 p-4 text-sm text-burgundy"
             >
               <svg
                 class="h-5 w-5 flex-shrink-0 text-burgundy"

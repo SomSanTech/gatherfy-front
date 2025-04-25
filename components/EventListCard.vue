@@ -6,6 +6,7 @@ const props = defineProps<{
   isVertical?: boolean;
   isFav?: boolean;
   isSquare?: boolean;
+  isList?: boolean;
 }>();
 
 const emits = defineEmits(['handleFav']);
@@ -78,7 +79,7 @@ const monthNames = [
     </div>
   </div> -->
   <div
-    :class="`${isSquare ? 'aspect-square w-[260px]' : 'h-[400px] w-[260px]'}`"
+    :class="`${isSquare ? 'aspect-square w-full' : isList ? 'h-[290px] w-full lg:h-[330px]' : 'h-[300px] w-[190px] lg:h-[400px] lg:w-[260px]'}`"
     class="relative flex flex-shrink-0 items-end gap-4 rounded-xl duration-200 hover:scale-105"
   >
     <div
@@ -94,25 +95,27 @@ const monthNames = [
         {{ new Date(eventDetail?.start_date).getDate() }}
       </div>
     </div>
-    <button
+    <!-- <button
       v-if="route.fullPath === '/favorite'"
       @click="handleFav(eventDetail.eventId)"
       class="absolute right-3 top-3 rounded-md bg-white p-2"
     >
       <FavFill v-if="isFav" class="text-xl text-burgundy" />
-      <FavOutline v-else class="fill-dark text-xl text-dark" />
-    </button>
+      <FavOutline v-else class="fill-dark text-xl text-dark" /> 
+    </button> -->
     <div class="mask-gradient rounded-b-xl bg-dark"></div>
 
-    <div class="absolute z-40 p-4 text-white">
-      <h2 class="t3 line-clamp-2 text-2xl font-bold">
+    <div class="absolute z-40 p-2 text-white lg:p-4">
+      <h2
+        class="t3 line-clamp-2 text-2xl font-bold leading-5 lg:leading-normal"
+      >
         {{ eventDetail?.name }}
       </h2>
       <p v-if="eventDetail.owner" class="b4">By {{ eventDetail?.owner }}</p>
       <p v-if="eventDetail.location" class="b4 line-clamp-2">
         At {{ eventDetail?.location }}
       </p>
-      <div class="pb- absolute -top-3 flex flex-wrap gap-1">
+      <div class="pb- absolute -top-5 flex flex-wrap gap-1 lg:-top-3">
         <NuxtLink
           v-for="tag in eventDetail?.tags"
           :key="tag.tag_title"
