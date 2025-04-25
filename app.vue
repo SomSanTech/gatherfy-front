@@ -81,7 +81,7 @@ watch(
 
     <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-dark/20' : ''"></div>
     <Nav
-      :class="`${route.fullPath === '/' ? (isScroll ? '' : '-translate-y-20') : ''}`"
+      :class="`${route.fullPath === '/' ? (isScroll ? '' : '-translate-y-24') : ''}`"
       v-if="!isBackoffice && !isLoading"
       class="fixed top-0 z-40 w-full transition-all duration-700"
     />
@@ -96,22 +96,24 @@ watch(
         state.isVisible = false;
       "
     />
-    <!-- <div
-      class="absolute left-1/2 top-[600px] z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-[100%] flex-col gap-4 rounded-xl bg-white p-10 text-center shadow-lg"
-      v-if="true"
+    <div
+      class="fixed bottom-4 right-4 z-50 animate-bounce"
+      v-if="!isBackoffice && !isLoading"
     >
-      <p class="b1">Session expired pls sign in again</p>
-      <button
-        class="b2 rounded-lg bg-burgundy py-1 text-light-grey"
-        @click="handleSessionExpire"
+      <a
+        href="https://apps.apple.com/app/yourapp"
+        class="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-white shadow-lg transition"
       >
-        OK
-      </button>
-    </div> -->
+        <Application />
+        <span>Get the App</span>
+      </a>
+    </div>
     <div>
-      <NuxtLayout>
-        <NuxtPage />
-      </NuxtLayout>
+      <UApp>
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
+      </UApp>
     </div>
   </div>
 </template>

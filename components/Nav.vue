@@ -43,7 +43,9 @@ const profileData = useCookie<UserProfile>('profileData');
       class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
     >
       <NuxtLink to="/">
-        <button class="go-home-btn oooh-baby-regular text-xl lg:text-4xl">
+        <button
+          class="go-home-btn league-gothic text-xl uppercase text-red-800 lg:text-4xl"
+        >
           Gatherfy
         </button>
       </NuxtLink>

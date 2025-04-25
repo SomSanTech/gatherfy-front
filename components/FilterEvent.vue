@@ -86,7 +86,7 @@ const updateDate = (newDate: Date) => {
     </div>
   </div>
   <div
-    :class="`fixed -left-0 top-0 z-40 flex h-screen w-3/4 flex-col gap-4 bg-white p-4 px-8 pt-20 drop-shadow-md lg:pointer-events-none lg:hidden`"
+    :class="`fixed -left-0 top-0 z-50 flex h-screen w-3/4 flex-col gap-4 bg-white p-4 px-8 pt-20 drop-shadow-md lg:pointer-events-none lg:hidden`"
   >
     <button @click="$emit('handleShowFilter')">
       <Cancle class="t2 absolute right-7 top-20" />

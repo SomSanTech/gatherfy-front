@@ -304,8 +304,8 @@ function formatTimeRange(start, end) {
 
                     <div class="mt-4">
                       <p class="b2 font-semibold">
-                        {{ formatDate(ticket.start_date) }} -
-                        {{ formatDate(ticket.end_date) }}
+                        {{ formatDate(ticket.regisDate) }}
+                        <!-- {{ formatDate(ticket.end_date) }} -->
                       </p>
                       <p class="b2">
                         {{
@@ -329,7 +329,7 @@ function formatTimeRange(start, end) {
                             ? 'pointer-events-none opacity-55'
                             : ''
                         "
-                        class="b3 w-full rounded-md bg-white px-2 py-1 drop-shadow-sm"
+                        class="b3 w-full shrink-0 rounded-md bg-white px-2 py-1 drop-shadow-sm"
                       >
                         {{
                           checkIsAlreadyReview(ticket.eventId)

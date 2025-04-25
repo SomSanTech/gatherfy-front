@@ -226,7 +226,7 @@ onMounted(() => {
       scroller
         .setup({
           step: '.step',
-          offset: 0.8, // halfway of viewport
+          offset: 0.9,
           debug: false,
         })
         .onStepEnter((response) => {
@@ -273,28 +273,39 @@ const monthNames = [
     <!--  -->
     <div
       id="reccom"
-      class="step justify- flex- bg-dak relative flex h-screen items-end gap-5 pb-20 pl-5 text-dark"
+      class="step bg-dak relative flex h-screen flex-col items-end justify-end gap-5 pb-20 pl-5 pr-5 text-dark lg:flex-row"
     >
-      <transition name="fade-slide">
+      <div
+        class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-dark/20 to-transparent"
+      ></div>
+      <transition name="fade-slide" class="w-fit">
         <div
           v-if="!isScroll"
-          class="flex cursor-pointer gap-5"
+          class="flex w-fit cursor-pointer items-end justify-end gap-2 self-end lg:gap-5"
           @click="scrollToRecommendEvent"
         >
-          <ArrowDown class="translate-y-5 -rotate-90 self-end text-[160px]" />
-          <p class="text-start text-[100px]">Explore event</p>
+          <ArrowDown
+            class="translate-y-2 -rotate-90 self-end text-[64px] sm:text-[160px]"
+          />
+          <p class="w-fit text-end text-[40px] sm:text-[100px] lg:text-start">
+            Explore event
+          </p>
         </div>
       </transition>
+
       <div
         ref="scrollContainer"
         @mouseenter="pauseScroll"
         @mouseleave="resumeScroll"
-        class="hide-scrollbar flex gap-10 overflow-x-auto scroll-smooth"
+        class="hide-scrollbar flex w-full gap-5 overflow-x-auto scroll-smooth sm:gap-10"
       >
-        <div v-for="data in bannerEventData" class="cursor-pointer">
+        <div
+          v-for="data in bannerEventData"
+          class="flex-shrink-0 cursor-pointer"
+        >
           <NuxtLink :to="{ name: 'event-id', params: { id: data?.slug } }">
             <div
-              class="relative flex h-full w-full items-end gap-10 rounded-2xl drop-shadow-xl"
+              class="relative flex h-full w-full items-end gap-5 rounded-2xl drop-shadow-xl"
             >
               <div class="relative flex h-full flex-col justify-end">
                 <div
@@ -304,25 +315,36 @@ const monthNames = [
                   :src="data?.image"
                   alt=""
                   :class="[
-                    'h-[500px] shrink-0 object-cover transition-all duration-1000',
+                    'h-[300px] shrink-0 object-cover transition-all duration-1000 sm:h-[500px]',
                     isScroll
-                      ? 'min-w-[1000px] max-w-[1000px]'
-                      : 'min-w-[500px] max-w-[500px]',
+                      ? 'min-w-[90vw] max-w-[90vw] sm:min-w-[1000px] sm:max-w-[1000px]'
+                      : 'min-w-[75vw] max-w-[75vw] sm:min-w-[500px] sm:max-w-[500px]',
                   ]"
                 />
+                <div class="absolute right-3 top-3 flex gap-1">
+                  <div
+                    v-for="tag in data?.tags"
+                    class="rounded-lg bg-white/30 px-3 py-1 text-xs text-white backdrop-blur sm:text-sm"
+                  >
+                    {{ tag.tag_title }}
+                  </div>
+                </div>
+
                 <div
-                  class="absolute left-3 top-3 aspect-square h-1/4 rounded-br-3xl rounded-tl-3xl bg-white/20 p-3 backdrop-blur-sm"
+                  class="absolute left-3 top-3 aspect-square h-[20%] rounded-br-3xl rounded-tl-3xl bg-white/20 p-2 backdrop-blur-sm sm:h-1/4 sm:p-3"
                 >
-                  <p class="b3 !text-7xl text-white">
+                  <p class="b3 !text-3xl text-white sm:!text-7xl">
                     {{ new Date(data?.start_date).getDate() }}
-                    <span class="b1 absolute bottom-3 right-3">{{
-                      monthNames[new Date(data?.start_date).getMonth()]
-                    }}</span>
+                    <span
+                      class="b1 absolute bottom-1 right-1 text-xl sm:bottom-3 sm:right-3 sm:text-2xl"
+                    >
+                      {{ monthNames[new Date(data?.start_date).getMonth()] }}
+                    </span>
                   </p>
                 </div>
 
                 <div
-                  class="absolute bottom-3 right-3 h-fit w-fit max-w-[75%] rounded-br-2xl rounded-tl-2xl bg-white/20 p-3 text-end backdrop-blur-sm"
+                  class=":w-fit absolute bottom-3 right-3 max-w-[75%] rounded-br-2xl rounded-tl-2xl bg-white/20 p-2 text-end backdrop-blur-sm sm:p-3 lg:w-[90%] lg:max-w-[90%]"
                 >
                   <p
                     style="
@@ -330,7 +352,7 @@ const monthNames = [
                       display: -webkit-box;
                       -webkit-box-orient: vertical;
                     "
-                    class="b3 overflow-hidden !text-3xl text-white"
+                    class="b3 overflow-hidden text-base text-white sm:!text-3xl"
                   >
                     {{ data.name }}
                   </p>
@@ -508,7 +530,7 @@ const monthNames = [
               </NuxtLink>
             </div>
             <div
-              class="row-span-1 hidden w-full grid-cols-3 place-content-center gap-10 rounded-2xl bg-black p-7 text-light-grey drop-shadow-md lg:grid"
+              class="row-span-1 hidden w-full grid-cols-3 place-content-center gap-10 rounded-2xl bg-dark p-7 text-light-grey drop-shadow-md lg:grid"
             >
               <div class="flex flex-col gap-1">
                 <Calendar />
@@ -769,6 +791,86 @@ const monthNames = [
         </div>
       </div>
     </div>
+
+    <!-- <div class="flex h-40 w-full flex-col gap-10 bg-dark p-10">
+      <div class="flex">
+        <div>GATHERFY</div>
+        <div>COntact</div>
+      </div>
+      <div class="border-t-[1px] border-black">
+        © 2023
+        <a href="https://flowbite.com/" class="hover:underline">Flowbite™</a>.
+        All Rights Reserved.
+      </div>
+    </div> -->
+
+    <footer class="mt-20 bg-dark text-light-grey">
+      <div
+        class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-12 md:grid-cols-3"
+      >
+        <!-- Logo + Description -->
+        <div>
+          <button
+            class="go-home-btn league-gothic text-xl uppercase text-red-800 lg:text-4xl"
+          >
+            Gatherfy
+          </button>
+          <p class="text-gray-400">
+            Making events easier, one click at a time.
+          </p>
+        </div>
+
+        <!-- Navigation -->
+        <div>
+          <h3 class="mb-4 text-xl font-semibold">Quick Links</h3>
+          <ul class="space-y-2 text-gray-300">
+            <li>
+              <NuxtLink to="/">
+                <a href="/" class="hover:text-white">Home</a>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink :to="{ name: 'events' }">
+                <a href="/about" class="hover:text-white">Events</a>
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social Media -->
+        <div>
+          <h3 class="mb-4 text-xl font-semibold">Follow Us</h3>
+          <div class="flex gap-4">
+            <a
+              href="mailto:gatherfy.somsantech@gmail.com"
+              class="flex items-center gap-2 fill-light-grey hover:text-white"
+            >
+              <Gmail />
+              <i class="fab fa-facebook-f">gatherfy.somsantech@gmail.com</i>
+            </a>
+            <!-- <a href="#" class="text-gray-400 hover:text-white">
+              <i class="fab fa-twitter"></i>
+              
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white">
+              <i class="fab fa-instagram"></i>
+            </a> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 border-t border-gray-700">
+        <div
+          class="mx-auto flex max-w-7xl flex-col justify-between px-6 py-4 text-sm text-gray-500 md:flex-row"
+        >
+          <p>&copy; 2025 Gatherfy. All rights reserved.</p>
+          <!-- <p>
+            <a href="/privacy" class="hover:text-white">Privacy Policy</a> ·
+            <a href="/terms" class="hover:text-white">Terms of Service</a>
+          </p> -->
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -781,8 +883,8 @@ const monthNames = [
   display: none;
 }
 .hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 img.expand {
