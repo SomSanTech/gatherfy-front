@@ -547,9 +547,9 @@ const items: StepperItem[] = [
     <div v-show="loginPopup && !isSignup" class="fixed z-50 h-screen w-full">
       <div
         :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'}`"
-        class="absolute left-1/2 z-50 flex min-w-[320px] -translate-x-1/2 gap-10 rounded-xl bg-white p-7 shadow-lg lg:min-w-[320px] lg:p-10"
+        class="absolute left-1/2 z-50 flex min-w-[300px] -translate-x-1/2 justify-center gap-10 rounded-xl bg-white p-5 shadow-lg lg:min-w-[320px] lg:p-10"
       >
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2 lg:gap-4">
           <button @click="handleLoginPopup" class="absolute right-5 top-5">
             <Cancle />
           </button>
@@ -949,10 +949,10 @@ const items: StepperItem[] = [
       <div v-show="loginPopup && isSignup" class="fixed z-50 h-screen w-full">
         <div
           :class="`${shouldShake ? 'animate-shake' : ''} ${isSignup ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'}`"
-          class="absolute left-1/2 z-50 flex -translate-x-1/2"
+          class="absolute left-1/2 z-50 flex -translate-x-1/2 flex-col lg:flex-row"
         >
           <div
-            class="flex flex-col items-center justify-center rounded-l-xl bg-dark px-24"
+            class="flex flex-col items-center justify-center rounded-t-xl bg-dark py-3 lg:rounded-l-xl lg:px-24"
           >
             <button
               class="league-gothic text-xl uppercase text-red-800 lg:text-4xl"
@@ -965,7 +965,7 @@ const items: StepperItem[] = [
             </div>
           </div>
           <div
-            class="jus flex w-[550px] flex-col items-center gap-7 rounded-r-xl bg-white p-7 shadow-lg lg:min-w-[320px] lg:p-10"
+            class="jus flex min-w-[300px] flex-col items-center gap-4 rounded-b-xl bg-white p-5 shadow-lg lg:w-[550px] lg:min-w-[320px] lg:rounded-r-xl lg:p-10"
           >
             <button @click="handleLoginPopup" class="absolute right-5 top-5">
               <Cancle />
@@ -1392,7 +1392,9 @@ const items: StepperItem[] = [
               </di>
             </div>
             <UStepper :items="items" class="w-full" />
-            <div class="absolute bottom-5 right-5 flex gap-2">
+            <div
+              class="absolute bottom-2 right-2 flex gap-2 lg:bottom-5 lg:right-5"
+            >
               <button
                 v-show="signUpIndex !== 0"
                 @click="handleSignUpIndex('prev')"

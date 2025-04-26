@@ -162,16 +162,12 @@ onMounted(async () => {
     isLoading.value = false;
   }, 500);
 });
-
 onBeforeUnmount(() => {
-  // if (qrCodeReader) {
-  navigator.mediaDevices
-    .getUserMedia({ video: true })
-    .then((stream) => {
-      stream.getTracks().forEach((track) => track.stop()); // Stop the camera
-    })
-    .catch((err) => console.error('Error stopping camera:', err));
-  // }
+  if (video.value && video.value.srcObject) {
+    const stream = video.value.srcObject as MediaStream;
+    stream.getTracks().forEach((track) => track.stop());
+    video.value.srcObject = null; // เคลียร์กล้องออกจาก <video>
+  }
 });
 </script>
 <template>
@@ -185,7 +181,7 @@ onBeforeUnmount(() => {
 
   <div class="h-screen w-full bg-mist-grey lg:ml-80">
     <div
-      class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-12"
+      class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-6"
     >
       <div class="my-auto flex aspect-square h-fit shrink-0">
         <video
@@ -195,7 +191,7 @@ onBeforeUnmount(() => {
           class="rounded-lg object-cover"
         ></video>
       </div>
-      <div class="bg-glass mb-5 h-2/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
+      <div class="bg-glass mb-5 h-3/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
           <div class="flex items-center gap-3">
@@ -234,7 +230,7 @@ onBeforeUnmount(() => {
           <div v-else class="overflow-y-auto">
             <div
               v-for="registration in registrationsData"
-              class="border-default-300 flex w-full cursor-default items-center border-b transition-colors"
+              class="border-default-300 grid w-full cursor-default grid-cols-12 items-center border-b transition-colors"
             >
               <RegistrationList
                 :registration="registration"

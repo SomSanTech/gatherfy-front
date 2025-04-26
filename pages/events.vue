@@ -4,7 +4,7 @@ import EventList from '~/components/EventList.vue';
 import ExploreBar from '~/components/ExploreBar.vue';
 
 const route = useRoute();
-const searchTerm = ref(route.query.k);
+const searchTerm = ref<any>(route.query.k);
 const tagsTerm = ref(route.query.tag);
 const eventSearch = ref();
 const formattedDate = ref();

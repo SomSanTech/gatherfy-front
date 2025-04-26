@@ -10,13 +10,19 @@ const props = defineProps<{
 </script>
 
 <template>
-  <td class="back-regis-name b2 p-4 align-middle">
+  <td
+    :class="isShowInQRScan ? 'col-span-6 flex items-center' : ''"
+    class="back-regis-name b2 p-4 align-middle"
+  >
     {{ registration?.firstName }} {{ registration?.lastName }}
   </td>
-  <td class="back-regis-phone b2 p-4 align-middle">
+  <td
+    :class="isShowInQRScan ? 'col-span-3 flex items-center' : ''"
+    class="back-regis-phone b2 p-4 align-middle"
+  >
     {{ registration?.phone }}
   </td>
-  <td class="back-regis-email b2 p-4 align-middle">
+  <td v-if="!isShowInQRScan" class="back-regis-email b2 p-4 align-middle">
     {{ registration?.email }}
   </td>
   <td
@@ -25,7 +31,12 @@ const props = defineProps<{
   >
     {{ registration?.eventName }}
   </td>
-  <td class="b2 p-4 text-center align-middle">
+  <td
+    :class="
+      isShowInQRScan ? 'col-span-3 flex w-full items-center justify-center' : ''
+    "
+    class="b2 p-4 text-center align-middle"
+  >
     <BtnComp
       class="back-regis-status cursor-default"
       :text="
