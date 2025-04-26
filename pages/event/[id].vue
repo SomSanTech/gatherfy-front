@@ -350,8 +350,6 @@ const value = ref(new Date(2022, 2, 3));
         <div
           class="relative z-10 bg-black bg-opacity-30 p-10 backdrop-blur-md lg:py-32"
         >
-          a
-          <UCalendar v-model="value" />
           <div
             class="mx-auto flex w-full max-w-6xl grid-cols-5 flex-col items-center gap-10 text-white lg:grid"
           >
@@ -407,8 +405,15 @@ const value = ref(new Date(2022, 2, 3));
                   class="detail-time"
                   v-if="event?.start_date && event?.end_date"
                 >
-                  {{ useFormatDateTime(event?.start_date, 'date') }} -
-                  {{ useFormatDateTime(event?.end_date, 'date') }}
+                  {{ useFormatDateTime(event?.start_date, 'date') }}
+                  <span
+                    v-if="
+                      useFormatDateTime(event?.start_date, 'date') !==
+                      useFormatDateTime(event?.end_date, 'date')
+                    "
+                  >
+                    - {{ useFormatDateTime(event?.end_date, 'date') }}
+                  </span>
                 </p>
               </div>
               <div class="b2 flex items-center gap-2">
