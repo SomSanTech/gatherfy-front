@@ -109,11 +109,9 @@ watch(
       </a>
     </div>
     <div>
-      <UApp>
-        <NuxtLayout>
-          <NuxtPage />
-        </NuxtLayout>
-      </UApp>
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </div>
   </div>
 </template>

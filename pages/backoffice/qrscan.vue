@@ -162,13 +162,13 @@ onMounted(async () => {
     isLoading.value = false;
   }, 500);
 });
-onBeforeUnmount(() => {
-  if (video.value && video.value.srcObject) {
-    const stream = video.value.srcObject as MediaStream;
-    stream.getTracks().forEach((track) => track.stop());
-    video.value.srcObject = null; // เคลียร์กล้องออกจาก <video>
-  }
-});
+// onBeforeUnmount(() => {
+//   if (video.value && video.value.srcObject) {
+//     const stream = video.value.srcObject as MediaStream;
+//     stream.getTracks().forEach((track) => track.stop());
+//     video.value.srcObject = null; // เคลียร์กล้องออกจาก <video>
+//   }
+// });
 </script>
 <template>
   <CompleteModal
