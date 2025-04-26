@@ -34,7 +34,7 @@ const getTokenForQR = async (eventId: string) => {
     'POST',
     accessToken.value
   );
-  return token.data?.qrToken;
+  if ('data' in token) return token.data?.qrToken;
 };
 const isStartCountDown = ref(false);
 const generateQRCode = async (eventId: string) => {

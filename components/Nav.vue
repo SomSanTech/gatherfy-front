@@ -52,7 +52,7 @@ const profileData = useCookie<UserProfile>('profileData');
 
       <div class="flex items-center gap-5">
         <div
-          class="b3 flex rounded-2xl border border-grey px-2 lg:px-4 lg:py-2"
+          class="b3 flex rounded-2xl border border-grey px-2 py-1 lg:px-4 lg:py-2"
         >
           <input
             type="text"
@@ -161,37 +161,6 @@ const profileData = useCookie<UserProfile>('profileData');
               <span>Sign Out</span>
             </button>
           </div>
-
-          <!-- <div
-            v-if="isOpenProfilePopup"
-            v-on-click-outside="handleOpenProfilePopup"
-            @click="isOpenProfilePopup = false" 
-            class="b2 absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-lg bg-white p-3 text-start shadow-xl"
-          >
-            <NuxtLink to="/profile">
-              <button
-              @click.stop
-                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-              >
-                My Profile
-              </button>
-            </NuxtLink>
-            <NuxtLink to="/tickets">
-              <button
-              @click.stop
-                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-              >
-                My Tickets
-              </button>
-            </NuxtLink>
-            <button
-              @click="signOut"
-              @click.stop
-              class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-            >
-              Sign out
-            </button>
-          </div> -->
         </div>
       </div>
     </div>

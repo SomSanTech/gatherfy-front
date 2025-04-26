@@ -27,6 +27,7 @@ const accessToken = useCookie('accessToken');
 const { state, showPopup } = usePopup();
 const isLoading = useState('isLoading');
 const isLoadRegis = ref<boolean>(false);
+const isSelectDate = ref(true);
 
 const handleGoSignIn = () => {
   loginPopup.value = true;
@@ -45,40 +46,47 @@ const regis = async () => {
       ? toLocalISOString(selectedDate.value)
       : null;
 
-    console.log(formattedDate);
+    console.log('formattedDate', formattedDate);
 
-    const regsitered = await useFetchWithAuth(
-      `v2/registrations`,
-      'POST',
-      accessToken.value,
-      {
-        eventId: event.value.eventId,
-        regisDate: formattedDate,
-      }
-    );
+    if (formattedDate === null) {
+      console.log('no date');
 
-    if (regsitered.status === 200) {
-      const regisData = await useFetchWithAuth(
-        'v1/tickets',
-        'GET',
-        accessToken.value
+      isSelectDate.value = false;
+      isLoadRegis.value = false;
+    } else {
+      const regsitered = await useFetchWithAuth(
+        `v2/registrations`,
+        'POST',
+        accessToken.value,
+        {
+          eventId: event.value.eventId,
+          regisDate: formattedDate,
+        }
       );
-      if ('data' in regisData) {
-        userRegisHistory.value = regisData.data;
+
+      if (regsitered.status === 200) {
+        const regisData = await useFetchWithAuth(
+          'v1/tickets',
+          'GET',
+          accessToken.value
+        );
+        if ('data' in regisData) {
+          userRegisHistory.value = regisData.data;
+        }
+        isShowSuccessRegisPopup.value = true;
+        showPopup('Register success', 'complete');
       }
-      isShowSuccessRegisPopup.value = true;
-      showPopup('Register success', 'complete');
+      if ('error' in regsitered) {
+        showPopup(`${regsitered.error}`, 'warn');
+      }
+      isOpenPopup.value = false;
+      isLoadRegis.value = false;
     }
-    if ('error' in regsitered) {
-      showPopup(`${regsitered.error}`, 'warn');
-    }
-    isOpenPopup.value = false;
-    isLoadRegis.value = false;
   }
 };
 
 const fetchData = async () => {
-  const fetchedData = await useFetchData(`v1/events/${param}`, 'GET');
+  const fetchedData = await useFetchData(`v2/events/${param}`, 'GET');
   if (fetchedData.error) {
     error.value = fetchData;
   } else {
@@ -306,6 +314,21 @@ watchEffect(() => {
 function removeWidthHeightAttributes(htmlString) {
   if (htmlString) return htmlString.replace(/\s(width|height)="\d+"/g, '');
 }
+
+function formatDateCheck(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // เดือนนับจาก 0 ต้อง +1
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+watchEffect(() => {
+  if (selectedDate.value) {
+    isSelectDate.value = true;
+  }
+});
+
+const value = ref(new Date(2022, 2, 3));
 </script>
 <template>
   <CompleteModal
@@ -320,7 +343,6 @@ function removeWidthHeightAttributes(htmlString) {
   <div v-else class="relative w-full">
     <div class="my-16 w-full lg:my-24">
       <!-- header -->
-
       <div
         :style="{ backgroundImage: `url(${event?.image})` }"
         class="w-full bg-opacity-75 bg-cover bg-center backdrop-blur-md"
@@ -328,19 +350,35 @@ function removeWidthHeightAttributes(htmlString) {
         <div
           class="relative z-10 bg-black bg-opacity-30 p-10 backdrop-blur-md lg:py-32"
         >
+          a
+          <UCalendar v-model="value" />
           <div
-            class="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 text-white lg:flex-row"
+            class="mx-auto flex w-full max-w-6xl grid-cols-5 flex-col items-center gap-10 text-white lg:grid"
           >
             <div
-              class="h-[330px] w-[220px] bg-zinc-200 lg:h-[500px] lg:w-[350px]"
+              class="relative col-span-3 flex max-h-[500px] w-full items-center justify-center overflow-hidden"
             >
+              <!-- แถบคาด -->
+              <div
+                v-if="
+                  event?.date?.every((d) => {
+                    const key = Object.keys(d)[0];
+                    return d[key] === 'full';
+                  })
+                "
+                class="absolute -left-0 top-0 w-[110px] -translate-x-6 translate-y-4 -rotate-45 overflow-hidden rounded-br-lg bg-red-600 px-3 py-1 text-center text-xs font-bold text-white"
+              >
+                FULL
+              </div>
+
               <img
                 :src="event?.image"
                 alt=""
-                class="detail-img h-full w-full object-cover lg:min-w-[320px]"
+                class="max-h-[300px] w-auto object-contain lg:max-h-[500px]"
               />
             </div>
-            <div class="flex w-fit flex-col justify-center gap-3">
+
+            <div class="col-span-2 flex w-fit flex-col justify-center gap-3">
               <div class="flex gap-2">
                 <div v-for="tag in event?.tags">
                   <NuxtLink
@@ -394,7 +432,11 @@ function removeWidthHeightAttributes(htmlString) {
                       new Date().getTime() ||
                     new Date(event?.ticket_end_date).getTime() <
                       new Date().getTime() ||
-                    checkIsAlreadyRegis
+                    checkIsAlreadyRegis ||
+                    event?.date?.every((d) => {
+                      const key = Object.keys(d)[0];
+                      return d[key] === 'full';
+                    })
                       ? 'pointer-events-none'
                       : ''
                   "
@@ -412,7 +454,11 @@ function removeWidthHeightAttributes(htmlString) {
                           new Date().getTime()
                         ? 'gray'
                         : new Date(event?.ticket_end_date).getTime() <
-                            new Date().getTime()
+                              new Date().getTime() ||
+                            event?.date?.every((d) => {
+                              const key = Object.keys(d)[0];
+                              return d[key] === 'full';
+                            })
                           ? 'gray'
                           : ''
                   "
@@ -425,7 +471,10 @@ function removeWidthHeightAttributes(htmlString) {
                         : new Date(event?.ticket_end_date).getTime() <
                             new Date().getTime()
                           ? 'Registration closed'
-                          : event?.status === 'full'
+                          : event?.date?.every((d) => {
+                                const key = Object.keys(d)[0];
+                                return d[key] === 'full';
+                              })
                             ? 'Fully booked'
                             : 'Register now'
                   "
@@ -560,17 +609,24 @@ function removeWidthHeightAttributes(htmlString) {
             <div class="mt-3">
               <p class="b3 flex items-center gap-2 font-semibold">
                 <Calendar /> Select date
+                <span v-if="!isSelectDate" class="text-burgundy"
+                  >Please select date</span
+                >
               </p>
-              <div class="grid grid-cols-2 gap-2 py-2">
+              <div class="b3 grid grid-cols-2 gap-1 py-2 lg:gap-2">
                 <button
                   v-for="date in availableDates"
                   :key="date"
                   @click="selectDate(date)"
                   :class="[
-                    'rounded-lg border px-3 py-2 text-sm transition',
+                    'rounded-lg border py-1 transition lg:px-3 lg:py-2',
                     selectedDate?.toDateString() === date.toDateString()
                       ? 'bg-ble-600 border-burgundy text-gray-800'
-                      : 'border-gray-300 bg-white text-gray-800 hover:bg-gray-100',
+                      : event?.date?.find(
+                            (d) => d[formatDateCheck(date)] === 'full'
+                          )
+                        ? 'cursor-not-allowed border-gray-400 bg-gray-300 text-gray-500'
+                        : 'border-gray-300 bg-white text-gray-800 hover:bg-gray-100',
                   ]"
                 >
                   {{ useFormatDateTime(date, 'date') }}
@@ -578,7 +634,7 @@ function removeWidthHeightAttributes(htmlString) {
               </div>
             </div>
             <div
-              class="mt-2 flex items-start gap-2 rounded-lg bg-burgundy/20 p-4 text-sm text-burgundy"
+              class="mt-2 flex items-start gap-2 rounded-lg bg-burgundy/20 p-2 text-sm text-burgundy lg:p-4"
             >
               <svg
                 class="h-5 w-5 flex-shrink-0 text-burgundy"
@@ -592,7 +648,7 @@ function removeWidthHeightAttributes(htmlString) {
                   clip-rule="evenodd"
                 />
               </svg>
-              <p>
+              <p class="b3">
                 By registering for this event, you agree to receive event
                 updates, announcements, and important information via your
                 registered email.
@@ -611,7 +667,7 @@ function removeWidthHeightAttributes(htmlString) {
 
         <img
           :src="event?.image"
-          class="max-w-[120px] self-end rounded-lg lg:max-w-[150px]"
+          class="hidden max-w-[120px] self-end rounded-lg lg:block lg:max-w-[150px]"
           alt=""
         />
       </div>
