@@ -43,14 +43,16 @@ const profileData = useCookie<UserProfile>('profileData');
       class="mx-auto flex items-center justify-between px-5 lg:max-w-6xl lg:px-0"
     >
       <NuxtLink to="/">
-        <button class="go-home-btn oooh-baby-regular text-xl lg:text-4xl">
+        <button
+          class="go-home-btn league-gothic text-xl uppercase text-red-800 lg:text-4xl"
+        >
           Gatherfy
         </button>
       </NuxtLink>
 
       <div class="flex items-center gap-5">
         <div
-          class="b3 flex rounded-2xl border border-grey px-2 lg:px-4 lg:py-2"
+          class="b3 flex rounded-2xl border border-grey px-2 py-1 lg:px-4 lg:py-2"
         >
           <input
             type="text"
@@ -138,6 +140,15 @@ const profileData = useCookie<UserProfile>('profileData');
                 <span>Manage Event</span>
               </button>
             </NuxtLink>
+            <NuxtLink to="/favorite" class="w-full">
+              <button
+                @click.stop
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start transition-all hover:bg-gray-100"
+              >
+                <FavOutline class="h-5 w-5 fill-gray-600 text-gray-600" />
+                <span>My Favorites</span>
+              </button>
+            </NuxtLink>
             <!-- Divider -->
             <div class="my-1 h-px w-full bg-gray-200"></div>
 
@@ -150,37 +161,6 @@ const profileData = useCookie<UserProfile>('profileData');
               <span>Sign Out</span>
             </button>
           </div>
-
-          <!-- <div
-            v-if="isOpenProfilePopup"
-            v-on-click-outside="handleOpenProfilePopup"
-            @click="isOpenProfilePopup = false" 
-            class="b2 absolute right-0 top-12 flex w-max flex-col items-start gap-1 rounded-lg bg-white p-3 text-start shadow-xl"
-          >
-            <NuxtLink to="/profile">
-              <button
-              @click.stop
-                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-              >
-                My Profile
-              </button>
-            </NuxtLink>
-            <NuxtLink to="/tickets">
-              <button
-              @click.stop
-                class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-              >
-                My Tickets
-              </button>
-            </NuxtLink>
-            <button
-              @click="signOut"
-              @click.stop
-              class="w-full rounded-md px-2 py-2 text-start hover:bg-grey"
-            >
-              Sign out
-            </button>
-          </div> -->
         </div>
       </div>
     </div>

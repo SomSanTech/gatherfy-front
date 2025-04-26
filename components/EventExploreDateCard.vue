@@ -17,7 +17,7 @@ const props = defineProps<{
 
       <div class="mask-gradient bg-black/50"></div>
 
-      <div class="absolute bottom-4 left-4 z-50 text-white">
+      <div class="absolute bottom-4 left-4 z-40 text-white">
         <h2 class="t3 text-2xl font-bold">{{ props.eventDetail?.name }}</h2>
         <p class="b4">By {{ props.eventDetail?.owner }}</p>
         <p class="b4">At {{ props.eventDetail?.location }}</p>

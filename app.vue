@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Nav from './components/Nav.vue';
 import { nextTick } from 'vue';
+
 useHead({
   script: [
     { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
   ],
   link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
 });
+
 const isLoggingOut = useState('isLoggingOut', () => false);
 const isOTPPopup = useState('isOTPPopup', () => {
   // Check if running on the client-side
@@ -23,11 +25,14 @@ const handleSessionExpire = useAuth().handleSessionExpire;
 const isSignInCookie = useCookie('is_user_sign_in');
 const isHavePopupOpen = useState('isHavePopupOpen', () => false);
 const isClickOK = useState('isClickOk');
+const isScroll = useState('isScroll', () => false);
 const isLoading = useState('isLoading', () => true);
 // const showBanner = useState('showCookieBanner')
 const { state, showPopup } = usePopup();
 
 onMounted(() => {
+  console.log(route.fullPath);
+
   if (process.client) {
     isOTPPopup.value = localStorage.getItem('isOTPPopup') === 'true';
   }
@@ -75,7 +80,11 @@ watch(
     <AcceptCookie />
 
     <div :class="isHavePopupOpen ? 'fixed inset-0 z-50 bg-dark/20' : ''"></div>
-    <Nav v-if="!isBackoffice && !isLoading" class="fixed top-0 z-40 w-full" />
+    <Nav
+      :class="`${route.fullPath === '/' ? (isScroll ? '' : '-translate-y-24') : ''}`"
+      v-if="!isBackoffice && !isLoading"
+      class="fixed top-0 z-40 w-full transition-all duration-700"
+    />
     <Login />
     <OtpPopup />
     <CompleteModal
@@ -87,18 +96,18 @@ watch(
         state.isVisible = false;
       "
     />
-    <!-- <div
-      class="absolute left-1/2 top-[600px] z-50 flex min-w-[420px] -translate-x-1/2 -translate-y-[100%] flex-col gap-4 rounded-xl bg-white p-10 text-center shadow-lg"
-      v-if="true"
+    <div
+      class="fixed bottom-4 right-4 z-50 animate-bounce"
+      v-if="!isBackoffice && !isLoading"
     >
-      <p class="b1">Session expired pls sign in again</p>
-      <button
-        class="b2 rounded-lg bg-burgundy py-1 text-light-grey"
-        @click="handleSessionExpire"
+      <a
+        href="https://apps.apple.com/app/yourapp"
+        class="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-white shadow-lg transition"
       >
-        OK
-      </button>
-    </div> -->
+        <Application />
+        <span>Get the App</span>
+      </a>
+    </div>
     <div>
       <NuxtLayout>
         <NuxtPage />

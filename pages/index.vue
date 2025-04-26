@@ -10,65 +10,41 @@ import BtnComp from '~/components/BtnComp.vue';
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import type { Event } from '~/models/event';
+import type { Tag } from '~/models/tag';
 import ExploreBar from '~/components/ExploreBar.vue';
+import scrollama from 'scrollama';
 
 const today = ref(new Date());
-
 const eventData = ref<Event[]>([]);
 const recommendedData = ref<Event[]>([]);
 const bannerEventData = ref<Event[]>([]);
-const tagsData = ref<Event[]>([]);
-
-const fetchData = async () => {
-  const fetchedData = await useFetchData('v1/events', 'GET');
-  const fetchTagData = await useFetchData('v1/tags', 'GET');
-  const fetchRecommendedData = await useFetchData(
-    'v1/events/recommended',
-    'GET'
-  );
-  eventData.value = fetchedData.data || [];
-  tagsData.value = fetchTagData.data || [];
-  recommendedData.value = fetchRecommendedData.data || [];
-  const currentDate = new Date().getTime();
-  bannerEventData.value = eventData.value
-    .filter((event) => new Date(event.end_date).getTime() > currentDate)
-    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-    .slice(0, 5);
-};
-
-const handleReccomEvent = (type: string) => {
-  if (type === 'next') {
-    reccommentIndex.value =
-      (reccommentIndex.value + 1) % recommendedData.value.length;
-  }
-  if (type === 'prev') {
-    reccommentIndex.value =
-      (reccommentIndex.value - 1 + recommendedData.value.length) %
-      recommendedData.value.length;
-  }
-};
-
+const tagsData = ref<Tag[]>([]);
 const isFirstClickSampleEvent = ref(false);
-
-const handleSampleEvent = (type: string) => {
-  isFirstClickSampleEvent.value = true;
-  if (type === 'next') {
-    sampleEventIndex.value =
-      (sampleEventIndex.value + 1) % bannerEventData.value.length;
-  }
-  if (type === 'prev') {
-    sampleEventIndex.value =
-      (sampleEventIndex.value - 1 + bannerEventData.value.length) %
-      bannerEventData.value.length;
-  }
-};
-
 const reccommentIndex = ref(0);
-
 const sampleEventIndex = ref(0);
-
-const maxDate = new Date();
-maxDate.setMonth(maxDate.getMonth() + 2);
+const selectedEventTime = ref('today');
+const isLoading = useState('isLoading');
+const isScroll = useState('isScroll');
+const filteredTimeData = ref();
+const scrollContainer = ref(null);
+const reccomRef = ref();
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+let intervalId = null;
+let scrollDirection = 1;
+let scroller;
 
 type GroupedEvents = {
   [date: string]: Event[];
@@ -104,15 +80,109 @@ const filterExploreDate = computed<GroupedEvents>(() => {
   return groupedEvents;
 });
 
-watch([today], ([newToday]) => {
-  filterExploreDate.value;
-});
-const selectedEventTime = ref('today');
+const fetchData = async () => {
+  const fetchedData = await useFetchData<Event[]>('v1/events', 'GET');
+  const fetchTagData = await useFetchData<Tag[]>('v1/tags', 'GET');
+  const fetchRecommendedData = await useFetchData<Event[]>(
+    'v1/events/recommended',
+    'GET'
+  );
+  eventData.value = fetchedData.data || [];
+  tagsData.value = fetchTagData.data || [];
+  recommendedData.value = fetchRecommendedData.data || [];
+  const currentDate = new Date().getTime();
+  bannerEventData.value = eventData.value
+    .filter((event) => new Date(event.ticket_end_date).getTime() > currentDate)
+    .sort(
+      (a: Event, b: Event) =>
+        new Date(a.ticket_start_date).getTime() -
+        new Date(b.ticket_start_date).getTime()
+    )
+    .slice(0, 5);
+
+  console.log('bannerEventData.value', bannerEventData.value);
+};
+
+const handleReccomEvent = (type: string) => {
+  if (type === 'next') {
+    reccommentIndex.value =
+      (reccommentIndex.value + 1) % recommendedData.value.length;
+  }
+  if (type === 'prev') {
+    reccommentIndex.value =
+      (reccommentIndex.value - 1 + recommendedData.value.length) %
+      recommendedData.value.length;
+  }
+};
+
+const handleSampleEvent = (type: string) => {
+  isFirstClickSampleEvent.value = true;
+  if (type === 'next') {
+    sampleEventIndex.value =
+      (sampleEventIndex.value + 1) % bannerEventData.value.length;
+  }
+  if (type === 'prev') {
+    sampleEventIndex.value =
+      (sampleEventIndex.value - 1 + bannerEventData.value.length) %
+      bannerEventData.value.length;
+  }
+};
+
 const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
 
-const isLoading = useState('isLoading');
+const filterTimeEventData = (time: string) => {
+  let filter;
+  if (time === 'today') {
+    filter = eventData.value.filter((e) => {
+      const start = new Date(e?.start_date)?.getTime();
+      const today = new Date().getTime();
+      const end = new Date(e?.end_date)?.getTime();
+      return start <= today && end >= today;
+    });
+  } else {
+    filter = eventData.value.filter((e) => {
+      return new Date(e?.start_date)?.getTime() > new Date().getTime();
+    });
+  }
+
+  filteredTimeData.value = filter;
+};
+
+const pauseScroll = () => clearInterval(intervalId);
+
+const resumeScroll = () => {
+  intervalId = setInterval(() => {
+    const el = scrollContainer.value;
+    if (el) {
+      el.scrollLeft += 2 * scrollDirection;
+
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
+        scrollDirection = -1;
+      }
+      if (el.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+    }
+  }, 20);
+};
+
+const scrollToRecommendEvent = () => {
+  reccomRef.value?.scrollIntoView({ behavior: 'smooth' });
+};
+
+watch([today], ([newToday]) => {
+  filterExploreDate.value;
+});
+
+watch(selectedEventTime, (newValue) => {
+  if (newValue) {
+    selectedEventTime.value = newValue;
+    filterTimeEventData(newValue);
+  }
+});
+
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -134,30 +204,67 @@ onMounted(async () => {
   }
 });
 
-const filteredTimeData = ref();
-const filterTimeEventData = (time: string) => {
-  let filter;
-  if (time === 'today') {
-    filter = eventData.value.filter((e) => {
-      const start = new Date(e?.start_date)?.getTime();
-      const today = new Date().getTime();
-      const end = new Date(e?.end_date)?.getTime();
-      return start <= today && end >= today;
-    });
-  } else {
-    filter = eventData.value.filter((e) => {
-      return new Date(e?.start_date)?.getTime() > new Date().getTime();
-    });
-  }
+onMounted(() => {
+  intervalId = setInterval(() => {
+    const el = scrollContainer.value;
+    if (el) {
+      el.scrollLeft += 2 * scrollDirection;
 
-  filteredTimeData.value = filter;
-};
-watch(selectedEventTime, (newValue) => {
-  if (newValue) {
-    selectedEventTime.value = newValue;
-    filterTimeEventData(newValue);
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth) {
+        scrollDirection = -1;
+      }
+      if (el.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+    }
+  }, 20);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+onMounted(() => {
+  if (process.client) {
+    setTimeout(() => {
+      const steps = document.getElementById('reccom');
+      scroller = scrollama();
+
+      scroller
+        .setup({
+          step: '.step',
+          offset: 0.9,
+          debug: false,
+        })
+        .onStepEnter((response) => {
+          isScroll.value = false;
+          console.log('enter');
+        })
+        .onStepExit((response) => {
+          isScroll.value = true;
+          console.log('out');
+        });
+
+      window.addEventListener('resize', scroller.resize);
+    }, 1000);
   }
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', scroller.resize);
+});
+
+const activeIndex = ref(0);
+
+onMounted(() => {
+  let intervalId = setInterval(() => {
+    activeIndex.value = (activeIndex.value + 1) % bannerEventData.value.length;
+  }, 3000); // ทุก 3 วิ
+});
+
+// onUnmounted(() => {
+//   clearInterval(intervalId)
+// })
 </script>
 
 <template>
@@ -166,64 +273,192 @@ watch(selectedEventTime, (newValue) => {
   <div
     v-else
     :class="isLoading ? 'opacity-0' : 'opacity-100'"
-    class="relative mx-auto my-28 px-5 lg:my-24 lg:max-w-6xl lg:px-0"
+    class="y-28 lg:y-24 relative mx-auto"
   >
-    <!-- Header Event Banner -->
-    <div class="relative">
-      <button
-        class="header-btn-prev absolute left-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
-        @click="handleSampleEvent('prev')"
+    <!-- Banner section -->
+    <!-- <div
+      id="reccom"
+      class="step bg-dak relative flex h-screen !p-0 flex-col lg:items-end lg:justify-end justify-center gap-5 pb-20 pl-5 pr-5 text-dark lg:flex-row"
+    >
+      <div
+        class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-dark/20 to-transparent"
+      ></div>
+      <transition name="fade-slide" class="w-fit px-5 lg:px-0">
+        <div
+          v-if="!isScroll"
+          class="flex w-fit cursor-pointer items-end justify-end gap-2 self-end lg:gap-5"
+          @click="scrollToRecommendEvent"
+        >
+          <ArrowDown
+            class="translate-y-2 -rotate-90 self-end text-[64px] sm:text-[160px]"
+          />
+          <p class="w-fit text-end text-[40px] sm:text-[100px] lg:text-start">
+            Explore event
+          </p>
+        </div>
+      </transition>
+
+      <div
+        ref="scrollContainer"
+        @mouseenter="pauseScroll"
+        @mouseleave="resumeScroll"
+        class="px-5 lg:px-0 hide-scrollbar flex w-full gap-5 overflow-x-auto scroll-smooth sm:gap-10"
       >
-        <ArrowIcon class="" />
-      </button>
-      <NuxtLink
-        :to="{
-          name: 'event-id',
-          params: { id: bannerEventData[sampleEventIndex]?.slug || 1 },
-        }"
-      >
-        <div class="relative h-[500px] w-full rounded-2xl">
-          <div class="relative">
-            <img
-              :src="bannerEventData[sampleEventIndex]?.image"
-              alt=""
-              class="h-[500px] w-full rounded-2xl object-cover"
-            />
-            <div class="absolute inset-0 rounded-2xl bg-black opacity-20"></div>
-          </div>
-          <div class="bg-blak/20 absolute bottom-3 left-3 rounded-lg px-4 py-4">
-            <div class="flex gap-1 pb-2">
-              <div v-for="tag in bannerEventData[sampleEventIndex]?.tags">
-                <NuxtLink
-                  :to="{ name: 'events', query: { tag: tag.tag_title } }"
-                >
-                  <button
-                    class="b4 rounded-sm bg-light-grey px-2 drop-shadow-md"
+        <div
+          v-for="data in bannerEventData"
+          class="flex-shrink-0 cursor-pointer"
+        >
+          <NuxtLink :to="{ name: 'event-id', params: { id: data?.slug } }">
+            <div
+              class="relative flex h-full w-full items-end gap-5 rounded-2xl drop-shadow-xl"
+            >
+              <div class="relative flex h-full flex-col justify-end">
+                <div
+                  class="pointer-events-none absolute h-full w-full bg-black/20"
+                ></div>
+                <img
+                  :src="data?.image"
+                  alt=""
+                  :class="[
+                    'h-[300px] shrink-0 object-cover transition-all duration-1000 sm:h-[500px]',
+                    isScroll
+                      ? 'min-w-[90vw] max-w-[90vw] sm:min-w-[1000px] sm:max-w-[1000px]'
+                      : 'min-w-[75vw] max-w-[75vw] sm:min-w-[500px] sm:max-w-[500px]',
+                  ]"
+                />
+                <div class="absolute right-3 top-3 flex gap-1">
+                  <div
+                    v-for="tag in data?.tags"
+                    class="rounded-lg bg-white/30 px-3 py-1 text-xs text-white backdrop-blur sm:text-sm"
                   >
                     {{ tag.tag_title }}
-                  </button>
-                </NuxtLink>
+                  </div>
+                </div>
+
+                <div
+                  class="absolute left-3 top-3 aspect-square h-[20%] rounded-br-3xl rounded-tl-3xl bg-white/20 p-2 backdrop-blur-sm sm:h-1/4 sm:p-3"
+                >
+                  <p class="b3 !text-3xl text-white sm:!text-7xl">
+                    {{ new Date(data?.start_date).getDate() }}
+                    <span
+                      class="b1 absolute bottom-1 right-1 text-xl sm:bottom-3 sm:right-3 sm:text-2xl"
+                    >
+                      {{ monthNames[new Date(data?.start_date).getMonth()] }}
+                    </span>
+                  </p>
+                </div>
+
+                <div
+                  class=":w-fit absolute bottom-3 right-3 max-w-[75%] rounded-br-2xl rounded-tl-2xl bg-white/20 p-2 text-end backdrop-blur-sm sm:p-3 lg:w-[90%] lg:max-w-[90%]"
+                >
+                  <p
+                    style="
+                      -webkit-line-clamp: 2;
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                    "
+                    class="b3 overflow-hidden text-base text-white sm:!text-3xl"
+                  >
+                    {{ data.name }}
+                  </p>
+                </div>
               </div>
             </div>
-            <h1 class="event-name shw t1 line-clamp-2 text-white">
-              {{ bannerEventData[sampleEventIndex]?.name }}
-            </h1>
-            <div class="b3 mt-4 flex gap-2">
-              <BtnComp text="Join now" />
-            </div>
-          </div>
+          </NuxtLink>
         </div>
-      </NuxtLink>
-      <button
-        @click="handleSampleEvent('next')"
-        class="header-btn-next absolute right-3 top-1/2 z-40 -translate-y-1/2 rounded-full bg-black/50 p-3 text-light-grey"
+      </div>
+    </div> -->
+
+    <div
+      id="reccom"
+      ref="scrollContiner"
+      class="step relative flex h-screen w-full flex-col items-center justify-center gap-14 overflow-hidden"
+    >
+      <div class="flex w-full items-center justify-center p-4 pt-32 lg:pt-32">
+        <div class="flex flex-col items-center text-center">
+          <p class="t1">Discover Unmissable Events Near You</p>
+          <button
+            @click="scrollToRecommendEvent"
+            class="b2 mt-4 flex items-center gap-1 rounded-xl border-[1px] border-dark px-6 py-2 text-dark transition-all"
+          >
+            Explore event <ArrowDown class="rotate-180" />
+          </button>
+        </div>
+      </div>
+      <div
+        class="items- relative flex h-full w-full justify-center overflow-hidden"
       >
-        <ArrowIcon class="rotate-180" />
-      </button>
+        <div
+          v-for="(data, index) in bannerEventData"
+          :key="data.slug"
+          :style="{
+            transform: `
+          translateX(${(index - activeIndex) * 18}px)
+          scale(${1 - Math.abs(index - activeIndex) * 0.05})
+          rotate(${(index - activeIndex) * 3}deg)
+        `,
+            zIndex: bannerEventData.length - Math.abs(index - activeIndex),
+            transition: 'transform 0.8s ease',
+          }"
+          class="absolute"
+        >
+          <NuxtLink
+            prefetch="false"
+            :to="{ name: 'event-id', params: { id: data?.slug } }"
+          >
+            <div
+              class="relative flex h-[390px] w-[250px] items-end overflow-hidden rounded-2xl bg-white shadow-2xl sm:h-[400px] sm:w-[850px]"
+            >
+              <div class="absolute inset-0 bg-black/20"></div>
+
+              <img
+                :src="data?.image"
+                alt=""
+                class="h-full w-full object-cover"
+              />
+
+              <!-- Tag -->
+              <div class="absolute right-3 top-3 flex gap-1 lg:gap-2">
+                <div
+                  v-for="tag in data?.tags"
+                  :key="tag.tag_title"
+                  class="b2 rounded-lg bg-white/30 px-3 py-1 text-white backdrop-blur"
+                >
+                  {{ tag.tag_title }}
+                </div>
+              </div>
+
+              <!-- Date -->
+              <div
+                class="absolute left-3 top-3 aspect-square h-16 rounded-br-2xl rounded-tl-2xl bg-white/30 p-2 leading-3 backdrop-blur sm:h-20"
+              >
+                <p class="b1 !text-[30px] leading-tight text-white">
+                  {{ new Date(data?.start_date).getDate() }}
+                  <span class="b2 block text-end">
+                    {{ monthNames[new Date(data?.start_date).getMonth()] }}
+                  </span>
+                </p>
+              </div>
+
+              <!-- Name -->
+              <div
+                class="absolute bottom-3 right-3 w-[70%] rounded-br-2xl rounded-tl-2xl bg-white/20 p-2 text-end backdrop-blur lg:w-fit"
+              >
+                <p class="b1 line-clamp-2 text-white">
+                  {{ data.name }}
+                </p>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
     </div>
 
     <!-- Recommend Event section -->
-    <div class="w-full py-7 lg:pt-16">
+    <div
+      ref="reccomRef"
+      class="mx-auto min-h-[100px] w-full px-5 py-7 lg:max-w-6xl lg:px-0 lg:pt-24"
+    >
       <h1 class="t2">Recommend Event</h1>
       <div class="relative flex w-full items-center justify-between gap-3 py-5">
         <button
@@ -275,7 +510,7 @@ watch(selectedEventTime, (newValue) => {
               </NuxtLink>
             </div>
             <div
-              class="row-span-1 hidden w-full grid-cols-3 place-content-center gap-10 rounded-2xl bg-black p-7 text-light-grey drop-shadow-md lg:grid"
+              class="row-span-1 hidden w-full grid-cols-3 place-content-center gap-10 rounded-2xl bg-dark p-7 text-light-grey drop-shadow-md lg:grid"
             >
               <div class="flex flex-col gap-1">
                 <Calendar />
@@ -418,8 +653,9 @@ watch(selectedEventTime, (newValue) => {
         </button>
       </div>
     </div>
+
     <!-- Event List section -->
-    <div id="time-list" class="w-full py-7">
+    <div id="time-list" class="mx-auto w-full px-5 py-7 lg:max-w-6xl lg:px-0">
       <ExploreBar
         :is-show-sort="false"
         @handle-select-time="handleSelectTime"
@@ -447,7 +683,7 @@ watch(selectedEventTime, (newValue) => {
               }}
             </p>
           </div>
-          <div id="time-list-card" v-else class="flex h-full w-full gap-3">
+          <div id="time-list-card" v-else class="flex h-full w-full gap-3 py-4">
             <div v-for="event in filteredTimeData">
               <NuxtLink :to="{ name: 'event-id', params: { id: event?.slug } }">
                 <EventListCard :eventDetail="event" :isVertical="true" />
@@ -462,7 +698,7 @@ watch(selectedEventTime, (newValue) => {
     </div>
 
     <!-- Tags section -->
-    <div class="py-7">
+    <div class="mx-auto px-5 py-7 lg:max-w-6xl lg:px-0">
       <h1 class="t1 py-3">Tags</h1>
       <div class="flex flex-wrap gap-2">
         <div v-for="tag in tagsData" :key="tag.tag_id" class="group">
@@ -470,10 +706,6 @@ watch(selectedEventTime, (newValue) => {
             <button
               class="group flex items-center gap-3 rounded-md bg-light-grey p-4 drop-shadow-md duration-200 hover:bg-grey"
             >
-              <!-- <div
-                :style="{ backgroundColor: tag.tag_code }"
-                class="h-full w-[5px] rounded"
-              ></div> -->
               <Entertainment
                 v-if="tag.tag_title.includes('Entertainment')"
                 :class="`group-hover:stroke-[${tag.tag_code}] group-hover:text-[${tag.tag_code}]`"
@@ -494,7 +726,10 @@ watch(selectedEventTime, (newValue) => {
     </div>
 
     <!-- Explore Date section -->
-    <div id="explore-date" class="w-full py-7">
+    <div
+      id="explore-date"
+      class="mx-auto w-full px-5 py-7 lg:max-w-6xl lg:px-0"
+    >
       <h1 class="explore-title t2 py-3">Explore by date</h1>
       <div class="flex w-full gap-8">
         <div class="w-full">
@@ -536,11 +771,85 @@ watch(selectedEventTime, (newValue) => {
         </div>
       </div>
     </div>
+
+    <!-- Footer section -->
+    <footer class="mt-20 bg-dark text-light-grey">
+      <div
+        class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-12 md:grid-cols-3"
+      >
+        <div>
+          <button
+            class="go-home-btn league-gothic text-2xl uppercase text-red-800 lg:text-4xl"
+          >
+            Gatherfy
+          </button>
+          <p class="b2 text-gray-400">
+            Making events easier, one click at a time.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="b1 mb-4 font-semibold">Quick Links</h3>
+          <ul class="b2 space-y-2 text-gray-300">
+            <li>
+              <NuxtLink to="/">
+                <a href="/" class="hover:text-white">Home</a>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink :to="{ name: 'events' }">
+                <a href="/about" class="hover:text-white">Events</a>
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="b1 mb-4 font-semibold">Follow Us</h3>
+          <div class="b2 flex gap-4">
+            <a
+              href="mailto:gatherfy.somsantech@gmail.com"
+              class="flex items-center gap-2 fill-light-grey hover:text-white"
+            >
+              <Gmail />
+              <i class="fab fa-facebook-f">gatherfy.somsantech@gmail.com</i>
+            </a>
+            <!-- <a href="#" class="text-gray-400 hover:text-white">
+              <i class="fab fa-twitter"></i>
+              
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white">
+              <i class="fab fa-instagram"></i>
+            </a> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 border-t border-gray-700">
+        <div
+          class="b3 mx-auto flex max-w-7xl flex-col justify-between px-6 py-4 text-gray-500 md:flex-row"
+        >
+          <p>&copy; 2025 Gatherfy. All rights reserved.</p>
+          <!-- <p>
+            <a href="/privacy" class="hover:text-white">Privacy Policy</a> ·
+            <a href="/terms" class="hover:text-white">Terms of Service</a>
+          </p> -->
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <style>
 .shw {
   text-shadow: 1px 1px 6px rgb(0 0 0 / 45%);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>

@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   modules: ['nuxt-rating', 'nuxt-vue3-google-signin'],
 
@@ -50,6 +52,10 @@ export default defineNuxtConfig({
     },
   },
 
-  plugins: ['~/plugins/preline.client.ts', '~/plugins/error-handler.ts'],
+  plugins: [
+    '~/plugins/preline.client.ts',
+    '~/plugins/error-handler.ts',
+    '~/plugins/google-signin.ts',
+  ],
   compatibilityDate: '2025-03-29',
 });

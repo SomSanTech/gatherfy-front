@@ -264,7 +264,7 @@ const fetchEventEdit = async () => {
         dataDTO
       );
 
-      if (fetchedData.errorData) {
+      if ('errorData' in fetchedData) {
         errorMsg.value = fetchedData.errorData;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -786,7 +786,7 @@ async function downloadReport() {
                   </div>
                 </div>
               </div>
-              <div class="flex justify-end gap-5">
+              <div class="flex justify-end gap-5 pt-4">
                 <BtnComp text="Save" color="green" />
               </div>
             </div>

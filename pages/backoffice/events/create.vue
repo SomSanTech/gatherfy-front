@@ -123,6 +123,7 @@ async function fetchData() {
   }
 }
 const { state, showPopup } = usePopup();
+const errorMsg = ref();
 
 async function fetchEventCreate() {
   const formattedTags = getFormattedTags(selectedTags.value);
@@ -146,6 +147,10 @@ async function fetchEventCreate() {
         accessToken.value,
         event.value
       );
+      if ('errorData' in fetchedData) {
+        errorMsg.value = fetchedData.errorData;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       if (fetchedData.status === 200) {
         router.push('/backoffice/events');
       } else {
@@ -333,6 +338,17 @@ onMounted(async () => {
         </NuxtLink>
         <div class="grid grid-cols-2">
           <h1 class="regis-detail-title t1">Create Event</h1>
+        </div>
+        <div
+          v-if="errorMsg"
+          class="b2 flex w-full shrink-0 flex-col gap-2 pt-4"
+        >
+          <p
+            v-for="e in errorMsg.details"
+            class="flex items-center gap-2 rounded-md bg-red-200 px-3 py-1 text-red-600"
+          >
+            <Cancle />{{ e }}
+          </p>
         </div>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>
@@ -760,7 +776,10 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
-              <div class="flex justify-end gap-5" @click="fetchEventCreate">
+              <div
+                class="flex justify-end gap-5 pt-4"
+                @click="fetchEventCreate"
+              >
                 <input
                   type="submit"
                   value="Save"

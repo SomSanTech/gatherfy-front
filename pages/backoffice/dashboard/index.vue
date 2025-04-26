@@ -538,7 +538,7 @@ watch(pieOfRegisChartRef, (newValue) => {
             <canvas ref="viewLineChartRef" class=""></canvas>
           </div>
           <div
-            class="view-by-gender bg-glass col-span-3 flex h-full flex-col gap-3 rounded-[20px] p-4 lg:p-12"
+            class="view-by-gender bg-glass flex h-full flex-col gap-3 rounded-[20px] p-4 lg:col-span-3 lg:p-12"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
