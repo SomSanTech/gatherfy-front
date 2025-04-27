@@ -31,8 +31,6 @@ const isLoading = useState('isLoading', () => true);
 const { state, showPopup } = usePopup();
 
 onMounted(() => {
-  console.log(route.fullPath);
-
   if (process.client) {
     isOTPPopup.value = localStorage.getItem('isOTPPopup') === 'true';
   }

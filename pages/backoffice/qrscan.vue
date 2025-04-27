@@ -162,13 +162,13 @@ onMounted(async () => {
     isLoading.value = false;
   }, 500);
 });
-// onBeforeUnmount(() => {
-//   if (video.value && video.value.srcObject) {
-//     const stream = video.value.srcObject as MediaStream;
-//     stream.getTracks().forEach((track) => track.stop());
-//     video.value.srcObject = null; // เคลียร์กล้องออกจาก <video>
-//   }
-// });
+onBeforeUnmount(() => {
+  if (video.value && video.value.srcObject) {
+    const stream = video.value.srcObject as MediaStream;
+    stream.getTracks().forEach((track) => track.stop());
+    video.value.srcObject = null; // เคลียร์กล้องออกจาก <video>
+  }
+});
 </script>
 <template>
   <CompleteModal
@@ -179,7 +179,7 @@ onMounted(async () => {
   />
   <!-- <Loader v-if="isLoading" /> -->
 
-  <div class="h-screen w-full bg-mist-grey lg:ml-80">
+  <div class="w-full bg-mist-grey lg:ml-80">
     <div
       class="justify- flex h-full flex-col items-center px-5 text-center lg:flex-row lg:gap-6"
     >
@@ -191,7 +191,9 @@ onMounted(async () => {
           class="rounded-lg object-cover"
         ></video>
       </div>
-      <div class="bg-glass mb-5 h-3/4 w-full rounded-xl p-7 lg:my-32 lg:mr-10">
+      <div
+        class="bg-glass max-h-3/4 mb-5 w-full rounded-xl p-7 lg:my-32 lg:mr-10"
+      >
         <div class="flex w-full flex-col items-start gap-4">
           <p class="t3">Event Registration</p>
           <div class="flex items-center gap-3">
@@ -220,14 +222,17 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-if="registrationsData" class="h-3/4 w-full overflow-y-auto">
+        <div
+          v-if="registrationsData"
+          class="max-h-[300px] w-full overflow-y-auto lg:max-h-[500px]"
+        >
           <div
             v-if="registrationsData.length === 0"
             class="b2 flex h-full w-full items-center justify-center"
           >
             <p>No Registration</p>
           </div>
-          <div v-else class="overflow-y-auto">
+          <div v-else class="">
             <div
               v-for="registration in registrationsData"
               class="border-default-300 grid w-full cursor-default grid-cols-12 items-center border-b transition-colors"

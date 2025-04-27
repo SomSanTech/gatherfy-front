@@ -25,7 +25,6 @@ const decodeToken = (token: any): any => {
 const isTokenExpired = (token: string) => {
   try {
     const payload = decodeToken(token);
-    console.log('vpayload', payload);
 
     const exp = payload.exp * 1000;
     return Date.now() > exp;
