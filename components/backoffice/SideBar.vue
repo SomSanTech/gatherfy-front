@@ -28,14 +28,14 @@ watchEffect(() => {
       <div class="oooh-baby-regular mb-10 px-14 text-center text-5xl">
         <NuxtLink to="/backoffice">
           <button
-            class="go-home-btn league-gothic text-xl uppercase text-red-800 lg:text-4xl"
+            class="go-home-btn league-gothic text-3xl uppercase text-red-800 lg:text-4xl"
           >
             Gatherfy
           </button>
         </NuxtLink>
       </div>
       <div class="flex flex-col gap-3">
-        <div class="b3">Main menu</div>
+        <div class="b2">Main menu</div>
         <NuxtLink to="/">
           <div
             :class="
@@ -46,7 +46,7 @@ watchEffect(() => {
             class="flex items-center gap-3 rounded-lg p-4 px-2 duration-200"
           >
             <Home class="t3" />
-            <p class="b2 font-medium">Home</p>
+            <p class="b font-medium">Home</p>
           </div>
         </NuxtLink>
         <NuxtLink to="/backoffice/dashboard">

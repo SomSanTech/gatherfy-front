@@ -46,11 +46,7 @@ const regis = async () => {
       ? toLocalISOString(selectedDate.value)
       : null;
 
-    console.log('formattedDate', formattedDate);
-
     if (formattedDate === null) {
-      console.log('no date');
-
       isSelectDate.value = false;
       isLoadRegis.value = false;
     } else {
@@ -203,7 +199,6 @@ const handleFavEvent = async () => {
     handleGoSignIn();
   } else {
     let isFav = favEvent.value.find((f) => f.eventId === event.value.eventId);
-    console.log(isFav);
 
     let fav;
     if (isFav) {
@@ -219,7 +214,6 @@ const handleFavEvent = async () => {
     }
     if (fav.status === 200) {
       getFavEvent();
-      console.log('favData', fav);
     } else {
       showPopup('Can not fav this event try again later', 'error');
     }
@@ -244,7 +238,6 @@ function generateDatesInRange(start: Date, end: Date): Date[] {
 }
 function selectDate(date: Date) {
   selectedDate.value = date;
-  console.log(selectedDate.value);
 }
 function formatDate(date: Date) {
   return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1)

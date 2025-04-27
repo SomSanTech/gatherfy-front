@@ -528,7 +528,7 @@ watch(selectedViewOption, (newValue) => {
         <img
           :src="eventDetail?.image"
           alt=""
-          class="h-[180px] rounded-[12px] object-cover"
+          class="h-[180px] max-w-[130px] rounded-[12px] object-cover"
         />
         <div class="flex w-fit flex-col justify-center gap-2">
           <div class="tag-group b4 flex gap-2">
@@ -544,9 +544,12 @@ watch(selectedViewOption, (newValue) => {
             :to="{ name: 'event-id', params: { id: eventDetail?.slug } }"
           >
             <button
-              class="dash-event-name flex items-center gap-1 text-3xl font-semibold duration-300 hover:underline"
+              class="dash-event-name t2 flex items-center gap-1 text-start font-semibold duration-300 hover:underline"
             >
-              {{ eventDetail?.name }} <Arrow class="t3 rotate-180" /></button
+              <p class="line-clamp-2">
+                {{ eventDetail?.name }}
+              </p>
+              <Arrow class="t3 rotate-180" /></button
           ></NuxtLink>
           <div class="dash-event-date b2 flex items-center gap-2">
             <Calendar />
@@ -563,8 +566,10 @@ watch(selectedViewOption, (newValue) => {
             </p>
           </div>
           <div class="dash-event-location b2 flex items-center gap-2">
-            <Location />
-            <p>{{ eventDetail?.location }}</p>
+            <Location class="shrink-0" />
+            <p class="line-clamp-1 lg:line-clamp-2">
+              {{ eventDetail?.location }}
+            </p>
           </div>
         </div>
       </div>
