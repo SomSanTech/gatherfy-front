@@ -99,7 +99,7 @@ watch(
       v-if="!isBackoffice && !isLoading"
     >
       <a
-        href="https://apps.apple.com/app/yourapp"
+        href="https://drive.google.com/file/d/1g0NB--H9uyJNPvPWNHI_fboINxAwVHsf/view?usp=sharing"
         class="flex items-center gap-2 rounded-full bg-dark px-4 py-2 text-white shadow-lg transition"
       >
         <Application />
