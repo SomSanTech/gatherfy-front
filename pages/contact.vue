@@ -300,82 +300,134 @@ onMounted(async () => {
         <div
           v-for="contact in contactData"
           :key="contact?.contactId"
-          class="b2 relative grid aspect-square h-full grid-rows-12 gap-3 rounded-xl border border-zinc-500/10 p-5 shadow-md shadow-zinc-300/30"
+          class="relative flex flex-col items-center gap-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-lg transition-shadow hover:shadow-xl"
         >
-          <div class="absolute right-3 top-3">
+          <!-- Delete Button -->
+          <div class="absolute right-4 top-4">
             <button @click="handleClickDeleteContact(contact?.contactId)">
               <Trash />
             </button>
           </div>
-          <div class="row-span-4 flex flex-col items-start gap-4">
-            <div class="h-14 w-14 rounded-full bg-zinc-200">
+
+          <!-- Profile Picture & Info -->
+          <div class="flex flex-col items-center gap-2">
+            <div
+              class="h-16 w-16 overflow-hidden rounded-full border-2 border-zinc-300"
+            >
               <img
-                class="h-14 w-14 shrink-0 rounded-full object-cover"
+                class="h-full w-full object-cover"
                 :src="`${contact?.userProfile?.users_image}`"
+                alt="Profile Picture"
               />
             </div>
-            <div class="flex flex-col">
-              <div class="font-semibold">
+            <div class="text-center">
+              <div class="text-xl font-semibold">
                 {{ contact?.userProfile?.username }}
               </div>
-              <div class="text-black/70">
-                {{ contact?.userProfile?.users_firstname }}
-                {{ contact?.userProfile?.users_lastname }}
+              <div
+                class="flex items-center justify-center gap-1 text-sm text-black/70"
+              >
+                <p>
+                  {{ contact?.userProfile?.users_firstname }}
+                </p>
+                <p v-if="contact?.userProfile?.users_lastname !== 'null'">
+                  {{ contact?.userProfile?.users_lastname }}
+                </p>
               </div>
             </div>
           </div>
-          <div class="row-span-3 flex flex-col justify-end gap-1">
+
+          <!-- Social Links -->
+          <div
+            v-if="contact?.userSocials && contact?.userSocials.length > 0"
+            class="w-full"
+          >
+            <div class="flex flex-col gap-2">
+              <div
+                v-for="social in contact?.userSocials"
+                class="flex items-center gap-2"
+              >
+                <a
+                  :href="social?.socialLink"
+                  target="_blank"
+                  class="flex items-center gap-1 text-dark hover:text-burgundy-dark"
+                >
+                  <X v-if="social?.socialPlatform === 'X'" />
+                  <Facebook v-else-if="social?.socialPlatform === 'Facebook'" />
+                  <Instagram
+                    v-else-if="social?.socialPlatform === 'Instagram'"
+                  />
+                  <Linkedin v-else-if="social?.socialPlatform === 'LinkIn'" />
+                  <LinkSocial v-else />
+                  <span class="text-sm">{{
+                    social?.socialLink.split('/').pop()
+                  }}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div
+            class="flex w-full flex-col gap-4 rounded-md border border-dashed p-2"
+          >
             <div
-              v-for="social in contact?.userSocials"
+              v-if="contact?.userProfile?.users_phone"
               class="flex items-center gap-2"
             >
+              <Phone class="text-[16px] text-black" />
               <a
-                :href="social?.socialLink"
-                target="_blank"
-                class="b3 flex items-center gap-1"
+                v-if="contact?.userProfile?.users_phone"
+                :href="'tel:' + contact?.userProfile?.users_phone"
+                class="b3 text-black hover:text-burgundy-dark"
               >
-                <X v-if="social?.socialPlatform === 'X'" />
-                <Facebook v-else-if="social?.socialPlatform === 'Facebook'" />
-                <Instagram v-else-if="social?.socialPlatform === 'Instagram'" />
-                <Linkedin v-else-if="social?.socialPlatform === 'LinkIn'" />
-                <LinkSocial v-else />
-                {{ social?.socialLink.split('/').pop() }}
+                {{ contact?.userProfile?.users_phone }}
+              </a>
+            </div>
+            <div class="flex items-center gap-2">
+              <Gmail class="text-[16px] text-black" />
+              <a
+                v-if="contact?.userProfile?.users_email"
+                :href="'mailto:' + contact?.userProfile?.users_email"
+                class="b3 text-black hover:text-burgundy-dark"
+              >
+                {{ contact?.userProfile?.users_email }}
               </a>
             </div>
           </div>
-          <div
-            class="b3 row-span-3 flex w-full flex-col justify-center gap-2 rounded-md border border-dashed p-2"
-          >
-            <div class="flex items-center gap-1">
-              <Phone class="fill-black text-[15px]" />
-              <p>{{ contact?.userProfile?.users_phone }}</p>
-            </div>
-            <div class="flex items-center gap-1">
-              <Gmail class="fill-black text-[15px]" />
-              <p>{{ contact?.userProfile?.users_email }}</p>
-            </div>
-          </div>
-          <div class="b3 row-span-2 flex flex-wrap items-end gap-2">
-            <p v-if="contact?.mutualEvents?.length > 0">Mutual events:</p>
-            <p v-else>No mutual events</p>
-            <div
-              v-for="(event, index) in contact?.mutualEvents"
-              class="flex items-center text-blue-400"
+
+          <!-- Mutual Events -->
+          <div class="w-full">
+            <p
+              class="text-sm text-gray-600"
+              v-if="contact?.mutualEvents?.length > 0"
             >
-              <NuxtLink
-                :to="{ name: 'event-id', params: { id: event?.eventSlug } }"
+              Mutual events:
+            </p>
+            <p class="text-sm text-gray-600" v-else>No mutual events</p>
+            <div
+              class="flex flex-col items-start justify-start gap-1 text-sm text-burgundy"
+            >
+              <div
+                v-for="(event, index) in contact?.mutualEvents"
+                :key="event?.eventSlug"
+                class="flex items-center"
               >
-                <p>
+                <NuxtLink
+                  :to="{ name: 'event-id', params: { id: event?.eventSlug } }"
+                  class="hover:underline"
+                >
                   {{ event?.eventName }}
                   <span v-if="index !== contact?.mutualEvents?.length - 1"
                     >,</span
                   >
-                </p>
-              </NuxtLink>
+                </NuxtLink>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
       <div
         v-show="isClickShareContact"
         class="fixed inset-0 z-40 flex items-center justify-center bg-black/50"
