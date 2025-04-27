@@ -964,7 +964,7 @@ const items: StepperItem[] = [
             </div>
           </div>
           <div
-            class="jus flex min-w-[300px] flex-col items-center gap-4 rounded-b-xl bg-white p-5 shadow-lg lg:w-[550px] lg:min-w-[320px] lg:rounded-r-xl lg:p-10"
+            class="jus flex min-w-[300px] flex-col items-center gap-6 rounded-b-xl bg-white p-5 shadow-lg lg:w-[550px] lg:min-w-[320px] lg:rounded-r-xl lg:p-10"
           >
             <button @click="handleLoginPopup" class="absolute right-5 top-5">
               <Cancle />
@@ -1397,14 +1397,14 @@ const items: StepperItem[] = [
               <button
                 v-show="signUpIndex !== 0"
                 @click="handleSignUpIndex('prev')"
-                class="b4 right-32 flex aspect-square w-6 shrink-0 items-center justify-center rounded-full bg-light-grey text-dark"
+                class="b2 right-32 flex aspect-square w-7 shrink-0 items-center justify-center rounded-full bg-light-grey text-dark"
               >
                 <Arrow />
               </button>
               <button
                 v-show="signUpIndex !== 2"
                 @click="handleSignUpIndex('next')"
-                class="b4 right-32 flex aspect-square w-6 shrink-0 rotate-180 items-center justify-center rounded-full bg-light-grey text-dark"
+                class="b2 right-32 flex aspect-square w-7 shrink-0 rotate-180 items-center justify-center rounded-full bg-light-grey text-dark"
               >
                 <Arrow />
               </button>
