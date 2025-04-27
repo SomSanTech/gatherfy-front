@@ -177,8 +177,8 @@ const filterTimeEventData = (time: string) => {
       const endTimestamp = end.getTime();
 
       return (
-        startTimestamp <= nowTimestamp &&
-        nowTimestamp <= endTimestamp &&
+        // startTimestamp <= nowTimestamp &&
+        // nowTimestamp <= endTimestamp &&
         isTodayRegisDate
       );
     });
@@ -404,7 +404,7 @@ function formatTimeRange(start, end) {
                                 0
                               ) !== new Date().setHours(0, 0, 0, 0)
                             "
-                            class="absolute left-1/2 top-1/2 z-40 h-fit w-max -translate-x-1/2 -translate-y-1/2 -rotate-45 cursor-default bg-white px-5 py-1 text-[12px] text-dark drop-shadow-sm"
+                            class="absolute left-1/2 top-1/2 z-40 h-fit w-max -translate-x-1/2 -translate-y-1/2 -rotate-45 cursor-default bg-white px-5 py-1 text-[12px] text-black drop-shadow-sm"
                           >
                             <p>Coming soon</p>
                           </button>
