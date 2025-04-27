@@ -92,7 +92,7 @@ onMounted(() => {
       v-else
       class="flex h-full w-full flex-row items-center justify-center gap-5 p-10"
     >
-      <canvas ref="donutChartRef" class=""></canvas>
+      <canvas style="width: 100%" ref="donutChartRef" class=""></canvas>
     </div>
   </div>
 </template>

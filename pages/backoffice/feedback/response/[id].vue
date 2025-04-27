@@ -149,7 +149,7 @@ onMounted(async () => {
     >
       <span class="loader"></span>
     </div>
-    <div v-else class="mx-2 my-24 flex w-full flex-col gap-3 lg:mx-20">
+    <div v-else class="my-24 flex w-full flex-col gap-3 px-2 lg:mx-20">
       <NuxtLink
         to="/backoffice/feedback"
         class="mb-1 flex items-center gap-2 text-dark-grey duration-200 hover:-ml-3"
@@ -158,7 +158,7 @@ onMounted(async () => {
         <p class="b2">Back to feedback list</p>
       </NuxtLink>
       <div class="w-full rounded-3xl bg-white p-2 drop-shadow-lg lg:p-10">
-        <div class="flex items-center gap-5">
+        <div class="flex w-full items-center gap-5">
           <img
             :src="eventData?.image"
             alt=""
@@ -219,7 +219,7 @@ onMounted(async () => {
           </p>
         </div>
         <div class="col-span-4">
-          <div class="mb-3 flex gap-3">
+          <div class="mb-3 flex flex-wrap gap-3">
             <div v-for="star in rating" :key="star">
               <div
                 class="b1 flex w-fit cursor-pointer items-center gap-1 rounded-full border px-3 py-1 duration-200"

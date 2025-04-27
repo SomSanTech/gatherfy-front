@@ -571,7 +571,7 @@ watch(selectedViewOption, (newValue) => {
 
       <div class="grid h-full gap-4 lg:grid-cols-10">
         <div
-          class="jus bg-glass col-span-5 flex flex-col gap-4 rounded-[20px] px-8 py-5"
+          class="bg-glass col-span-10 flex w-full flex-col gap-4 rounded-[20px] px-8 py-5 lg:col-span-5"
         >
           <div class="flex items-center justify-between">
             <h1 class="b1 font-semibold">
@@ -591,17 +591,21 @@ watch(selectedViewOption, (newValue) => {
           <canvas
             ref="viewsChartRef"
             class=""
-            style="height: 100%; max-height: 400px"
+            style="height: 100%; max-height: 400px; width: 100%"
           ></canvas>
         </div>
         <div
-          class="bg-glass col-span-3 mx-auto flex w-full flex-col gap-2 rounded-[20px] p-8"
+          class="bg-glass col-span-10 mx-auto flex w-full flex-col gap-2 rounded-[20px] p-8 lg:col-span-3"
         >
           <p class="b1 self-start font-semibold">Registration Goal</p>
           <div
             class="view-goal flex h-full w-full flex-col items-center justify-center gap-8 rounded-[20px] p-8"
           >
-            <canvas ref="registrationGoalChartRef" class=""></canvas>
+            <canvas
+              style="width: 100%"
+              ref="registrationGoalChartRef"
+              class=""
+            ></canvas>
           </div>
           <p
             v-if="
@@ -613,7 +617,7 @@ watch(selectedViewOption, (newValue) => {
             from {{ eventDetail?.registration_goal }} Registration
           </p>
         </div>
-        <div class="col-span-2 flex h-full">
+        <div class="col-span-10 flex h-full lg:col-span-2">
           <SumaryOfView
             v-if="viewsData && registrationsData"
             :profile-data="profileData"
@@ -626,7 +630,7 @@ watch(selectedViewOption, (newValue) => {
       <div class="flex flex-col gap-4">
         <div class="grid gap-4 lg:grid-cols-12">
           <div
-            class="view-by-gender-age bg-glass rounded-[20px] p-12 lg:col-span-8"
+            class="view-by-gender-age bg-glass col-span-12 w-full rounded-[20px] p-12 lg:col-span-8"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -635,12 +639,12 @@ watch(selectedViewOption, (newValue) => {
             <canvas
               ref="ageGenderChartRef"
               class="h-full"
-              style="height: 100%"
+              style="height: 100%; width: 100%"
             ></canvas>
           </div>
           <div
             v-if="groupedByGender"
-            class="view-by-gender bg-glass col-span-4 flex flex-grow flex-col gap-2 rounded-[20px] p-12"
+            class="view-by-gender bg-glass col-span-12 flex w-full flex-grow flex-col gap-2 rounded-[20px] p-12 lg:col-span-4"
           >
             <PieChart :groupedByGender="groupedByGender" :colors="colors" />
           </div>
@@ -648,7 +652,7 @@ watch(selectedViewOption, (newValue) => {
 
         <div class="grid gap-4 lg:grid-cols-12">
           <div
-            class="view-by-checkin bg-glass col-span-7 flex flex-col gap-2 rounded-[20px] p-12"
+            class="view-by-checkin bg-glass col-span-12 flex flex-col gap-2 rounded-[20px] p-12 lg:col-span-7"
           >
             <p class="b1 font-semibold">Check-In</p>
             <div
@@ -707,7 +711,7 @@ watch(selectedViewOption, (newValue) => {
             </div>
           </div>
           <div
-            class="view-by-feedback bg-glass col-span-5 flex flex-col gap-2 rounded-[20px] p-12"
+            class="view-by-feedback bg-glass col-span-12 flex flex-col gap-2 rounded-[20px] p-12 lg:col-span-5"
           >
             <p class="b1 self-start font-semibold">Feedback</p>
             <div

@@ -164,20 +164,35 @@ const filterTimeEventData = (time: string) => {
   let filter;
   if (time === 'today') {
     filter = tickets.value.filter((e) => {
-      const start = new Date(e?.start_date)?.getTime();
-      const today = new Date().getTime();
-      const end = new Date(e?.end_date)?.getTime();
-      return start <= today && end >= today;
+      const now = new Date();
+      const start = new Date(e?.start_date);
+      const end = new Date(e?.end_date);
+      const regisDate = new Date(e?.regisDate);
+
+      // เทียบเฉพาะวัน ไม่เอาเวลา
+      const isTodayRegisDate = now.toDateString() === regisDate.toDateString();
+
+      const nowTimestamp = now.getTime();
+      const startTimestamp = start.getTime();
+      const endTimestamp = end.getTime();
+
+      return (
+        startTimestamp <= nowTimestamp &&
+        nowTimestamp <= endTimestamp &&
+        isTodayRegisDate
+      );
     });
   } else if (time === 'upcome') {
     filter = tickets.value.filter((e) => {
-      return new Date(e?.start_date)?.getTime() > new Date().getTime();
+      const today = new Date().setHours(0, 0, 0, 0); // ตัดเวลาเหลือแค่วัน
+      const regisDate = new Date(e?.regisDate)?.setHours(0, 0, 0, 0);
+      return today < regisDate;
     });
   } else if (time === 'past') {
     filter = tickets.value.filter((e) => {
-      const today = new Date().getTime();
-      const end = new Date(e?.end_date)?.getTime();
-      return today > end;
+      const today = new Date().setHours(0, 0, 0, 0);
+      const regisDate = new Date(e?.regisDate)?.setHours(0, 0, 0, 0);
+      return today > regisDate;
     });
   }
 

@@ -55,7 +55,8 @@ onMounted(async () => {
 <template>
   <Loader v-if="isLoading" />
   <div v-else class="relative w-full px-8 duration-300 lg:px-0">
-    <div v-if="!favEvent || favEvent.length === 0">no fav</div>
+    <p class="t3 pb-2">My Favorites</p>
+    <div v-if="!favEvent || favEvent.length === 0" class="pt-12">no fav</div>
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div
         v-if="favEvent"
