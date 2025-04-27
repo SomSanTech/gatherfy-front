@@ -418,7 +418,9 @@ onMounted(() => {
               />
 
               <!-- Tag -->
-              <div class="absolute right-3 top-3 flex gap-1 lg:gap-2">
+              <div
+                class="absolute right-3 top-3 flex flex-col gap-1 lg:flex-row lg:gap-2"
+              >
                 <div
                   v-for="tag in data?.tags"
                   :key="tag.tag_title"
