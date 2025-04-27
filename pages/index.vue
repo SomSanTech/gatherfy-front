@@ -256,43 +256,54 @@ onBeforeUnmount(() => {
 });
 
 const activeIndex = ref(0);
+// let intervalId = null;
 
 onMounted(() => {
-  let intervalId = setInterval(() => {
+  intervalId = setInterval(() => {
     activeIndex.value = (activeIndex.value + 1) % bannerEventData.value.length;
-  }, 3000); // ทุก 3 วิ
+  }, 3000); // Every 3 seconds
 });
 
-// onUnmounted(() => {
-//   clearInterval(intervalId)
-// })
+onUnmounted(() => {
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
+});
 
 const isDragging = ref(false);
 const dragStartX = ref(0);
 const dragCurrentX = ref(0);
 const offsetX = ref(0);
-// const activeIndex = ref(0); // สมมุติมีอยู่แล้ว
 
+// Function to stop the auto slideshow when the user starts dragging
 function startDrag(e) {
   isDragging.value = true;
+  if (intervalId) {
+    clearInterval(intervalId); // Stop the automatic slideshow
+  }
   dragStartX.value = e.type.includes('touch')
     ? e.touches[0].clientX
     : e.clientX;
   dragCurrentX.value = dragStartX.value;
 }
 
+// Function to track dragging and calculate offset
 function onDragging(e) {
   if (!isDragging.value) return;
+  if (intervalId) {
+    clearInterval(intervalId); // Stop the automatic slideshow
+  }
   dragCurrentX.value = e.type.includes('touch')
     ? e.touches[0].clientX
     : e.clientX;
   offsetX.value = dragCurrentX.value - dragStartX.value;
 }
 
+// Function to handle when dragging ends
 function endDrag() {
   if (!isDragging.value) return;
 
-  const threshold = 50; // ต้องลากเกินกี่ px ถึงนับว่าเป็นการเปลี่ยน
+  const threshold = 50; // Threshold for swipe sensitivity
   if (offsetX.value > threshold) {
     activeIndex.value =
       (activeIndex.value - 1 + bannerEventData.value.length) %
@@ -303,6 +314,11 @@ function endDrag() {
 
   offsetX.value = 0;
   isDragging.value = false;
+
+  // Restart the interval after drag ends
+  intervalId = setInterval(() => {
+    activeIndex.value = (activeIndex.value + 1) % bannerEventData.value.length;
+  }, 3000); // Resume automatic slideshow after drag
 }
 </script>
 
