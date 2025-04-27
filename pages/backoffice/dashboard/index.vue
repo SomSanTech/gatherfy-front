@@ -581,7 +581,7 @@ watch(pieOfRegisChartRef, (newValue) => {
             <div>
               <p class="b1 font-semibold">Events</p>
             </div>
-            <div class="w-full table-auto caption-top text-sm">
+            <div class="w-full text-sm">
               <div
                 class="b3 border-default-300 grid grid-cols-12 border-b pb-2 !text-sm transition-colors"
               >
@@ -620,7 +620,11 @@ watch(pieOfRegisChartRef, (newValue) => {
                     class="b3 bg-glass grid h-fit w-full grid-cols-12 content-center gap-6 rounded-md p-3"
                   >
                     <p class="col-span-4">{{ event?.eventName }}</p>
-                    <p class="col-span-4">{{ event?.eventLocation }}</p>
+                    <div class="col-span-4">
+                      <p class="line-clamp-2">
+                        {{ event?.eventLocation }}
+                      </p>
+                    </div>
                     <p
                       :class="
                         new Date(event?.eventEndDate).getTime() <

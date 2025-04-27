@@ -333,8 +333,10 @@ function formatTimeRange(start, end) {
                     <div
                       class="w-full"
                       v-if="
-                        new Date().getTime() >
-                        new Date(ticket.end_date).getTime()
+                        new Date(ticket?.regisDate).getTime() <
+                        new Date().setHours(0, 0, 0, 0)
+                        // new Date(ticket?.regisDate).getTime() >=
+                        //   new Date(ticket.end_date).getTime()
                       "
                     >
                       <button
@@ -353,7 +355,7 @@ function formatTimeRange(start, end) {
                         }}
                       </button>
                     </div>
-                    <div>
+                    <div v-else>
                       <p
                         v-if="qrValues[ticket.eventId]"
                         class="b3 w-full text-center"
@@ -362,7 +364,7 @@ function formatTimeRange(start, end) {
                       </p>
                       <div
                         v-if="
-                          new Date().getTime() <
+                          new Date(ticket?.regisDate).getTime() <
                           new Date(ticket.end_date).getTime()
                         "
                         class="b3 relative flex aspect-square w-[120px] items-center justify-center text-center"
@@ -372,6 +374,15 @@ function formatTimeRange(start, end) {
                           class="relative h-full w-full border-[1px] border-dashed border-black/50 bg-white"
                         >
                           <button
+                            v-if="
+                              ticket?.regisStatus !== 'Checked in' &&
+                              new Date(ticket?.regisDate).setHours(
+                                0,
+                                0,
+                                0,
+                                0
+                              ) === new Date().setHours(0, 0, 0, 0)
+                            "
                             @click="generateQRCode(ticket.eventId)"
                             class="absolute left-1/2 top-1/2 z-40 h-fit w-max -translate-x-1/2 -translate-y-1/2 rounded-md bg-burgundy px-3 py-1 text-[12px] text-light-grey drop-shadow-sm"
                           >
@@ -384,7 +395,25 @@ function formatTimeRange(start, end) {
                               QR Code
                             </p>
                           </button>
-
+                          <button
+                            v-else-if="
+                              new Date(ticket?.regisDate).setHours(
+                                0,
+                                0,
+                                0,
+                                0
+                              ) !== new Date().setHours(0, 0, 0, 0)
+                            "
+                            class="absolute left-1/2 top-1/2 z-40 h-fit w-max -translate-x-1/2 -translate-y-1/2 -rotate-45 cursor-default bg-white px-5 py-1 text-[12px] text-dark drop-shadow-sm"
+                          >
+                            <p>Coming soon</p>
+                          </button>
+                          <button
+                            v-else
+                            class="absolute left-1/2 top-1/2 z-40 h-fit w-max -translate-x-1/2 -translate-y-1/2 -rotate-45 cursor-default bg-burgundy px-5 py-1 text-[12px] text-light-grey drop-shadow-sm"
+                          >
+                            <p>Checked in</p>
+                          </button>
                           <img
                             src="../components/images/qrcode.svg"
                             alt=""

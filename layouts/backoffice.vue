@@ -7,15 +7,16 @@
   </div> -->
   <div class="relative flex min-h-screen">
     <!-- Burger Button -->
-    <button
+    <div
       @click="isSidebarOpen = !isSidebarOpen"
-      class="fixed left-4 top-4 z-50 p-2 md:hidden"
+      :class="!isSidebarOpen && !isLoading ? 'left-4' : 'left-[270px]'"
+      class="fixed top-4 z-50 p-2 md:hidden"
     >
       <button v-if="!isSidebarOpen && !isLoading">
         <Burger class="text-2xl" />
       </button>
       <button v-else :class="!isLoading ? '' : 'hidden'"><Cancle /></button>
-    </button>
+    </div>
 
     <!-- Sidebar (แสดงซ่อนตาม isSidebarOpen) -->
     <SideBar

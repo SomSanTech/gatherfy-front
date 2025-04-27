@@ -16,7 +16,6 @@ const getFavEvent = async () => {
 
 const handleFavEvent = async (id) => {
   let isFav = favEvent.value.find((f) => f.eventId === id);
-  console.log(isFav);
 
   let fav;
   if (isFav) {
@@ -32,7 +31,6 @@ const handleFavEvent = async (id) => {
   }
   if (fav.status === 200) {
     getFavEvent();
-    console.log('favData', fav);
   } else {
     // showPopup('Can not fav this event try again later', 'error');
   }

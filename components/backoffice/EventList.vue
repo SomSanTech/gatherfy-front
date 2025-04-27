@@ -28,7 +28,9 @@ const emit = defineEmits(['handleDeleteEvent']);
     {{ useFormatDateTime(event?.eventStartDate, 'time') }}
   </td>
   <td v-else class="b2 p-4 align-middle">
-    {{ event?.eventLocation }}
+    <p class="line-clamp-2">
+      {{ event?.eventLocation }}
+    </p>
   </td>
   <td>
     <div
@@ -52,7 +54,7 @@ const emit = defineEmits(['handleDeleteEvent']);
       v-else-if="type === 'registration'"
       class="flex justify-center gap-5 text-xl text-gray-600"
     >
-      <div class="flex items-center justify-center gap-2 p-4">
+      <div class="flex shrink-0 items-center justify-center gap-2 p-4">
         <UserList class="t3" />
         <p class="b3">Registration list</p>
       </div>

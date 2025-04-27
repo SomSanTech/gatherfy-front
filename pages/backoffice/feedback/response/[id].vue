@@ -157,12 +157,12 @@ onMounted(async () => {
         <Arrow />
         <p class="b2">Back to feedback list</p>
       </NuxtLink>
-      <div class="w-full rounded-3xl bg-white p-2 drop-shadow-lg lg:p-10">
+      <div class="w-full rounded-3xl bg-white p-3 drop-shadow-lg lg:p-10">
         <div class="flex w-full items-center gap-5">
           <img
             :src="eventData?.image"
             alt=""
-            class="h-[180px] rounded-lg object-cover"
+            class="h-[180px] max-w-[130px] rounded-lg object-cover"
           />
           <div class="flex w-fit flex-col justify-center gap-2">
             <div class="tag-group b4 flex gap-2">
@@ -178,7 +178,7 @@ onMounted(async () => {
               :to="{ name: 'event-id', params: { id: eventData?.slug } }"
             >
               <button
-                class="dash-event-name t3 flex items-center justify-start gap-1 text-3xl font-semibold duration-300 hover:underline"
+                class="dash-event-name t2 flex items-center justify-start gap-1 text-start text-3xl font-semibold duration-300 hover:underline"
               >
                 {{ eventData?.name }}
                 <Arrow class="t3 rotate-180" />
@@ -199,15 +199,17 @@ onMounted(async () => {
               </p>
             </div>
             <div class="dash-event-location b2 flex items-center gap-2">
-              <Location />
-              <p>{{ eventData?.location }}</p>
+              <Location class="shrink-0" />
+              <p class="line-clamp-1 lg:line-clamp-2">
+                {{ eventData?.location }}
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div
         v-if="averageRating"
-        class="grid w-full grid-cols-6 gap-5 rounded-3xl bg-white p-3 drop-shadow-lg lg:p-10"
+        class="flex w-full flex-col gap-5 rounded-3xl bg-white p-3 drop-shadow-lg lg:grid lg:grid-cols-6 lg:p-10"
       >
         <div class="col-span-2 place-items-center content-center">
           <p class="t3 mb-5">Average Rating</p>
@@ -236,7 +238,7 @@ onMounted(async () => {
               <p class="t3 mt-10">There's no review with that rating</p>
             </div>
             <div v-else v-for="item in filterFeedbackData">
-              <div class="my-2 flex gap-5 rounded-xl border p-5 pb-6">
+              <div class="my-2 flex gap-5 rounded-xl border p-3 lg:p-5 lg:pb-6">
                 <div
                   class="mt-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-zinc-200"
                 >

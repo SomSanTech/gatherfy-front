@@ -35,11 +35,11 @@ onMounted(() => {
 <template>
   <Loader v-if="isLoading" />
 
-  <div v-else class="flex w-screen bg-mist-grey lg:ml-80">
+  <div v-else class="flex w-screen bg-mist-grey px-3 lg:ml-80 lg:px-0">
     <div
-      class="mx-4 mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
+      class="mb-16 mt-32 h-fit w-full rounded-3xl bg-white drop-shadow-lg lg:mx-20"
     >
-      <div class="p-3 lg:p-12">
+      <div class="p-5 lg:p-12">
         <h1 class="t1">Registrations by event</h1>
         <div v-if="isLoading" class="my-16 flex items-center justify-center">
           <span class="loader"></span>

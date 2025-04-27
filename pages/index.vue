@@ -99,8 +99,6 @@ const fetchData = async () => {
         new Date(b.ticket_start_date).getTime()
     )
     .slice(0, 5);
-
-  console.log('bannerEventData.value', bannerEventData.value);
 };
 
 const handleReccomEvent = (type: string) => {
@@ -131,7 +129,6 @@ const handleSampleEvent = (type: string) => {
 const handleSelectTime = (time: string) => {
   selectedEventTime.value = time;
 };
-
 const filterTimeEventData = (time: string) => {
   let filter;
   if (time === 'today') {
@@ -146,6 +143,12 @@ const filterTimeEventData = (time: string) => {
       return new Date(e?.start_date)?.getTime() > new Date().getTime();
     });
   }
+
+  filter.sort((a, b) => {
+    return (
+      new Date(a?.start_date)?.getTime() - new Date(b?.start_date)?.getTime()
+    );
+  });
 
   filteredTimeData.value = filter;
 };
@@ -238,11 +241,9 @@ onMounted(() => {
         })
         .onStepEnter((response) => {
           isScroll.value = false;
-          console.log('enter');
         })
         .onStepExit((response) => {
           isScroll.value = true;
-          console.log('out');
         });
 
       window.addEventListener('resize', scroller.resize);
@@ -265,6 +266,44 @@ onMounted(() => {
 // onUnmounted(() => {
 //   clearInterval(intervalId)
 // })
+
+const isDragging = ref(false);
+const dragStartX = ref(0);
+const dragCurrentX = ref(0);
+const offsetX = ref(0);
+// const activeIndex = ref(0); // สมมุติมีอยู่แล้ว
+
+function startDrag(e) {
+  isDragging.value = true;
+  dragStartX.value = e.type.includes('touch')
+    ? e.touches[0].clientX
+    : e.clientX;
+  dragCurrentX.value = dragStartX.value;
+}
+
+function onDragging(e) {
+  if (!isDragging.value) return;
+  dragCurrentX.value = e.type.includes('touch')
+    ? e.touches[0].clientX
+    : e.clientX;
+  offsetX.value = dragCurrentX.value - dragStartX.value;
+}
+
+function endDrag() {
+  if (!isDragging.value) return;
+
+  const threshold = 50; // ต้องลากเกินกี่ px ถึงนับว่าเป็นการเปลี่ยน
+  if (offsetX.value > threshold) {
+    activeIndex.value =
+      (activeIndex.value - 1 + bannerEventData.value.length) %
+      bannerEventData.value.length;
+  } else if (offsetX.value < -threshold) {
+    activeIndex.value = (activeIndex.value + 1) % bannerEventData.value.length;
+  }
+
+  offsetX.value = 0;
+  isDragging.value = false;
+}
 </script>
 
 <template>
@@ -386,6 +425,13 @@ onMounted(() => {
         </div>
       </div>
       <div
+        @mousedown="startDrag"
+        @mousemove="onDragging"
+        @mouseup="endDrag"
+        @mouseleave="endDrag"
+        @touchstart="startDrag"
+        @touchmove="onDragging"
+        @touchend="endDrag"
         class="items- relative flex h-full w-full justify-center overflow-hidden"
       >
         <div
@@ -393,17 +439,17 @@ onMounted(() => {
           :key="data.slug"
           :style="{
             transform: `
-          translateX(${(index - activeIndex) * 18}px)
-          scale(${1 - Math.abs(index - activeIndex) * 0.05})
-          rotate(${(index - activeIndex) * 3}deg)
-        `,
+    translateX(${(index - activeIndex) * 18 + (index === activeIndex ? offsetX : 0)}px)
+    scale(${1 - Math.abs(index - activeIndex) * 0.05})
+    rotate(${(index - activeIndex) * 3}deg)
+  `,
             zIndex: bannerEventData.length - Math.abs(index - activeIndex),
-            transition: 'transform 0.8s ease',
+            transition: isDragging ? 'none' : 'transform 0.8s ease',
           }"
           class="absolute"
         >
           <NuxtLink
-            prefetch="false"
+            :prefetch="false"
             :to="{ name: 'event-id', params: { id: data?.slug } }"
           >
             <div
@@ -672,7 +718,7 @@ onMounted(() => {
       </h1>
       <div class="relative">
         <div
-          class="absolute left-0 top-0 z-20 h-full w-6 bg-gradient-to-r from-white"
+          class="absolute -left-1 top-0 z-20 h-full w-6 bg-gradient-to-r from-white"
         ></div>
         <div class="w-full overflow-x-auto px-4 pb-5">
           <div class="pt-14" v-if="filteredTimeData?.length === 0">
@@ -694,7 +740,7 @@ onMounted(() => {
           </div>
         </div>
         <div
-          class="absolute right-0 top-0 z-20 h-full w-10 bg-gradient-to-l from-white"
+          class="absolute -right-1 top-0 z-20 h-full w-10 bg-gradient-to-l from-white"
         ></div>
       </div>
     </div>

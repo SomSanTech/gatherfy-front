@@ -11,13 +11,13 @@ const props = defineProps<{
 
 <template>
   <td
-    :class="isShowInQRScan ? 'col-span-6 flex items-center' : ''"
+    :class="isShowInQRScan ? 'col-span-4 flex items-center text-start' : ''"
     class="back-regis-name b2 p-4 align-middle"
   >
     {{ registration?.firstName }} {{ registration?.lastName }}
   </td>
   <td
-    :class="isShowInQRScan ? 'col-span-3 flex items-center' : ''"
+    :class="isShowInQRScan ? 'col-span-4 flex items-center' : ''"
     class="back-regis-phone b2 p-4 align-middle"
   >
     {{ registration?.phone }}
@@ -33,7 +33,7 @@ const props = defineProps<{
   </td>
   <td
     :class="
-      isShowInQRScan ? 'col-span-3 flex w-full items-center justify-center' : ''
+      isShowInQRScan ? 'col-span-2 flex w-full items-center justify-start' : ''
     "
     class="b2 p-4 text-center align-middle"
   >
