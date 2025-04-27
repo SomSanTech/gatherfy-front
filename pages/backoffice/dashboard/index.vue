@@ -529,7 +529,7 @@ watch(pieOfRegisChartRef, (newValue) => {
 
         <div class="grid gap-3 lg:grid-cols-10">
           <div
-            class="view-by-month bg-glass col-span-7 rounded-[20px] p-4 lg:p-12"
+            class="view-by-month bg-glass col-span-10 rounded-[20px] p-4 lg:col-span-7 lg:p-12"
           >
             <p class="b1 pb-5 font-semibold">
               Monthly Event View Counts (4 months)
@@ -538,7 +538,7 @@ watch(pieOfRegisChartRef, (newValue) => {
             <canvas ref="viewLineChartRef" class=""></canvas>
           </div>
           <div
-            class="view-by-gender bg-glass flex h-full flex-col gap-3 rounded-[20px] p-4 lg:col-span-3 lg:p-12"
+            class="view-by-gender bg-glass col-span-10 flex h-full flex-col gap-3 rounded-[20px] p-4 lg:col-span-3 lg:p-12"
             v-if="groupedByAgeRangeAndGender"
           >
             <h1 class="b1 font-semibold">
@@ -553,7 +553,7 @@ watch(pieOfRegisChartRef, (newValue) => {
         </div>
         <div class="grid gap-4 lg:grid-cols-10">
           <div
-            class="col-span-3 grid h-full gap-4 md:max-h-[600px] lg:grid-rows-3"
+            class="col-span-10 grid h-full gap-4 md:max-h-[600px] lg:col-span-3 lg:grid-rows-3"
           >
             <div
               v-if="eventsData"
@@ -576,7 +576,7 @@ watch(pieOfRegisChartRef, (newValue) => {
             </div>
           </div>
           <div
-            class="col-span-7 flex grid-cols-10 flex-col gap-2 rounded-[20px] drop-shadow-md md:max-h-[600px]"
+            class="col-span-10 flex grid-cols-10 flex-col gap-2 rounded-[20px] drop-shadow-md md:max-h-[600px] lg:col-span-7"
           >
             <div>
               <p class="b1 font-semibold">Events</p>
