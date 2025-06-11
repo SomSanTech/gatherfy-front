@@ -1,6 +1,7 @@
-# Nuxt 3 Project with Playwright Testing
+## Gatherfy
+A Nuxt 3 web application for event management that allows users to discover, register, and manage events easily.
+
 ### 📋 Overview
-Gatherfy-eiei
 
 ### 📦 Installation
 1. Clone the Repository
@@ -29,3 +30,7 @@ npx playwright install
 ```bash
 npx playwright test --ui
 ```
+### 🛠 Tech Stack
+- [Nuxt 3](https://nuxt.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
